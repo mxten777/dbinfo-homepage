@@ -126,45 +126,64 @@ const Leaves: React.FC = () => {
   };
 
   return (
-    <div className="p-4 md:p-8 bg-gradient-to-br from-blue-50 to-white min-h-screen">
-      {/* 상단 타이틀 */}
-      <div className="max-w-5xl mx-auto mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-extrabold text-blue-800 mb-2 tracking-tight">연차 관리</h1>
-          <div className="h-1 w-16 bg-blue-200 rounded mb-4"></div>
+    <div className="p-4 md:p-10 bg-gradient-to-br from-blue-100 to-white min-h-screen font-sans">
+      {/* 전체 상단 타이틀 */}
+      <div className="max-w-5xl mx-auto mb-12">
+        <h1 className="text-4xl md:text-5xl font-extrabold text-blue-900 text-center mb-2 drop-shadow-lg tracking-tight">DB.INFO 연차 관리 시스템</h1>
+        <p className="text-center text-lg md:text-xl text-blue-700 mb-6 font-medium">연차 신청, 내역 확인, 회사 공지까지 한눈에!</p>
+        <div className="h-1 w-24 bg-gradient-to-r from-blue-400 to-blue-200 rounded mx-auto mb-4"></div>
+      </div>
+      {/* 상단 유저/관리자 카드 */}
+      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+        <div className="col-span-1 bg-white rounded-2xl shadow-xl p-6 flex flex-col items-center border border-blue-100">
+          <div className="bg-blue-100 rounded-full p-4 mb-2">
+            <svg className="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+          </div>
+          <div className="text-xl font-bold text-blue-700 mb-1">{user?.email}</div>
+          <div className="text-gray-500 text-base mb-2">환영합니다! 오늘도 힘내세요.</div>
+          <button onClick={logout} className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg shadow hover:bg-gray-200 font-semibold text-base">로그아웃</button>
         </div>
-        {isAdmin && (
+        <div className="col-span-1 bg-white rounded-2xl shadow-xl p-6 border border-blue-100 flex flex-col justify-center">
+          <div className="flex items-center gap-2 mb-2">
+            <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12c0 4.418-4.03 8-9 8s-9-3.582-9-8 4.03-8 9-8 9 3.582 9 8z" /></svg>
+            <span className="text-lg font-bold text-blue-700">회사 공지사항</span>
+          </div>
+          <div className="text-gray-400 text-base">공지사항 없음</div>
+        </div>
+        <div className="col-span-1 bg-white rounded-2xl shadow-xl p-6 border border-blue-100 flex flex-col justify-center">
+          <div className="flex items-center gap-2 mb-2">
+            <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            <span className="text-lg font-bold text-blue-700">내 연차 신청 내역</span>
+          </div>
+          <div className="text-gray-400 text-base">신청 내역 없음</div>
+        </div>
+      </div>
+      {/* 관리자 홈 버튼 */}
+      {isAdmin && (
+        <div className="max-w-5xl mx-auto mb-8 flex justify-end">
           <button
             onClick={() => navigate('/admin-home')}
-            className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 font-semibold shadow mt-2"
+            className="px-8 py-3 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 font-bold shadow text-lg"
           >
             관리자홈
           </button>
-        )}
-      </div>
+        </div>
+      )}
       {loading ? (
         <p>로딩 중...</p>
       ) : (
         <>
           {/* 상단 인사/잔여연차 카드 */}
-          {user && (
+          {/* 잔여 연차 카드 (직원만) */}
+          {user && !isAdmin && (
             <div className="max-w-3xl mx-auto mb-8">
-              <div className="flex items-center gap-4 bg-white rounded-2xl shadow-lg p-6 border border-blue-100">
-                <div className="bg-blue-100 rounded-full p-3">
-                  <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              <div className="flex items-center gap-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl shadow-xl p-8 border border-blue-200">
+                <div className="bg-blue-200 rounded-full p-4">
+                  <svg className="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                 </div>
                 <div>
-                  <div className="text-lg font-bold text-blue-700">{isAdmin ? `관리자: ${user.email}` : (employees.find(e => e.id === user.uid)?.name || user.email)}</div>
-                  {isAdmin ? (
-                    <div className="text-gray-500 text-sm">관리자 화면입니다.</div>
-                  ) : (
-                    <>
-                      <div className="text-gray-500 text-sm">환영합니다! 오늘도 힘내세요.</div>
-                      <div className="mt-1 text-sm text-gray-700">
-                        <span className="font-semibold">잔여 연차:</span> <span className="text-blue-600 font-bold">{employees.find(e => e.id === user.uid)?.remainingLeaves ?? '-'}</span>일
-                      </div>
-                    </>
-                  )}
+                  <div className="text-2xl font-bold text-blue-800 mb-1">{employees.find(e => e.id === user.uid)?.name || user.email}</div>
+                  <div className="text-gray-600 text-lg">잔여 연차 <span className="text-blue-700 font-extrabold text-2xl">{employees.find(e => e.id === user.uid)?.remainingLeaves ?? '-'}</span>일</div>
                 </div>
               </div>
             </div>

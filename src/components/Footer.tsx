@@ -71,10 +71,16 @@ function Footer() {
         대중교통: 1호선, 7호선 8번 출구 500미터
       </div>
       <div>
-        <a href="http://map.kakao.com/" target="_blank" rel="noopener noreferrer" className="underline text-blue-500">오시는 길</a>
+        <a
+          href="https://map.naver.com/p/search/%EC%84%9C%EC%9A%B8%ED%8A%B9%EB%B3%84%EC%8B%9C%20%EA%B8%88%EC%B2%9C%EA%B5%AC%20%EC%84%9C%EB%B6%80%EC%83%9B%EA%B8%B8%20606,%20%EB%8C%80%EC%84%B1%EB%94%94%ED%8F%B4%EB%A6%AC%EC%8A%A4%20%EC%A7%80%EC%8B%9D%EC%82%B0%EC%97%85%EC%84%BC%ED%84%B0%20B%EB%8F%99%201410%ED%98%B8"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline text-blue-500 font-semibold text-base"
+        >
+          오시는 길
+        </a>
       </div>
       <div className="mt-2">DB.INFO Co.,Ltd. All rights reserved.</div>
-      {/* 관리자 메뉴에서만 업로드/초기화 버튼 노출, 푸터에서는 제거 */}
     </footer>
   );
 }
