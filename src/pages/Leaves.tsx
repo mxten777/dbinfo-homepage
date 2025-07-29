@@ -228,7 +228,9 @@ const Leaves: React.FC = () => {
                         <td className="border px-4 py-2 whitespace-nowrap">{leave.date}</td>
                         <td className="border px-4 py-2 whitespace-nowrap truncate" title={leave.reason}>{leave.reason}</td>
                         <td className="border px-4 py-2 whitespace-nowrap">{leave.createdAt ? new Date(leave.createdAt).toLocaleDateString('ko-KR') : '-'}</td>
-                        <td className="border px-4 py-2 font-bold text-blue-600 whitespace-nowrap">{leave.status}</td>
+                        <td className="border px-4 py-2 font-bold text-blue-600 whitespace-nowrap">
+                          {leave.status === '신청' ? '검증' : leave.status === '승인' ? '승인' : leave.status === '반려' ? '반려' : leave.status === '거절' ? '거절' : leave.status}
+                        </td>
                         <td className="border px-4 py-2 whitespace-nowrap">
                           {leave.status === '신청' ? (
                             <div className="flex gap-2 justify-center">
@@ -242,7 +244,7 @@ const Leaves: React.FC = () => {
                               >반려</button>
                             </div>
                           ) : (
-                            <span className="text-gray-400">처리 완료</span>
+                            <span className="text-gray-400">처리완료</span>
                           )}
                         </td>
                       </tr>
