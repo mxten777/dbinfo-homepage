@@ -79,13 +79,23 @@ const EmployeeHome: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 py-8 px-2 md:px-0">
-      <div className="max-w-5xl mx-auto space-y-8">
-        {/* 상단 인사/잔여연차 카드 */}
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className="flex-1 bg-white rounded-2xl shadow-lg p-6 border border-blue-100 flex items-center gap-4">
-            <div className="bg-blue-100 rounded-full p-4">
-              <svg className="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+    <div className="min-h-screen bg-gray-50 py-10 px-2 flex flex-col items-center">
+      <div className="w-full max-w-5xl mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-center text-blue-700">직원정보</h1>
+          <button
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg font-bold hover:bg-blue-600 transition"
+            onClick={() => navigate('/employee-login')}
+          >
+            직원로그인 화면으로
+          </button>
+        </div>
+        {/* 직원정보 카드 */}
+        <div className="mb-10">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 flex items-center gap-4">
+            <div className="flex items-center gap-2 mb-3">
+              <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              <h2 className="text-xl font-bold text-blue-600">직원정보</h2>
             </div>
             <div>
               <div className="text-lg font-bold text-blue-700">{employee ? employee.name : user?.email}</div>
@@ -100,11 +110,13 @@ const EmployeeHome: React.FC = () => {
             </div>
             <button onClick={handleLogout} className="ml-auto px-4 py-2 bg-gray-200 rounded-lg text-sm font-semibold hover:bg-gray-300 shadow">로그아웃</button>
           </div>
-          {/* 공지사항 카드 */}
-          <div className="flex-1 bg-white rounded-2xl shadow-lg p-6 border border-blue-100">
+        </div>
+        {/* 공지사항 카드 */}
+        <div className="mb-10">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
             <div className="flex items-center gap-2 mb-3">
               <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 20.5c4.142 0 7.5-3.358 7.5-7.5s-3.358-7.5-7.5-7.5-7.5 3.358-7.5 7.5 3.358 7.5 7.5 7.5z" /></svg>
-              <h2 className="text-lg font-bold text-blue-700">회사 공지사항</h2>
+              <h2 className="text-xl font-bold text-blue-600">공지사항</h2>
             </div>
             <ul className="space-y-2">
               {notices.length === 0 ? <li className="text-gray-400">공지사항 없음</li> :
@@ -117,39 +129,82 @@ const EmployeeHome: React.FC = () => {
             </ul>
           </div>
         </div>
-
         {/* 연차신청 카드 */}
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className="flex-1 bg-white rounded-2xl shadow-lg p-6 border border-blue-100">
+        <div className="mb-10">
+          <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-lg p-8 flex flex-col gap-6 border border-gray-100">
             <div className="flex items-center gap-2 mb-3">
               <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-              <h2 className="text-lg font-bold text-blue-700">연차 신청</h2>
+              <h2 className="text-xl font-bold text-blue-600">연차신청</h2>
             </div>
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <input name="date" type="date" value={form.date} onChange={handleFormChange} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200" required />
-              <textarea name="reason" value={form.reason} onChange={handleFormChange} placeholder="사유" className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200" required />
-              <button type="submit" className="w-full px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-lg shadow font-bold hover:scale-105 transition-transform">연차 신청</button>
-            </form>
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <label className="block font-semibold mb-2 text-gray-700">날짜</label>
+                <input
+                  type="date"
+                  name="date"
+                  value={form.date}
+                  onChange={handleFormChange}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-blue-400"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block font-semibold mb-2 text-gray-700">사유</label>
+                <input
+                  type="text"
+                  name="reason"
+                  value={form.reason}
+                  onChange={handleFormChange}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-blue-400"
+                  placeholder="사유 입력"
+                  required
+                />
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                className="px-8 py-2 bg-blue-500 text-white rounded-lg font-bold hover:bg-blue-600 transition"
+              >
+                연차 신청
+              </button>
+            </div>
             {message && <div className="text-green-600 mt-4 text-center font-semibold">{message}</div>}
-          </div>
-          {/* 내 연차신청 내역 카드 */}
-          <div className="flex-1 bg-white rounded-2xl shadow-lg p-6 border border-blue-100">
-            <div className="flex items-center gap-2 mb-3">
-              <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2a4 4 0 018 0v2M9 21h6a2 2 0 002-2v-2a2 2 0 00-2-2H9a2 2 0 00-2 2v2a2 2 0 002 2z" /></svg>
-              <h2 className="text-lg font-bold text-blue-700">내 연차 신청 내역</h2>
-            </div>
-            <div className="space-y-2">
-              {leaves.length === 0 ? <div className="text-gray-400">신청 내역 없음</div> :
-                leaves.map(l => (
-                  <div key={l.id} className="p-3 bg-blue-50 rounded-lg flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                    <div className="font-semibold text-gray-800">{l.date} <span className="text-xs text-gray-500">{l.reason}</span></div>
-                    <div>
-                      {l.status === '신청' && <span className="inline-block px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold">신청</span>}
-                      {l.status === '승인' && <span className="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">승인</span>}
-                      {l.status === '거절' && <span className="inline-block px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold">거절</span>}
-                    </div>
-                  </div>
-                ))}
+          </form>
+        </div>
+        {/* 내 연차신청 내역 테이블 */}
+        <div className="mb-10">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+            <h2 className="text-xl font-bold mb-4 text-blue-600">내 연차 신청 내역</h2>
+            <div className="overflow-x-auto">
+              {leaves.length === 0 ? (
+                <div className="text-center py-8 text-gray-400">신청 내역 없음</div>
+              ) : (
+                <table className="min-w-[700px] w-full border-separate border-spacing-y-2">
+                  <thead>
+                    <tr className="bg-blue-50 text-blue-900">
+                      <th className="border px-4 py-2 rounded-tl-lg">날짜</th>
+                      <th className="border px-4 py-2">사유</th>
+                      <th className="border px-4 py-2">신청일자</th>
+                      <th className="border px-4 py-2">상태</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {leaves.map(l => (
+                      <tr key={l.id} className="bg-gray-50 hover:bg-blue-50 shadow rounded-lg">
+                        <td className="border px-4 py-2 font-semibold">{l.date}</td>
+                        <td className="border px-4 py-2">{l.reason}</td>
+                        <td className="border px-4 py-2">{l.createdAt ? new Date(l.createdAt).toLocaleDateString('ko-KR') : '-'}</td>
+                        <td className="border px-4 py-2 font-bold">
+                          {l.status === '신청' && <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold">신청</span>}
+                          {l.status === '승인' && <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">승인</span>}
+                          {l.status === '거절' && <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold">거절</span>}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
         </div>
