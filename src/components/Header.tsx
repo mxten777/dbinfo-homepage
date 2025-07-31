@@ -44,7 +44,6 @@ export default function Header() {
         <span className="px-3 py-1 rounded bg-gray-300 text-gray-400 cursor-not-allowed block sm:inline-block" aria-disabled>채용</span>
         <span className="px-3 py-1 rounded bg-gray-300 text-gray-400 cursor-not-allowed block sm:inline-block" aria-disabled>프로젝트 현황</span>
         {/* <span className="px-3 py-1 rounded bg-gray-300 text-gray-400 cursor-not-allowed block sm:inline-block" aria-disabled>프로젝트</span> */}
-        <span className="px-3 py-1 rounded bg-gray-300 text-gray-400 cursor-not-allowed block sm:inline-block" aria-disabled>관리자로그인</span>
         <span className="px-3 py-1 rounded bg-gray-300 text-gray-400 cursor-not-allowed block sm:inline-block" aria-disabled>직원로그인</span>
       </>
     );
@@ -56,7 +55,6 @@ export default function Header() {
         <a href="#recruit" className={`px-3 py-1 rounded ${isAdminScreen ? 'bg-gray-300 text-gray-400 cursor-not-allowed' : 'hover:bg-white/20 hover:text-yellow-200 text-white transition'} block sm:inline-block`} onClick={e => { if(isAdminScreen){e.preventDefault();return;} e.preventDefault(); const target = document.getElementById('recruit'); if (target) { const header = document.querySelector('header'); const headerHeight = header ? header.offsetHeight : 64; const y = target.getBoundingClientRect().top + window.scrollY - headerHeight; window.scrollTo({ top: y, behavior: 'smooth' }); setMenuOpen(false); } }} aria-disabled={isAdminScreen}>채용</a>
         <Link to="/project-list" className={`px-3 py-1 rounded ${(isAdminScreen || isLoginScreen) ? 'bg-gray-300 text-gray-400 cursor-not-allowed' : 'hover:bg-white/20 hover:text-yellow-200 text-white transition'} block sm:inline-block`} onClick={e => { if(isAdminScreen || isLoginScreen){e.preventDefault();return;} setMenuOpen(false); }} aria-disabled={isAdminScreen || isLoginScreen}>프로젝트 현황</Link>
         {/* <Link to="/projects" className={`px-3 py-1 rounded ${(isAdminScreen || isLoginScreen) ? 'bg-gray-300 text-gray-400 cursor-not-allowed' : 'hover:bg-white/20 hover:text-yellow-200 text-white transition'} block sm:inline-block`} onClick={e => { if(isAdminScreen || isLoginScreen){e.preventDefault();return;} setMenuOpen(false); }} aria-disabled={isAdminScreen || isLoginScreen}>프로젝트</Link> */}
-        <Link to="/admin" className={`px-3 py-1 rounded ${(isAdminScreen || isLoginScreen) ? 'bg-gray-300 text-gray-400 cursor-not-allowed' : 'hover:bg-white/20 hover:text-yellow-200 text-white transition'} block sm:inline-block`} onClick={e => { if(isAdminScreen || isLoginScreen){e.preventDefault();return;} setMenuOpen(false); }} aria-disabled={isAdminScreen || isLoginScreen}>관리자로그인</Link>
         <Link to="/employee-login" className={`px-3 py-1 rounded ${(isAdminScreen || isLoginScreen) ? 'bg-gray-300 text-gray-400 cursor-not-allowed' : 'hover:bg-white/20 hover:text-yellow-200 text-white transition'} block sm:inline-block`} onClick={e => { if(isAdminScreen || isLoginScreen){e.preventDefault();return;} setMenuOpen(false); }} aria-disabled={isAdminScreen || isLoginScreen}>직원로그인</Link>
       </>
     );

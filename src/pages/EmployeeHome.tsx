@@ -5,13 +5,14 @@ import { db } from '../firebaseConfig';
 import type { Notice } from '../types/notice';
 import type { Leave, Employee } from '../types/employee';
 import { useAuth } from '../AuthContext';
+import CompanyNewsList from '../components/CompanyNewsList';
 
 const EmployeeHome: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [notices, setNotices] = useState<Notice[]>([]);
   const [leaves, setLeaves] = useState<Leave[]>([]);
-  const [form, setForm] = useState({ date: '', reason: '' });
+  const [form, setForm] = useState({ startDate: '', endDate: '', reason: '' });
   const [message, setMessage] = useState('');
   const [employee, setEmployee] = useState<Employee | null>(null);
 
@@ -43,7 +44,7 @@ const EmployeeHome: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.date || !form.reason || !user?.uid) {
+    if (!form.startDate || !form.endDate || !form.reason || !user?.uid) {
       setMessage('모든 항목을 입력하세요.');
       return;
     }
@@ -52,7 +53,8 @@ const EmployeeHome: React.FC = () => {
       const newLeave: Omit<Leave, 'id'> = {
         employeeId: user.uid,
         employeeName: employee?.name || user.email || '',
-        date: form.date,
+        startDate: form.startDate,
+        endDate: form.endDate,
         reason: form.reason,
         status: '신청',
         createdAt: now.toISOString()
@@ -63,7 +65,7 @@ const EmployeeHome: React.FC = () => {
       await firestore.updateDoc(firestore.doc(db, 'leaves', docRef.id), { id: docRef.id });
       setLeaves(prev => [...prev, { ...newLeave, id: docRef.id }]);
       setMessage('연차신청이 접수되었습니다.');
-      setForm({ date: '', reason: '' });
+      setForm({ startDate: '', endDate: '', reason: '' });
       setTimeout(() => setMessage(''), 1500);
     } catch (err) {
       setMessage('신청 실패');
@@ -111,22 +113,14 @@ const EmployeeHome: React.FC = () => {
             <button onClick={handleLogout} className="ml-auto px-4 py-2 bg-gray-200 rounded-lg text-sm font-semibold hover:bg-gray-300 shadow">로그아웃</button>
           </div>
         </div>
-        {/* 공지사항 카드 */}
+        {/* 사내소식 카드 */}
         <div className="mb-10">
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
             <div className="flex items-center gap-2 mb-3">
-              <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 20.5c4.142 0 7.5-3.358 7.5-7.5s-3.358-7.5-7.5-7.5-7.5 3.358-7.5 7.5 3.358 7.5 7.5 7.5z" /></svg>
-              <h2 className="text-xl font-bold text-blue-600">공지사항</h2>
+              <svg className="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 21H5a2 2 0 01-2-2V7a2 2 0 012-2h4l2-2h6a2 2 0 012 2v12a2 2 0 01-2 2z" /></svg>
+              <h2 className="text-xl font-bold text-indigo-600">사내소식</h2>
             </div>
-            <ul className="space-y-2">
-              {notices.length === 0 ? <li className="text-gray-400">공지사항 없음</li> :
-                notices.map(n => (
-                  <li key={n.id} className="p-3 bg-blue-50 rounded-lg flex justify-between items-center">
-                    <span className="font-semibold text-gray-800">{n.title}</span>
-                    <span className="text-xs text-gray-500">{n.date}</span>
-                  </li>
-                ))}
-            </ul>
+            <CompanyNewsList />
           </div>
         </div>
         {/* 연차신청 카드 */}
@@ -136,13 +130,24 @@ const EmployeeHome: React.FC = () => {
               <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
               <h2 className="text-xl font-bold text-blue-600">연차신청</h2>
             </div>
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-3 gap-6">
               <div>
-                <label className="block font-semibold mb-2 text-gray-700">날짜</label>
+                <label className="block font-semibold mb-2 text-gray-700">시작일</label>
                 <input
                   type="date"
-                  name="date"
-                  value={form.date}
+                  name="startDate"
+                  value={form.startDate}
+                  onChange={handleFormChange}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-blue-400"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block font-semibold mb-2 text-gray-700">종료일</label>
+                <input
+                  type="date"
+                  name="endDate"
+                  value={form.endDate}
                   onChange={handleFormChange}
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-blue-400"
                   required
@@ -183,7 +188,8 @@ const EmployeeHome: React.FC = () => {
                 <table className="min-w-[700px] w-full border-separate border-spacing-y-2">
                   <thead>
                     <tr className="bg-blue-50 text-blue-900">
-                      <th className="border px-4 py-2 rounded-tl-lg">날짜</th>
+                      <th className="border px-4 py-2 rounded-tl-lg">시작일</th>
+                      <th className="border px-4 py-2">종료일</th>
                       <th className="border px-4 py-2">사유</th>
                       <th className="border px-4 py-2">신청일자</th>
                       <th className="border px-4 py-2">상태</th>
@@ -192,7 +198,8 @@ const EmployeeHome: React.FC = () => {
                   <tbody>
                     {leaves.map(l => (
                       <tr key={l.id} className="bg-gray-50 hover:bg-blue-50 shadow rounded-lg">
-                        <td className="border px-4 py-2 font-semibold">{l.date}</td>
+                        <td className="border px-4 py-2 font-semibold">{l.startDate}</td>
+                        <td className="border px-4 py-2 font-semibold">{l.endDate}</td>
                         <td className="border px-4 py-2">{l.reason}</td>
                         <td className="border px-4 py-2">{l.createdAt ? new Date(l.createdAt).toLocaleDateString('ko-KR') : '-'}</td>
                         <td className="border px-4 py-2 font-bold">

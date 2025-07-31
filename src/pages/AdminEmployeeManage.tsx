@@ -16,10 +16,14 @@ type EmployeeForm = {
   joinDate: string;
   email: string;
   phone: string;
+  carryOverLeaves: number;
+  annualLeaves: number;
+  usedLeaves: number;
+  remainingLeaves: number;
 };
 
 const initialForm: EmployeeForm = {
-  empNo: '', name: '', regNo: '', gender: '', position: '', department: '', jobType: '', joinDate: '', email: '', phone: ''
+  empNo: '', name: '', regNo: '', gender: '', position: '', department: '', jobType: '', joinDate: '', email: '', phone: '', carryOverLeaves: 0, annualLeaves: 0, usedLeaves: 0, remainingLeaves: 0
 };
 
 const AdminEmployeeManage: React.FC = () => {
@@ -76,18 +80,22 @@ const AdminEmployeeManage: React.FC = () => {
 
   const handleEditClick = (emp: any) => {
     setEditId(emp.id);
-    setForm({
-      empNo: emp.empNo || '',
-      name: emp.name || '',
-      regNo: emp.regNo || '',
-      gender: emp.gender || '',
-      position: emp.position || '',
-      department: emp.department || '',
-      jobType: emp.jobType || '',
-      joinDate: emp.joinDate || '',
-      email: emp.email || '',
-      phone: emp.phone || ''
-    });
+      setForm({
+        empNo: emp.empNo || '',
+        name: emp.name || '',
+        regNo: emp.regNo || '',
+        gender: emp.gender || '',
+        position: emp.position || '',
+        department: emp.department || '',
+        jobType: emp.jobType || '',
+        joinDate: emp.joinDate || '',
+        email: emp.email || '',
+        phone: emp.phone || '',
+        carryOverLeaves: emp.carryOverLeaves || 0,
+        annualLeaves: emp.annualLeaves || 0,
+        usedLeaves: emp.usedLeaves || 0,
+        remainingLeaves: emp.remainingLeaves || 0
+      });
   };
 
   const handleDelete = async (id: string) => {
@@ -104,7 +112,7 @@ const AdminEmployeeManage: React.FC = () => {
   // Header(네비게이션) 없이 화면만 출력
   return (
     <div className="p-8 max-w-4xl mx-auto">
-      <h2 className="text-3xl font-extrabold mb-6 text-blue-800 tracking-tight text-center drop-shadow">직원정보 등록/수정/삭제</h2>
+      <h2 className="text-3xl mb-6 text-blue-800 tracking-tight text-center drop-shadow">직원정보 등록/수정/삭제</h2>
       {message && <div className="mb-4 text-green-600 font-semibold text-lg text-center">{message}</div>}
       <form onSubmit={handleAddOrEdit} className="bg-gradient-to-br from-blue-50 to-white rounded-2xl shadow-2xl p-8 mb-10 grid grid-cols-1 md:grid-cols-2 gap-6 border border-blue-100">
         <div>
@@ -144,6 +152,22 @@ const AdminEmployeeManage: React.FC = () => {
           <input name="joinDate" type="date" value={form.joinDate} onChange={handleFormChange} className="border-2 border-blue-200 rounded-lg px-3 py-2 w-full text-lg focus:outline-none focus:ring-2 focus:ring-blue-300" />
         </div>
         <div>
+          <label className="block text-base font-bold mb-2 text-gray-700">이월연차</label>
+          <input name="carryOverLeaves" type="number" value={form.carryOverLeaves} onChange={handleFormChange} className="border-2 border-blue-200 rounded-lg px-3 py-2 w-full text-lg focus:outline-none focus:ring-2 focus:ring-blue-300" />
+        </div>
+        <div>
+          <label className="block text-base font-bold mb-2 text-gray-700">올해연차</label>
+          <input name="annualLeaves" type="number" value={form.annualLeaves} onChange={handleFormChange} className="border-2 border-blue-200 rounded-lg px-3 py-2 w-full text-lg focus:outline-none focus:ring-2 focus:ring-blue-300" />
+        </div>
+        <div>
+          <label className="block text-base font-bold mb-2 text-gray-700">연차사용일수</label>
+          <input name="usedLeaves" type="number" value={form.usedLeaves} onChange={handleFormChange} className="border-2 border-blue-200 rounded-lg px-3 py-2 w-full text-lg focus:outline-none focus:ring-2 focus:ring-blue-300" />
+        </div>
+        <div>
+          <label className="block text-base font-bold mb-2 text-gray-700">잔여연차</label>
+          <input name="remainingLeaves" type="number" value={form.remainingLeaves} readOnly className="border-2 border-blue-200 rounded-lg px-3 py-2 w-full text-lg bg-gray-100" />
+        </div>
+        <div>
           <label className="block text-base font-bold mb-2 text-gray-700">이메일</label>
           <input name="email" value={form.email} onChange={handleFormChange} className="border-2 border-blue-200 rounded-lg px-3 py-2 w-full text-lg focus:outline-none focus:ring-2 focus:ring-blue-300" />
         </div>
@@ -156,50 +180,62 @@ const AdminEmployeeManage: React.FC = () => {
           {editId && <button type="button" className="px-8 py-3 bg-gray-400 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-gray-500 transition-all duration-150" onClick={()=>{setForm(initialForm);setEditId(null);}}>취소</button>}
         </div>
       </form>
-      <div className="overflow-x-auto">
-        <table className="min-w-[1100px] border mb-6 whitespace-nowrap text-lg shadow-xl rounded-xl bg-white">
-          <thead>
-            <tr className="bg-blue-100 text-blue-900 text-lg">
-              <th className="border px-4 py-3">사번</th>
-              <th className="border px-4 py-3">성명</th>
-              <th className="border px-4 py-3">주민번호</th>
-              <th className="border px-4 py-3">성별</th>
-              <th className="border px-4 py-3">직위</th>
-              <th className="border px-4 py-3">부서</th>
-              <th className="border px-4 py-3">직종</th>
-              <th className="border px-4 py-3">입사일</th>
-              <th className="border px-4 py-3">이메일</th>
-              <th className="border px-4 py-3">연락처</th>
-              <th className="border px-4 py-3">수정</th>
-              <th className="border px-4 py-3">삭제</th>
-            </tr>
-          </thead>
-          <tbody>
-            {employees.map(emp => (
-              <tr key={emp.id} className="hover:bg-blue-50 transition">
-                <td className="border px-4 py-2 font-semibold">{emp.empNo}</td>
-                <td className="border px-4 py-2 font-semibold">{emp.name}</td>
-                <td className="border px-4 py-2">{emp.regNo || '-'}</td>
-                <td className="border px-4 py-2">{emp.gender || '-'}</td>
-                <td className="border px-4 py-2">{emp.position || '-'}</td>
-                <td className="border px-4 py-2">{emp.department || '-'}</td>
-                <td className="border px-4 py-2">{emp.jobType || '-'}</td>
-                <td className="border px-4 py-2">{emp.joinDate || '-'}</td>
-                <td className="border px-4 py-2">{emp.email || '-'}</td>
-                <td className="border px-4 py-2">{emp.phone || '-'}</td>
-                <td className="border px-4 py-2">
-                  <button onClick={() => handleEditClick(emp)} className="px-3 py-1 bg-yellow-200 text-yellow-900 rounded-lg font-bold shadow hover:bg-yellow-300 transition">수정</button>
-                </td>
-                <td className="border px-4 py-2">
-                  <button onClick={() => handleDelete(emp.id!)} className="px-3 py-1 bg-red-500 text-white rounded-lg font-bold shadow hover:bg-red-600 transition">삭제</button>
-                </td>
+      <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-5xl mx-auto mt-6">
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white rounded-lg overflow-hidden">
+            <thead className="bg-blue-100 sticky top-0 z-10">
+              <tr className="text-base font-semibold text-blue-900 text-center align-middle">
+                <th className="border px-4 py-3 whitespace-nowrap">사번</th>
+                <th className="border px-4 py-3 whitespace-nowrap">성명</th>
+                <th className="border px-4 py-3 whitespace-nowrap">주민번호</th>
+                <th className="border px-4 py-3 whitespace-nowrap">성별</th>
+                <th className="border px-4 py-3 whitespace-nowrap">직위</th>
+                <th className="border px-4 py-3 whitespace-nowrap">부서</th>
+                <th className="border px-4 py-3 whitespace-nowrap">직종</th>
+                <th className="border px-4 py-3 whitespace-nowrap">입사일</th>
+                <th className="border px-4 py-3 whitespace-nowrap">이월연차</th>
+                <th className="border px-4 py-3 whitespace-nowrap">올해연차</th>
+                <th className="border px-4 py-3 whitespace-nowrap">총연차</th>
+                <th className="border px-4 py-3 whitespace-nowrap">연차사용일수</th>
+                <th className="border px-4 py-3 whitespace-nowrap">잔여연차</th>
+                <th className="border px-4 py-3 whitespace-nowrap">이메일</th>
+                <th className="border px-4 py-3 whitespace-nowrap">연락처</th>
+                <th className="border px-4 py-3 whitespace-nowrap">수정</th>
+                <th className="border px-4 py-3 whitespace-nowrap">삭제</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {employees.map((emp, idx) => (
+                <tr key={emp.id} className={idx % 2 === 0 ? 'bg-gray-50 hover:bg-blue-100 transition' : 'bg-white hover:bg-blue-100 transition'}>
+                  <td className="border px-4 py-2 whitespace-nowrap">{emp.empNo}</td>
+                  <td className="border px-4 py-2 whitespace-nowrap">{emp.name}</td>
+                  <td className="border px-4 py-2 whitespace-nowrap">{emp.regNo || '-'}</td>
+                  <td className="border px-4 py-2 whitespace-nowrap">{emp.gender || '-'}</td>
+                  <td className="border px-4 py-2 whitespace-nowrap">{emp.position || '-'}</td>
+                  <td className="border px-4 py-2 whitespace-nowrap">{emp.department || '-'}</td>
+                  <td className="border px-4 py-2 whitespace-nowrap">{emp.jobType || '-'}</td>
+                  <td className="border px-4 py-2 whitespace-nowrap">{emp.joinDate || '-'}</td>
+                  <td className="border px-4 py-2 whitespace-nowrap">{emp.carryOverLeaves ?? '-'}</td>
+                  <td className="border px-4 py-2 whitespace-nowrap">{emp.annualLeaves ?? '-'}</td>
+                  <td className="border px-4 py-2 whitespace-nowrap">{(Number(emp.carryOverLeaves) || 0) + (Number(emp.annualLeaves) || 0)}</td>
+                  <td className="border px-4 py-2 whitespace-nowrap">{emp.usedLeaves ?? '-'}</td>
+                  <td className="border px-4 py-2 whitespace-nowrap">{emp.remainingLeaves ?? '-'}</td>
+                  <td className="border px-4 py-2 whitespace-nowrap">{emp.email || '-'}</td>
+                  <td className="border px-4 py-2 whitespace-nowrap">{emp.phone || '-'}</td>
+                  <td className="border px-4 py-2 whitespace-nowrap">
+                    <button onClick={() => handleEditClick(emp)} className="px-3 py-1 bg-yellow-200 text-yellow-900 rounded-lg font-bold shadow hover:bg-yellow-300 transition">수정</button>
+                  </td>
+                  <td className="border px-4 py-2 whitespace-nowrap">
+                    <button onClick={() => handleDelete(emp.id!)} className="px-3 py-1 bg-red-500 text-white rounded-lg font-bold shadow hover:bg-red-600 transition">삭제</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
       <div className="flex justify-center mt-10">
-        <button className="px-8 py-3 bg-gray-300 text-gray-800 rounded-full shadow-lg hover:bg-gray-400 font-bold text-lg transition-all duration-150" onClick={() => navigate('/admin-home')}>
+        <button className="px-8 py-3 bg-gray-300 text-gray-800 rounded-full shadow-lg hover:bg-gray-400 font-bold text-lg transition-all duration-150" onClick={() => navigate('/admin/home')}>
           관리자 홈으로
         </button>
       </div>

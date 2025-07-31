@@ -4,9 +4,11 @@ export interface Employee {
   empNo: string; // 사번 YYMMDD-001 형식
   name: string;
   email?: string;
-  totalLeaves: number;
-  usedLeaves: number;
-  remainingLeaves: number;
+  totalLeaves?: number;        // 총연차(이월+올해, 기존 호환)
+  carryOverLeaves?: number;    // 이월연차
+  annualLeaves?: number;       // 올해연차
+  usedLeaves?: number;         // 연차사용일수
+  remainingLeaves?: number;    // 잔여연차(자동계산)
 }
 
 // 사번 생성 함수: 오늘 날짜 기준 YYMMDD-001 형식, 이미 존재하는 사번 배열을 받아 다음 번호 생성

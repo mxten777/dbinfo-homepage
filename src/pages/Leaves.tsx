@@ -2,10 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, getDocs, addDoc, updateDoc, doc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
+import { useAuth } from '../AuthContext';
+
 
 const Leaves: React.FC = () => {
+  // 로그인한 사용자 정보
+  // AuthContext에서 user 가져오기
+  // 직원 정보에서 이메일로 이름 자동 입력
+  const { user } = useAuth();
   // 직원 데이터 상태
-  const [employees, setEmployees] = useState<any[]>([]);
+  type Employee = { id: string; name: string; email: string; [key: string]: any };
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   // 연차신청 내역 상태
@@ -49,7 +56,7 @@ const Leaves: React.FC = () => {
   const [error, setError] = useState('');
 
   // 연차신청 폼 상태
-  const [form, setForm] = useState({ name: '', date: '', reason: '' });
+  const [form, setForm] = useState({ name: '', startDate: '', endDate: '', reason: '' });
   const [submitLoading, setSubmitLoading] = useState(false);
 
   // 직원 데이터 Firestore에서 불러오기
@@ -57,7 +64,20 @@ const Leaves: React.FC = () => {
     const fetchEmployees = async () => {
       try {
         const snap = await getDocs(collection(db, 'employees'));
-        setEmployees(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        const empList: Employee[] = snap.docs.map(doc => ({
+          id: doc.id,
+          name: typeof doc.data().name === 'string' ? doc.data().name : '',
+          email: typeof doc.data().email === 'string' ? doc.data().email : '',
+          ...doc.data()
+        }));
+        setEmployees(empList);
+        // 로그인한 사용자 이메일과 일치하는 직원 정보 찾기
+        if (user && typeof user.email === 'string' && user.email.length > 0) {
+          const emp = empList.find(e => typeof e.email === 'string' && e.email === user.email);
+          if (emp && typeof emp.name === 'string' && emp.name.length > 0) {
+            setForm(f => ({ ...f, name: emp.name }));
+          }
+        }
       } catch (err) {
         setError('직원 데이터를 불러올 수 없습니다.');
       } finally {
@@ -65,7 +85,7 @@ const Leaves: React.FC = () => {
       }
     };
     fetchEmployees();
-  }, []);
+  }, [user]);
 
   // 폼 입력 핸들러
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,7 +95,7 @@ const Leaves: React.FC = () => {
   // 연차신청 폼 제출 핸들러
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.date || !form.reason) {
+    if (!form.name || !form.startDate || !form.endDate || !form.reason) {
       alert('모든 항목을 입력하세요.');
       return;
     }
@@ -83,13 +103,14 @@ const Leaves: React.FC = () => {
     try {
       await addDoc(collection(db, 'leaves'), {
         name: form.name,
-        date: form.date,
+        startDate: form.startDate,
+        endDate: form.endDate,
         reason: form.reason,
         createdAt: new Date().toISOString(),
         status: '신청',
       });
       alert('연차 신청이 완료되었습니다!');
-      setForm({ name: '', date: '', reason: '' });
+      setForm({ name: '', startDate: '', endDate: '', reason: '' });
     } catch (err) {
       alert('신청 실패: ' + (err as Error).message);
     } finally {
@@ -112,7 +133,7 @@ const Leaves: React.FC = () => {
         {/* 연차신청 폼 */}
         <div className="mb-10">
           <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-lg p-8 flex flex-col gap-6 border border-gray-100">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div>
                 <label className="block font-semibold mb-2 text-gray-700">이름</label>
                 <input
@@ -126,11 +147,22 @@ const Leaves: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block font-semibold mb-2 text-gray-700">날짜</label>
+                <label className="block font-semibold mb-2 text-gray-700">시작일</label>
                 <input
                   type="date"
-                  name="date"
-                  value={form.date}
+                  name="startDate"
+                  value={form.startDate}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-blue-400"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block font-semibold mb-2 text-gray-700">종료일</label>
+                <input
+                  type="date"
+                  name="endDate"
+                  value={form.endDate}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-blue-400"
                   required
@@ -214,7 +246,8 @@ const Leaves: React.FC = () => {
                   <thead>
                     <tr className="bg-blue-50 text-blue-900">
                       <th className="border px-4 py-2 rounded-tl-lg whitespace-nowrap">이름</th>
-                      <th className="border px-4 py-2 whitespace-nowrap">날짜</th>
+                      <th className="border px-4 py-2 whitespace-nowrap">시작일</th>
+                      <th className="border px-4 py-2 whitespace-nowrap">종료일</th>
                       <th className="border px-4 py-2 whitespace-nowrap">사유</th>
                       <th className="border px-4 py-2 whitespace-nowrap">신청일자</th>
                       <th className="border px-4 py-2 whitespace-nowrap">상태</th>
@@ -225,7 +258,8 @@ const Leaves: React.FC = () => {
                     {leaves.map(leave => (
                       <tr key={leave.id} className="bg-gray-50 hover:bg-blue-50 shadow rounded-lg">
                         <td className="border px-4 py-2 whitespace-nowrap">{leave.name}</td>
-                        <td className="border px-4 py-2 whitespace-nowrap">{leave.date}</td>
+                        <td className="border px-4 py-2 whitespace-nowrap">{leave.startDate || '-'}</td>
+                        <td className="border px-4 py-2 whitespace-nowrap">{leave.endDate || '-'}</td>
                         <td className="border px-4 py-2 whitespace-nowrap truncate" title={leave.reason}>{leave.reason}</td>
                         <td className="border px-4 py-2 whitespace-nowrap">{leave.createdAt ? new Date(leave.createdAt).toLocaleDateString('ko-KR') : '-'}</td>
                         <td className="border px-4 py-2 font-bold text-blue-600 whitespace-nowrap">

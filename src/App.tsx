@@ -1,19 +1,5 @@
 /// <reference types="react" />
-import Leaves from './pages/Leaves';
-import Admin from './pages/Admin';
-import AdminHome from './pages/AdminHome';
-
-import AdminEmployeeEdit from './pages/AdminEmployeeEdit';
-import AdminEmployeeManage from './pages/AdminEmployeeManage';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import Home from './pages/Home';
-import Projects from './pages/Projects';
-import ProjectList from './pages/ProjectList';
-import EmployeeLogin from './pages/EmployeeLogin';
-import EmployeeHome from './pages/EmployeeHome';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import { AuthProvider, useAuth } from './AuthContext';
+import Leaves from './pages/Leaves'; import AdminEmployeeEdit from './pages/AdminEmployeeEdit'; import AdminEmployeeManage from './pages/AdminEmployeeManage'; import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'; import Home from './pages/Home'; import Projects from './pages/Projects'; import ProjectList from './pages/ProjectList'; import EmployeeLogin from './pages/EmployeeLogin'; import EmployeeHome from './pages/EmployeeHome'; import Header from './components/Header'; import Footer from './components/Footer'; import { AuthProvider, useAuth } from './AuthContext'; import AdminProtectedRoute from './pages/admin/AdminProtectedRoute'; import AdminLayout from './pages/admin/AdminLayout'; import AdminLeaves from './pages/admin/AdminLeaves'; import AdminLogin from './pages/admin/AdminLogin'; import AdminHome from './pages/admin/AdminHome'; import AdminEmployeeLeaveEdit from './pages/admin/AdminEmployeeLeaveEdit'; import AdminProjectRegister from './pages/admin/AdminProjectRegister'; import AdminProjectStatus from './pages/admin/AdminProjectStatus'; import AdminCompanyNewsManage from './pages/admin/AdminCompanyNewsManage';
 
 // 관리자 인증 필요 페이지 보호용 컴포넌트
 function ProtectedRoute({ children }: { children: JSX.Element }) {
@@ -35,11 +21,12 @@ function BrandBar() {
 
 function AppRoutesWithHeader() {
   const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
   const hideHeader = location.pathname === '/admin-employee-manage';
   return (
     <>
-      <BrandBar />
-      {!hideHeader && <Header />}
+      {!isAdminRoute && <BrandBar />}
+      {!isAdminRoute && !hideHeader && <Header />}
       <main className="min-h-[60vh]">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -54,16 +41,36 @@ function AppRoutesWithHeader() {
               <Leaves />
             </ProtectedRoute>
           } />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/admin-home" element={<AdminHome />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/*" element={<AdminProtectedRoute />}>
+            <Route element={<AdminLayout />}>
+              <Route path="home" element={<AdminHome />} />
+              <Route path="leaves" element={<AdminLeaves />} />
+              <Route path="project-status" element={<AdminProjectStatus />} />
+              <Route path="employee-manage" element={<AdminEmployeeManage />} />
+              <Route path="company-news-manage" element={<AdminCompanyNewsManage />} />
+              <Route path="employee-upload" element={<DummyPage title="직원정보 업로드" />} />
+              <Route path="leave-reset" element={<DummyPage title="연차기록 초기화" />} />
+              <Route path="employee-leave-edit" element={<AdminEmployeeLeaveEdit />} />
+            </Route>
+          </Route>
           <Route path="/employee-login" element={<EmployeeLogin />} />
           <Route path="/employee-home" element={<EmployeeHome />} />
           <Route path="/admin-employee-edit" element={<AdminEmployeeEdit />} />
           <Route path="/admin-employee-manage" element={<AdminEmployeeManage />} />
         </Routes>
       </main>
-      <Footer />
+      {!isAdminRoute && <Footer />}
     </>
+  );
+}
+
+function DummyPage({ title }: { title: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh]">
+      <h2 className="text-2xl font-bold mb-4">{title}</h2>
+      <p className="text-gray-500">이 페이지는 준비 중입니다.</p>
+    </div>
   );
 }
 
