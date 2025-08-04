@@ -1,12 +1,13 @@
 export interface Leave {
   id: string;
   employeeId: string;
-  employeeName: string;
-  name: string;
+  employeeName?: string;
+  name?: string;
   startDate: string;
   endDate: string;
-  date: string;
+  date?: string;
   reason: string;
+  type: '연차' | '반차' | '병가' | '기타';
   status: '신청' | '승인' | '거절' | 'pending' | 'approved' | 'rejected';
   createdAt: string;
 }

@@ -124,6 +124,7 @@ const EmployeeHome: React.FC = () => {
         endDate: form.endDate,
         date: `${form.startDate}~${form.endDate}`,
         reason: form.reason,
+        type: '연차',
         status: '신청' as const,
         createdAt: now.toISOString()
       };
