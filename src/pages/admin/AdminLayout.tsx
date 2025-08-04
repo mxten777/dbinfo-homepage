@@ -1,4 +1,4 @@
-          <MenuBtn icon={<svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3" /></svg>} label="연차정보 초기화" onClick={() => navigate('/admin/employee-leave-edit')} />
+// (잘못된 navigate 참조 제거)
 import React from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 

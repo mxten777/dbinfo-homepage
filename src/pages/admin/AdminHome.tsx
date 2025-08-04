@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaCalendarCheck, FaProjectDiagram, FaUserEdit, FaUserPlus, FaTrashAlt, FaUpload, FaEraser } from 'react-icons/fa';
+import { FaCalendarCheck, FaProjectDiagram, FaUserEdit, FaUserPlus, FaEraser } from 'react-icons/fa';
 
 const topMenus = [
   {
@@ -42,7 +42,7 @@ const bottomMenus = [
   },
 ];
 
-const oneTimeMenus = [];
+// 사용하지 않는 oneTimeMenus 제거
 
 const AdminHome: React.FC = () => {
   const navigate = useNavigate();

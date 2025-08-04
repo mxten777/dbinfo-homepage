@@ -1,5 +1,24 @@
 /// <reference types="react" />
-import Leaves from './pages/Leaves'; import AdminEmployeeEdit from './pages/AdminEmployeeEdit'; import AdminEmployeeManage from './pages/AdminEmployeeManage'; import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'; import Home from './pages/Home'; import Projects from './pages/Projects'; import ProjectList from './pages/ProjectList'; import EmployeeLogin from './pages/EmployeeLogin'; import EmployeeHome from './pages/EmployeeHome'; import Header from './components/Header'; import Footer from './components/Footer'; import { AuthProvider, useAuth } from './AuthContext'; import AdminProtectedRoute from './pages/admin/AdminProtectedRoute'; import AdminLayout from './pages/admin/AdminLayout'; import AdminLeaves from './pages/admin/AdminLeaves'; import AdminLogin from './pages/admin/AdminLogin'; import AdminHome from './pages/admin/AdminHome'; import AdminEmployeeLeaveEdit from './pages/admin/AdminEmployeeLeaveEdit'; import AdminProjectRegister from './pages/admin/AdminProjectRegister'; import AdminProjectStatus from './pages/admin/AdminProjectStatus'; import AdminCompanyNewsManage from './pages/admin/AdminCompanyNewsManage';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AuthProvider, useAuth } from './AuthContext';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import Home from './pages/Home';
+import Projects from './pages/Projects';
+import ProjectList from './pages/ProjectList';
+import Leaves from './pages/Leaves';
+import AdminLogin from './pages/admin/AdminLogin';
+import AdminProtectedRoute from './pages/admin/AdminProtectedRoute';
+import AdminLayout from './pages/admin/AdminLayout';
+import AdminHome from './pages/admin/AdminHome';
+import AdminLeaves from './pages/admin/AdminLeaves';
+import AdminProjectStatus from './pages/admin/AdminProjectStatus';
+import AdminEmployeeManage from './pages/AdminEmployeeManage';
+import AdminCompanyNewsManage from './pages/admin/AdminCompanyNewsManage';
+import AdminEmployeeLeaveEdit from './pages/admin/AdminEmployeeLeaveEdit';
+import EmployeeLogin from './pages/EmployeeLogin';
+import EmployeeHome from './pages/EmployeeHome';
+import AdminEmployeeEdit from './pages/AdminEmployeeEdit';
 
 // 관리자 인증 필요 페이지 보호용 컴포넌트
 function ProtectedRoute({ children }: { children: JSX.Element }) {

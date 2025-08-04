@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
-import type { Notice } from '../types/notice';
+// 불필요한 타입 import 제거
 import type { Leave, Employee } from '../types/employee';
 import { useAuth } from '../AuthContext';
 import CompanyNewsList from '../components/CompanyNewsList';
@@ -10,7 +10,7 @@ import CompanyNewsList from '../components/CompanyNewsList';
 const EmployeeHome: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const [notices, setNotices] = useState<Notice[]>([]);
+  // 불필요한 상태 제거
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [form, setForm] = useState({ startDate: '', endDate: '', reason: '' });
   const [message, setMessage] = useState('');
@@ -18,8 +18,7 @@ const EmployeeHome: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const noticeSnap = await getDocs(collection(db, 'notices'));
-      setNotices(noticeSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Notice)));
+      // 불필요한 코드 제거
       const leaveSnap = await getDocs(collection(db, 'leaves'));
       setLeaves(leaveSnap.docs.filter(doc => doc.data().employeeId === user?.uid).map(doc => ({ id: doc.id, ...doc.data() } as Leave)));
       // 직원 정보 불러오기
@@ -53,8 +52,7 @@ const EmployeeHome: React.FC = () => {
       const newLeave: Omit<Leave, 'id'> = {
         employeeId: user.uid,
         employeeName: employee?.name || user.email || '',
-        startDate: form.startDate,
-        endDate: form.endDate,
+        date: `${form.startDate}~${form.endDate}`,
         reason: form.reason,
         status: '신청',
         createdAt: now.toISOString()
@@ -177,7 +175,7 @@ const EmployeeHome: React.FC = () => {
             {message && <div className="text-green-600 mt-4 text-center font-semibold">{message}</div>}
           </form>
         </div>
-        {/* 내 연차신청 내역 테이블 */}
+        {/* 내 연차신청 내역 테이블 (Leave 타입에 맞게 date 필드만 사용) */}
         <div className="mb-10">
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
             <h2 className="text-xl font-bold mb-4 text-blue-600">내 연차 신청 내역</h2>
@@ -188,8 +186,7 @@ const EmployeeHome: React.FC = () => {
                 <table className="min-w-[700px] w-full border-separate border-spacing-y-2">
                   <thead>
                     <tr className="bg-blue-50 text-blue-900">
-                      <th className="border px-4 py-2 rounded-tl-lg">시작일</th>
-                      <th className="border px-4 py-2">종료일</th>
+                      <th className="border px-4 py-2 rounded-tl-lg">기간</th>
                       <th className="border px-4 py-2">사유</th>
                       <th className="border px-4 py-2">신청일자</th>
                       <th className="border px-4 py-2">상태</th>
@@ -198,8 +195,7 @@ const EmployeeHome: React.FC = () => {
                   <tbody>
                     {leaves.map(l => (
                       <tr key={l.id} className="bg-gray-50 hover:bg-blue-50 shadow rounded-lg">
-                        <td className="border px-4 py-2 font-semibold">{l.startDate}</td>
-                        <td className="border px-4 py-2 font-semibold">{l.endDate}</td>
+                        <td className="border px-4 py-2 font-semibold">{l.date}</td>
                         <td className="border px-4 py-2">{l.reason}</td>
                         <td className="border px-4 py-2">{l.createdAt ? new Date(l.createdAt).toLocaleDateString('ko-KR') : '-'}</td>
                         <td className="border px-4 py-2 font-bold">

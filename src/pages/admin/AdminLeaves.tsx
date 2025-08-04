@@ -67,9 +67,7 @@ const AdminLeaves: React.FC = () => {
       const start = new Date(leave.startDate);
       const end = new Date(leave.endDate);
       // YYYY-MM-DD 형식으로 변환
-      const formatDate = (d: Date) => d.toISOString().slice(0, 10);
-      const startStr = formatDate(start);
-      const endStr = formatDate(end);
+      // const formatDate = (d: Date) => d.toISOString().slice(0, 10);
       const days = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
       // 직원 정보 조회
       const empSnap = await getDocs(collection(db, 'employees'));
