@@ -1,312 +1,245 @@
-import React, { useEffect, useState } from 'react';
-import { collection, getDocs, updateDoc, doc, addDoc } from 'firebase/firestore';
+﻿import React, { useState, useEffect } from 'react';
+import { collection, getDocs, doc, updateDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
-import { useNavigate } from 'react-router-dom';
-import { AiOutlineHome } from 'react-icons/ai';
+import type { Leave, Employee } from '../../types/employee';
 
 const AdminLeaves: React.FC = () => {
-  const navigate = useNavigate();
-  // 연차신청 폼 상태
-  const [form, setForm] = useState({ name: '', startDate: '', endDate: '', reason: '' });
-  const [submitLoading, setSubmitLoading] = useState(false);
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.name || !form.startDate || !form.endDate || !form.reason) {
-      alert('모든 항목을 입력하세요.');
-      return;
-    }
-    setSubmitLoading(true);
-    try {
-      await addDoc(collection(db, 'leaves'), {
-        name: form.name,
-        employeeName: form.name,
-        startDate: form.startDate,
-        endDate: form.endDate,
-        date: `${form.startDate}~${form.endDate}`,
-        reason: form.reason,
-        createdAt: new Date().toISOString(),
-        status: '신청',
-      });
-      alert('연차 신청이 완료되었습니다!');
-      setForm({ name: '', startDate: '', endDate: '', reason: '' });
-      fetchLeaves();
-    } catch (err) {
-      alert('신청 실패: ' + (err as Error).message);
-    } finally {
-      setSubmitLoading(false);
-    }
-  };
-  const [leaves, setLeaves] = useState<any[]>([]);
-  const [leavesLoading, setLeavesLoading] = useState(true);
-  const [leavesError, setLeavesError] = useState('');
+  const [leaves, setLeaves] = useState<Leave[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const fetchLeaves = async () => {
-    setLeavesLoading(true);
-    try {
-      const snap = await getDocs(collection(db, 'leaves'));
-      setLeaves(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    } catch (err) {
-      setLeavesError('연차신청 내역을 불러올 수 없습니다.');
-    } finally {
-      setLeavesLoading(false);
-    }
-  };
   useEffect(() => {
-    fetchLeaves();
-  }, []);
-
-  const handleApprove = async (leaveId: string) => {
-    try {
-      // leaveId로 신청 정보 조회
-      const leaveSnap = await getDocs(collection(db, 'leaves'));
-      const leave = leaveSnap.docs.find(doc => doc.id === leaveId)?.data();
-      if (!leave) throw new Error('신청 정보를 찾을 수 없습니다.');
-      
-      // 날짜 정보 확인 (startDate, endDate 또는 date 필드에서)
-      let startDate: string, endDate: string;
-      
-      if (leave.startDate && leave.endDate) {
-        // 새로운 형식: startDate, endDate 필드가 있는 경우
-        startDate = leave.startDate;
-        endDate = leave.endDate;
-      } else if (leave.date && leave.date.includes('~')) {
-        // 기존 형식: date 필드에서 시작일~종료일 형태
-        [startDate, endDate] = leave.date.split('~');
-      } else {
-        throw new Error('신청 기간 정보가 올바르지 않습니다.');
-      }
-      
-      // 기간 계산
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-      const days = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-      
-      // 직원 정보 조회 (name 또는 employeeName으로)
-      const empSnap = await getDocs(collection(db, 'employees'));
-      const empDoc = empSnap.docs.find(doc => 
-        doc.data().name === leave.name || 
-        doc.data().name === leave.employeeName ||
-        doc.data().email === leave.employeeId
-      );
-      
-      if (!empDoc) throw new Error('직원 정보를 찾을 수 없습니다.');
-      
-      const emp = empDoc.data();
-      const usedLeaves = (emp.usedLeaves ?? 0) + days;
-      const carryOverLeaves = emp.carryOverLeaves ?? 0;
-      const annualLeaves = emp.annualLeaves ?? 0;
-      const totalLeaves = emp.totalLeaves ?? (carryOverLeaves + annualLeaves);
-      
-      // 잔여연차 = 총연차 - 사용연차
-      const remainingLeaves = Math.max(0, totalLeaves - usedLeaves);
-      
-      // 직원 정보 업데이트
-      await updateDoc(doc(db, 'employees', empDoc.id), {
-        usedLeaves,
-        remainingLeaves,
-        totalLeaves: carryOverLeaves + annualLeaves // 총연차도 업데이트
-      });
-      
-      // 신청 상태 승인 처리
-      await updateDoc(doc(db, 'leaves', leaveId), { status: '승인' });
-      fetchLeaves();
-    } catch (err) {
-      alert('승인 처리 실패: ' + (err as Error).message);
-    }
-  };
-
-  const handleReject = async (leaveId: string) => {
-    try {
-      await updateDoc(doc(db, 'leaves', leaveId), { status: '반려' });
-      fetchLeaves();
-    } catch (err) {
-      alert('반려 처리 실패: ' + (err as Error).message);
-    }
-  };
-
-  const [employeeStatus, setEmployeeStatus] = useState<any[]>([]);
-  useEffect(() => {
-    const fetchEmployeeStatus = async () => {
+    // 직원 데이터 가져오기
+    const fetchEmployees = async () => {
       try {
-        const snap = await getDocs(collection(db, 'employees'));
-        setEmployeeStatus(snap.docs.map(doc => ({
+        const employeesSnapshot = await getDocs(collection(db, 'employees'));
+        const employeesData = employeesSnapshot.docs.map(doc => ({
           id: doc.id,
-          name: doc.data().name,
-          email: doc.data().email ?? '',
-          totalLeaves: doc.data().totalLeaves ?? 0,
-          usedLeaves: doc.data().usedLeaves ?? 0,
-          remainingLeaves: doc.data().remainingLeaves ?? 0
-        })));
-      } catch {
-        setEmployeeStatus([]);
+          ...doc.data()
+        })) as Employee[];
+        setEmployees(employeesData);
+      } catch (error) {
+        console.error('직원 데이터 가져오기 실패:', error);
       }
     };
-    fetchEmployeeStatus();
+
+    // 연차 신청 실시간 가져오기
+    const unsubscribe = onSnapshot(
+      query(collection(db, 'leaves'), orderBy('createdAt', 'desc')),
+      (snapshot) => {
+        const leavesData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          // 날짜 객체를 문자열로 변환
+          startDate: doc.data().startDate?.toDate?.() || doc.data().startDate,
+          endDate: doc.data().endDate?.toDate?.() || doc.data().endDate,
+          createdAt: doc.data().createdAt?.toDate?.() || doc.data().createdAt
+        })) as Leave[];
+        setLeaves(leavesData);
+        setLoading(false);
+      },
+      (error) => {
+        console.error('연차 데이터 실시간 가져오기 실패:', error);
+        setLoading(false);
+      }
+    );
+
+    fetchEmployees();
+    return () => unsubscribe();
   }, []);
 
+  const getEmployeeInfo = (leave: Leave) => {
+    const employee = employees.find(emp => 
+      emp.id === leave.employeeId || 
+      emp.email === leave.employeeId ||
+      emp.name === leave.name || 
+      emp.name === leave.employeeName
+    );
+    
+    return {
+      name: employee?.name || leave.employeeName || leave.name || '알 수 없음',
+      email: employee?.email || leave.employeeId || ''
+    };
+  };
+
+  const updateLeaveStatus = async (leaveId: string, status: '승인' | '거절' | 'approved' | 'rejected') => {
+    try {
+      await updateDoc(doc(db, 'leaves', leaveId), {
+        status,
+        updatedAt: new Date()
+      });
+    } catch (error) {
+      console.error('연차 상태 업데이트 실패:', error);
+      alert('상태 업데이트에 실패했습니다.');
+    }
+  };
+
+  const formatDate = (date: any): string => {
+    if (!date) return '날짜 없음';
+    
+    // Date 객체인 경우
+    if (date instanceof Date) {
+      return date.toLocaleDateString('ko-KR');
+    }
+    
+    // 문자열인 경우
+    if (typeof date === 'string') {
+      const parsedDate = new Date(date);
+      if (!isNaN(parsedDate.getTime())) {
+        return parsedDate.toLocaleDateString('ko-KR');
+      }
+      return date;
+    }
+    
+    // Firestore Timestamp인 경우
+    if (date.toDate && typeof date.toDate === 'function') {
+      return date.toDate().toLocaleDateString('ko-KR');
+    }
+    
+    return '날짜 형식 오류';
+  };
+
+  const calculateLeaveDays = (startDate: any, endDate: any): number => {
+    if (!startDate || !endDate) return 0;
+    
+    let start: Date;
+    let end: Date;
+    
+    // Date 객체로 변환
+    if (startDate instanceof Date) {
+      start = startDate;
+    } else if (typeof startDate === 'string') {
+      start = new Date(startDate);
+    } else if (startDate.toDate) {
+      start = startDate.toDate();
+    } else {
+      return 0;
+    }
+    
+    if (endDate instanceof Date) {
+      end = endDate;
+    } else if (typeof endDate === 'string') {
+      end = new Date(endDate);
+    } else if (endDate.toDate) {
+      end = endDate.toDate();
+    } else {
+      return 0;
+    }
+    
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return 0;
+    
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    return diffDays;
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-lg">로딩 중...</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-white py-8 px-2 flex justify-center items-start">
-      <div className="w-full max-w-lg mx-auto sm:max-w-4xl">
-        <div className="bg-white rounded-3xl shadow-xl p-5 sm:p-12 border border-blue-100 flex flex-col gap-10 sm:gap-12">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-blue-600 text-center mb-2 tracking-tight drop-shadow-sm">관리자 연차신청 관리</h1>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5 sm:flex-row sm:gap-8 items-stretch justify-center mb-8">
-            <div className="flex flex-col items-start w-full sm:w-auto">
-              <label className="font-semibold mb-1 sm:mb-2 text-gray-700 text-sm sm:text-base">이름</label>
-              <input type="text" name="name" value={form.name} onChange={handleChange} className="w-full sm:w-32 border border-blue-200 bg-blue-50 rounded-lg px-3 py-2 text-center focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm sm:text-base placeholder:text-blue-300" placeholder="이름" required />
-            </div>
-            <div className="flex flex-col items-start w-full sm:w-auto">
-              <label className="font-semibold mb-1 sm:mb-2 text-gray-700 text-sm sm:text-base">시작일</label>
-              <input type="date" name="startDate" value={form.startDate} onChange={handleChange} className="w-full sm:w-36 border border-blue-200 bg-blue-50 rounded-lg px-3 py-2 text-center focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm sm:text-base placeholder:text-blue-300" required />
-            </div>
-            <div className="flex flex-col items-start w-full sm:w-auto">
-              <label className="font-semibold mb-1 sm:mb-2 text-gray-700 text-sm sm:text-base">종료일</label>
-              <input type="date" name="endDate" value={form.endDate} onChange={handleChange} className="w-full sm:w-36 border border-blue-200 bg-blue-50 rounded-lg px-3 py-2 text-center focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm sm:text-base placeholder:text-blue-300" required />
-            </div>
-            <div className="flex flex-col items-start w-full sm:w-auto">
-              <label className="font-semibold mb-1 sm:mb-2 text-gray-700 text-sm sm:text-base">사유</label>
-              <input type="text" name="reason" value={form.reason} onChange={handleChange} className="w-full sm:w-40 border border-blue-200 bg-blue-50 rounded-lg px-3 py-2 text-center focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm sm:text-base placeholder:text-blue-300" placeholder="사유" required />
-            </div>
-            <button type="submit" className="w-full sm:w-32 py-3 bg-blue-500/90 text-white rounded-xl font-bold text-base sm:text-lg shadow-md hover:bg-blue-600/90 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-blue-300 active:scale-95" disabled={submitLoading}>
-              {submitLoading ? '신청 중...' : '신청'}
-            </button>
-          </form>
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold mb-4 text-blue-500 text-center">연차신청 내역</h2>
-            <div className="bg-white rounded-2xl shadow-md p-3 sm:p-7 w-full mx-auto mt-4 sm:mt-6 border border-blue-50">
-              <div className="overflow-x-auto">
-                {leavesLoading ? (
-                  <div className="text-center py-8 text-gray-400">연차신청 내역 로딩 중...</div>
-                ) : leavesError ? (
-                  <div className="text-center py-8 text-red-500">{leavesError}</div>
-                ) : leaves.length === 0 ? (
-                  <div className="text-center py-8 text-gray-400">신청 내역 없음</div>
-                ) : (
-                  <table className="min-w-full text-xs sm:text-base bg-white rounded-lg overflow-hidden">
-                    <thead className="bg-blue-100 sticky top-0 z-10">
-                      <tr>
-                        <th className="border px-2 py-2 sm:px-4 sm:py-2 font-bold text-blue-700 bg-blue-50">번호</th>
-                        <th className="border px-2 py-2 sm:px-4 sm:py-2 font-bold text-blue-700 bg-blue-50">이름</th>
-                        <th className="border px-2 py-2 sm:px-4 sm:py-2 font-bold text-blue-700 bg-blue-50">시작일</th>
-                        <th className="border px-2 py-2 sm:px-4 sm:py-2 font-bold text-blue-700 bg-blue-50">종료일</th>
-                        <th className="border px-2 py-2 sm:px-4 sm:py-2 font-bold text-blue-700 bg-blue-50">사유</th>
-                        <th className="border px-2 py-2 sm:px-4 sm:py-2 font-bold text-blue-700 bg-blue-50">신청일자</th>
-                        <th className="border px-2 py-2 sm:px-4 sm:py-2 font-bold text-blue-700 bg-blue-50">상태</th>
-                        <th className="border px-2 py-2 sm:px-4 sm:py-2 font-bold text-blue-700 bg-blue-50">처리</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {leaves.map((leave, idx) => {
-                        // 날짜 표시를 위한 처리
-                        let displayStartDate = '-';
-                        let displayEndDate = '-';
-                        
-                        if (leave.startDate && leave.endDate) {
-                          // 새로운 형식: startDate, endDate 필드가 있는 경우
-                          displayStartDate = leave.startDate;
-                          displayEndDate = leave.endDate;
-                        } else if (leave.date && leave.date.includes('~')) {
-                          // 기존 형식: date 필드에서 시작일~종료일 형태
-                          const [start, end] = leave.date.split('~');
-                          displayStartDate = start || '-';
-                          displayEndDate = end || '-';
-                        }
-                        
-                        return (
-                          <tr key={leave.id} className="group bg-white even:bg-blue-50/40 hover:bg-blue-100 transition border-b border-blue-50">
-                            <td className="border px-2 py-2 sm:px-4 sm:py-2 font-bold text-blue-600 text-center">{idx + 1}</td>
-                            <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">{leave.name || leave.employeeName || '-'}</td>
-                            <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">{displayStartDate}</td>
-                            <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">{displayEndDate}</td>
-                            <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap truncate" title={leave.reason}>{leave.reason}</td>
-                            <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">{leave.createdAt ? new Date(leave.createdAt).toLocaleDateString('ko-KR') : '-'}</td>
-                            <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap text-center">
-                              {leave.status === '신청' ? (
-                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-semibold text-xs sm:text-sm">
-                                  <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3" /></svg>
-                                  검증
-                                </span>
-                              ) : leave.status === '승인' ? (
-                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-100 text-green-700 font-semibold text-xs sm:text-sm">
-                                  <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                                  승인
-                                </span>
-                              ) : leave.status === '반려' ? (
-                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-100 text-red-700 font-semibold text-xs sm:text-sm">
-                                  <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                                  반려
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gray-100 text-gray-500 font-semibold text-xs sm:text-sm">
-                                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h4v4" /></svg>
-                                  {leave.status}
-                                </span>
-                              )}
-                            </td>
-                            <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap text-center">
-                              {leave.status === '신청' ? (
-                                <div className="flex gap-2 justify-center">
-                                  <button className="px-2 py-1 sm:px-4 sm:py-1 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition text-xs sm:text-base" onClick={() => handleApprove(leave.id)}>승인</button>
-                                  <button className="px-2 py-1 sm:px-4 sm:py-1 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition text-xs sm:text-base" onClick={() => handleReject(leave.id)}>반려</button>
-                                </div>
-                              ) : (
-                                <span className="text-gray-400">처리완료</span>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-            </div>
-          </div>
-          <div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-4 text-blue-500 text-center">직원 연차현황</h2>
-          <div className="overflow-x-auto mb-8">
-            {employeeStatus.length === 0 ? (
-              <div className="text-center py-6 text-gray-400">직원 연차현황 데이터 없음</div>
-            ) : (
-              <table className="min-w-full sm:min-w-[1050px] border mb-8 whitespace-nowrap text-xs sm:text-lg shadow-md rounded-2xl bg-white">
-                <thead className="sticky top-0 z-10 bg-blue-100">
-                  <tr className="bg-blue-50 text-blue-900 text-xs sm:text-lg">
-                    <th className="border px-2 py-2 sm:px-4 sm:py-2 rounded-tl-lg whitespace-nowrap">이메일</th>
-                    <th className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">이름</th>
-                    <th className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">총 연차</th>
-                    <th className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">사용</th>
-                    <th className="border px-2 py-2 sm:px-4 sm:py-2 rounded-tr-lg whitespace-nowrap">잔여</th>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">연차 관리</h1>
+      
+      {leaves.length === 0 ? (
+        <div className="bg-white rounded-lg shadow p-8 text-center">
+          <p className="text-gray-500 text-lg">연차 신청이 없습니다.</p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-2 py-3 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    직원 정보
+                  </th>
+                  <th className="px-2 py-3 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    연차 기간
+                  </th>
+                  <th className="px-2 py-3 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    일수
+                  </th>
+                  <th className="px-2 py-3 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    사유
+                  </th>
+                  <th className="px-2 py-3 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    상태
+                  </th>
+                  <th className="px-2 py-3 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    작업
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {leaves.map((leave) => (
+                  <tr key={leave.id} className="hover:bg-gray-50">
+                    <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">
+                      <div>
+                        <div className="font-semibold text-gray-900">
+                          {getEmployeeInfo(leave).name}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {getEmployeeInfo(leave).email}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900">
+                      <div>
+                        <div>{formatDate(leave.startDate)}</div>
+                        <div className="text-gray-500">~ {formatDate(leave.endDate)}</div>
+                      </div>
+                    </td>
+                    <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900">
+                      {calculateLeaveDays(leave.startDate, leave.endDate)}일
+                    </td>
+                    <td className="px-2 py-2 sm:px-6 sm:py-4 text-sm text-gray-900 max-w-xs truncate">
+                      {leave.reason || '사유 없음'}
+                    </td>
+                    <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap">
+                      <span className={`+"inline-flex px-2 py-1 text-xs font-semibold rounded-full $"+"{
+                        leave.status === '승인' || leave.status === 'approved'
+                          ? 'bg-green-100 text-green-800' 
+                          : leave.status === '거절' || leave.status === 'rejected'
+                          ? 'bg-red-100 text-red-800'
+                          : 'bg-yellow-100 text-yellow-800'
+                      }+"}`"+">
+                        {leave.status === '승인' || leave.status === 'approved' ? '승인' : 
+                         leave.status === '거절' || leave.status === 'rejected' ? '거절' : '대기'}
+                      </span>
+                    </td>
+                    <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                      {(leave.status === '신청' || leave.status === 'pending') && (
+                        <>
+                          <button
+                            onClick={() => updateLeaveStatus(leave.id!, '승인')}
+                            className="text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 px-3 py-1 rounded transition-colors"
+                          >
+                            승인
+                          </button>
+                          <button
+                            onClick={() => updateLeaveStatus(leave.id!, '거절')}
+                            className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded transition-colors"
+                          >
+                            거절
+                          </button>
+                        </>
+                      )}
+                      {(leave.status !== '신청' && leave.status !== 'pending') && (
+                        <span className="text-gray-400">처리 완료</span>
+                      )}
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {employeeStatus.map((emp, idx) => (
-                    <tr key={emp.id} className={idx % 2 === 0 ? 'bg-white even:bg-blue-50/40 hover:bg-blue-100 transition' : 'bg-white hover:bg-blue-100 transition'}>
-                      <td className="border px-2 py-2 sm:px-6 sm:py-4">{emp.email}</td>
-                      <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">{emp.name}</td>
-                      <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">{emp.totalLeaves || ((emp.carryOverLeaves || 0) + (emp.annualLeaves || 0))}</td>
-                      <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">{emp.usedLeaves || 0}</td>
-                      <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">{emp.remainingLeaves || ((emp.totalLeaves || ((emp.carryOverLeaves || 0) + (emp.annualLeaves || 0))) - (emp.usedLeaves || 0))}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-          </div>
-          {/* 카드 내부 하단 네비게이션 버튼 */}
-          <div className="flex justify-center mt-4 sm:mt-10">
-            <button
-              className="flex items-center gap-2 bg-blue-500/90 text-white rounded-full px-7 py-3 shadow-md font-semibold text-base sm:text-lg hover:bg-blue-600/90 transition-all duration-150 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-300"
-              onClick={() => navigate('/admin/home')}
-            >
-              <AiOutlineHome className="text-xl sm:text-2xl" />
-              <span>관리자 홈으로</span>
-            </button>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

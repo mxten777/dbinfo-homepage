@@ -53,7 +53,7 @@ const EmployeeHome: React.FC = () => {
       const now = new Date();
       const newLeave: Omit<Leave, 'id'> = {
         employeeId: user.uid,
-        employeeName: employee?.name || user.email || '',
+        employeeName: employee?.name || user.email?.split('@')[0] || '',
         name: employee?.name || user.email?.split('@')[0] || '',
         startDate: form.startDate,
         endDate: form.endDate,
@@ -103,13 +103,20 @@ const EmployeeHome: React.FC = () => {
               <h2 className="text-xl font-bold text-blue-600">직원정보</h2>
             </div>
             <div>
-              <div className="text-lg font-bold text-blue-700">{employee ? employee.name : user?.email}</div>
-              <div className="text-gray-500 text-sm">환영합니다! 오늘도 힘내세요.</div>
+              <div className="text-lg font-bold text-blue-700">
+                {employee ? employee.name : (user?.email?.split('@')[0] || '사용자')}
+              </div>
+              <div className="text-gray-600 text-sm">
+                {employee?.email || user?.email || ''}
+              </div>
+              <div className="text-gray-500 text-xs mt-1">환영합니다! 오늘도 힘내세요.</div>
               {employee && (
-                <div className="mt-2 text-sm text-gray-700">
-                  <span className="mr-4">총 연차: <b>{employee.totalLeaves}</b></span>
-                  <span className="mr-4">사용: <b>{employee.usedLeaves}</b></span>
-                  <span>잔여: <b className="text-blue-600">{employee.remainingLeaves}</b></span>
+                <div className="mt-3 text-sm text-gray-700">
+                  <div className="flex flex-wrap gap-4">
+                    <span>총 연차: <b>{employee.totalLeaves}</b></span>
+                    <span>사용: <b>{employee.usedLeaves}</b></span>
+                    <span>잔여: <b className="text-blue-600">{employee.remainingLeaves}</b></span>
+                  </div>
                   {(employee.carryOverLeaves || employee.annualLeaves) && (
                     <div className="mt-1 text-xs text-gray-500">
                       (이월: {employee.carryOverLeaves || 0} + 올해: {employee.annualLeaves || 0})

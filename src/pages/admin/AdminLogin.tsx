@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { sendPasswordResetEmail, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebaseConfig';
 import { useNavigate } from 'react-router-dom';
+import { createAdminAccounts } from '../../createAdminAccounts';
 
 const AdminLogin: React.FC = () => {
   const [id, setId] = useState('');
@@ -10,6 +11,7 @@ const AdminLogin: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [resetMsg, setResetMsg] = useState('');
+  const [isCreatingAccounts, setIsCreatingAccounts] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,6 +42,21 @@ const AdminLogin: React.FC = () => {
     }
   };
 
+  const handleCreateAdminAccounts = async () => {
+    setIsCreatingAccounts(true);
+    setError('');
+    setSuccess('');
+    
+    try {
+      await createAdminAccounts();
+      setSuccess('관리자 계정이 성공적으로 생성되었습니다!');
+    } catch (error: any) {
+      setError('계정 생성 실패: ' + error.message);
+    } finally {
+      setIsCreatingAccounts(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-white">
       <div className="w-full">
@@ -48,10 +65,13 @@ const AdminLogin: React.FC = () => {
           <span className="ml-2 px-2 py-1 bg-white/30 text-xs text-white rounded-full font-semibold">IT INNOVATION</span>
         </div>
       </div>
+      
       <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-blue-700 text-center">관리자 로그인</h2>
+        
         {error && <div className="mb-4 text-red-500 text-center">{error}</div>}
-        {success && <div className="text-green-600 text-center font-bold">{success}</div>}
+        {success && <div className="text-green-600 text-center font-bold mb-4">{success}</div>}
+        
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
             type="email"
@@ -83,7 +103,30 @@ const AdminLogin: React.FC = () => {
             비밀번호 재설정
           </button>
         </form>
+        
         {resetMsg && <div className="text-center text-sm mt-2 text-green-600">{resetMsg}</div>}
+        
+        {/* 개발환경에서만 보이는 관리자 계정 생성 버튼 */}
+        {import.meta.env.DEV && (
+          <div className="mt-6 pt-4 border-t border-gray-200">
+            <button
+              onClick={handleCreateAdminAccounts}
+              disabled={isCreatingAccounts}
+              className="w-full px-4 py-2 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 transition disabled:bg-gray-400"
+            >
+              {isCreatingAccounts ? '계정 생성 중...' : '관리자 계정 생성'}
+            </button>
+            <p className="text-xs text-gray-500 mt-2 text-center">
+              개발환경에서만 표시됩니다
+            </p>
+          </div>
+        )}
+        
+        <div className="mt-6 text-center text-sm text-gray-600">
+          <p className="font-semibold">등록된 관리자:</p>
+          <p className="text-xs mt-1">hankjae@db-info.co.kr</p>
+          <p className="text-xs">6511kesuk@db-info.co.kr</p>
+        </div>
       </div>
     </div>
   );
