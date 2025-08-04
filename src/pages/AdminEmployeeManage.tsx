@@ -2,7 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
-import { db } from '../firebaseConfig';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { auth, db } from '../firebaseConfig';
 // Header import가 있다면 주석처리 또는 제거 (이 파일에는 Header import 없음)
 // 카드형 입력폼에 필요한 필드 추가 (주민번호, 성별, 직위, 부서, 직종, 입사일, 연락처)
 type EmployeeForm = {
@@ -36,7 +37,11 @@ const AdminEmployeeManage: React.FC = () => {
   useEffect(() => {
     const fetchEmployees = async () => {
       const snap = await getDocs(collection(db, 'employees'));
-      setEmployees(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      // 관리자는 직원 목록에서 제외 (role이 'admin'이 아닌 직원만 표시)
+      const employeeData = snap.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }) as any)
+        .filter((emp: any) => emp.role !== 'admin'); // 관리자 제외
+      setEmployees(employeeData);
     };
     fetchEmployees();
   }, [message]);
@@ -62,20 +67,60 @@ const AdminEmployeeManage: React.FC = () => {
       setMessage('이름과 사번을 입력하세요.');
       return;
     }
+    
+    if (!editId && !form.email) {
+      setMessage('신규 직원 등록 시 이메일은 필수입니다.');
+      return;
+    }
+    
     try {
       if (editId) {
+        // 직원 정보 수정
         await updateDoc(doc(db, 'employees', editId), form);
         setMessage('수정 완료');
       } else {
-        await addDoc(collection(db, 'employees'), form);
-        setMessage('등록 완료');
+        // 신규 직원 등록: Firebase Auth 계정 + Firestore 정보 생성
+        const tempPassword = `temp${form.empNo}!`; // 임시 비밀번호 (사번 + !)
+        
+        // 1. Firebase Authentication 계정 생성
+        const userCredential = await createUserWithEmailAndPassword(
+          auth, 
+          form.email, 
+          tempPassword
+        );
+        
+        // 2. 사용자 프로필 업데이트
+        await updateProfile(userCredential.user, {
+          displayName: form.name
+        });
+        
+        // 3. Firestore employees 컬렉션에 직원 정보 저장
+        await addDoc(collection(db, 'employees'), {
+          ...form,
+          uid: userCredential.user.uid, // Firebase Auth UID 연결
+          createdAt: new Date().toISOString(),
+          tempPassword: tempPassword, // 관리자가 알 수 있도록 임시 저장
+          passwordChanged: false // 최초 로그인 후 비밀번호 변경 여부
+        });
+        
+        setMessage(`등록 완료! 임시 비밀번호: ${tempPassword}`);
+        
+        // 관리자에게 임시 비밀번호 알림
+        alert(`직원 등록 완료!\n이메일: ${form.email}\n임시 비밀번호: ${tempPassword}\n\n직원에게 최초 로그인 후 비밀번호 변경을 안내해주세요.`);
       }
       setForm(initialForm);
       setEditId(null);
-    } catch {
-      setMessage('실패');
+    } catch (error: any) {
+      console.error('직원 등록 실패:', error);
+      if (error.code === 'auth/email-already-in-use') {
+        setMessage('이미 사용 중인 이메일입니다.');
+      } else if (error.code === 'auth/weak-password') {
+        setMessage('비밀번호가 너무 약합니다.');
+      } else {
+        setMessage('등록 실패: ' + (error.message || '오류 발생'));
+      }
     }
-    setTimeout(() => setMessage(''), 1500);
+    setTimeout(() => setMessage(''), 3000);
   };
 
   const handleEditClick = (emp: any) => {

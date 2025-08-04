@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { db } from '../firebaseConfig';
 // 불필요한 타입 import 제거
 import type { Leave, Employee } from '../types/employee';
@@ -15,6 +16,9 @@ const EmployeeHome: React.FC = () => {
   const [form, setForm] = useState({ startDate: '', endDate: '', reason: '' });
   const [message, setMessage] = useState('');
   const [employee, setEmployee] = useState<Employee | null>(null);
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [passwordMessage, setPasswordMessage] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -23,24 +27,85 @@ const EmployeeHome: React.FC = () => {
       setLeaves(leaveSnap.docs.filter(doc => doc.data().employeeId === user?.uid).map(doc => ({ id: doc.id, ...doc.data() } as Leave)));
       // 직원 정보 불러오기
       const empSnap = await getDocs(collection(db, 'employees'));
-      const emp = empSnap.docs.find(doc => doc.id === user?.uid);
-      setEmployee(emp ? {
-        id: emp.id,
-        empNo: emp.data().empNo ?? '',
-        name: emp.data().name ?? '',
-        email: emp.data().email ?? '',
-        carryOverLeaves: emp.data().carryOverLeaves ?? 0,
-        annualLeaves: emp.data().annualLeaves ?? 0,
-        totalLeaves: emp.data().totalLeaves ?? ((emp.data().carryOverLeaves ?? 0) + (emp.data().annualLeaves ?? 0)),
-        usedLeaves: emp.data().usedLeaves ?? 0,
-        remainingLeaves: emp.data().remainingLeaves ?? ((emp.data().totalLeaves ?? ((emp.data().carryOverLeaves ?? 0) + (emp.data().annualLeaves ?? 0))) - (emp.data().usedLeaves ?? 0))
-      } : null);
+      const empDoc = empSnap.docs.find(doc => doc.data().uid === user?.uid);
+      
+      if (empDoc) {
+        const empData = empDoc.data();
+        setEmployee({
+          id: empDoc.id,
+          empNo: empData.empNo ?? '',
+          name: empData.name ?? '',
+          email: empData.email ?? '',
+          carryOverLeaves: empData.carryOverLeaves ?? 0,
+          annualLeaves: empData.annualLeaves ?? 0,
+          totalLeaves: empData.totalLeaves ?? ((empData.carryOverLeaves ?? 0) + (empData.annualLeaves ?? 0)),
+          usedLeaves: empData.usedLeaves ?? 0,
+          remainingLeaves: empData.remainingLeaves ?? ((empData.totalLeaves ?? ((empData.carryOverLeaves ?? 0) + (empData.annualLeaves ?? 0))) - (empData.usedLeaves ?? 0))
+        });
+        
+        // 임시 비밀번호로 로그인한 경우 비밀번호 변경 유도
+        if (empData.passwordChanged === false) {
+          setShowPasswordChange(true);
+          setPasswordMessage('보안을 위해 비밀번호를 변경해주세요.');
+        }
+      }
     };
     fetchData();
   }, [user]);
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+      setPasswordMessage('모든 비밀번호 필드를 입력해주세요.');
+      return;
+    }
+    
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordMessage('새 비밀번호가 일치하지 않습니다.');
+      return;
+    }
+    
+    if (passwordForm.newPassword.length < 6) {
+      setPasswordMessage('새 비밀번호는 최소 6자 이상이어야 합니다.');
+      return;
+    }
+    
+    try {
+      if (!user || !employee) {
+        setPasswordMessage('사용자 정보를 찾을 수 없습니다.');
+        return;
+      }
+      
+      // 현재 비밀번호로 재인증
+      const credential = EmailAuthProvider.credential(user.email!, passwordForm.currentPassword);
+      await reauthenticateWithCredential(user, credential);
+      
+      // 비밀번호 변경
+      await updatePassword(user, passwordForm.newPassword);
+      
+      // Firestore에서 passwordChanged를 true로 업데이트
+      await updateDoc(doc(db, 'employees', employee.id), {
+        passwordChanged: true,
+        tempPassword: null // 임시 비밀번호 정보 삭제
+      });
+      
+      setPasswordMessage('비밀번호가 성공적으로 변경되었습니다.');
+      setShowPasswordChange(false);
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      
+    } catch (error: any) {
+      console.error('비밀번호 변경 실패:', error);
+      if (error.code === 'auth/wrong-password') {
+        setPasswordMessage('현재 비밀번호가 올바르지 않습니다.');
+      } else {
+        setPasswordMessage('비밀번호 변경에 실패했습니다: ' + (error.message || '오류 발생'));
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -128,6 +193,85 @@ const EmployeeHome: React.FC = () => {
             <button onClick={handleLogout} className="ml-auto px-4 py-2 bg-gray-200 rounded-lg text-sm font-semibold hover:bg-gray-300 shadow">로그아웃</button>
           </div>
         </div>
+        
+        {/* 비밀번호 변경 모달 */}
+        {showPasswordChange && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-blue-700">비밀번호 변경</h3>
+                <button 
+                  onClick={() => setShowPasswordChange(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              </div>
+              
+              {passwordMessage && (
+                <div className={`p-3 mb-4 rounded ${
+                  passwordMessage.includes('성공') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                }`}>
+                  {passwordMessage}
+                </div>
+              )}
+              
+              <form onSubmit={handlePasswordChange} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">현재 비밀번호</label>
+                  <input
+                    type="password"
+                    value={passwordForm.currentPassword}
+                    onChange={(e) => setPasswordForm({...passwordForm, currentPassword: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">새 비밀번호</label>
+                  <input
+                    type="password"
+                    value={passwordForm.newPassword}
+                    onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    minLength={6}
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">새 비밀번호 확인</label>
+                  <input
+                    type="password"
+                    value={passwordForm.confirmPassword}
+                    onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    minLength={6}
+                    required
+                  />
+                </div>
+                
+                <div className="flex gap-3">
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+                  >
+                    변경하기
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowPasswordChange(false)}
+                    className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
+                  >
+                    취소
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+        
         {/* 사내소식 카드 */}
         <div className="mb-10">
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">

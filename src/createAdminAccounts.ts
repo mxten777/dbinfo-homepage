@@ -6,14 +6,19 @@ import { auth, db } from './firebaseConfig';
 // 관리자 계정 정보
 const adminAccounts = [
   {
+    email: 'jndgy@naver.com',
+    password: 'admin1234!',
+    name: '관리자'
+  },
+  {
     email: 'hankjae@db-info.co.kr',
     password: 'admin1234!',
-    name: '한국재'
+    name: '한규재'
   },
   {
     email: '6511kesuk@db-info.co.kr', 
     password: 'admin1234!',
-    name: '이수연'
+    name: '김애숙'
   }
 ];
 
@@ -23,46 +28,54 @@ export const createAdminAccounts = async () => {
   
   for (const admin of adminAccounts) {
     try {
-      console.log(`${admin.email} 계정 생성 중...`);
+      console.log(`${admin.email} 계정 처리 중...`);
       
-      // Firebase Authentication에 사용자 생성
-      const userCredential = await createUserWithEmailAndPassword(
-        auth, 
-        admin.email, 
-        admin.password
-      );
+      let user;
       
-      const user = userCredential.user;
+      // 1. 먼저 계정 생성 시도
+      try {
+        const userCredential = await createUserWithEmailAndPassword(
+          auth, 
+          admin.email, 
+          admin.password
+        );
+        user = userCredential.user;
+        console.log(`✅ ${admin.email} 새 계정 생성 완료`);
+      } catch (createError: any) {
+        if (createError.code === 'auth/email-already-in-use') {
+          console.log(`⚠️ ${admin.email}는 이미 등록된 계정입니다.`);
+          
+          // 현재 로그인된 사용자가 해당 이메일과 같은지 확인
+          const currentUser = auth.currentUser;
+          if (currentUser && currentUser.email === admin.email) {
+            user = currentUser;
+            console.log(`✅ ${admin.email} 현재 로그인된 계정에 관리자 권한 부여`);
+          } else {
+            console.log(`ℹ️ ${admin.email} 계정이 존재하지만 현재 로그인되지 않음`);
+            console.log(`💡 해당 계정으로 로그인한 후 다시 시도하거나, Firebase 콘솔에서 직접 관리자 권한을 부여하세요.`);
+            continue; // 다음 계정으로 넘어감
+          }
+        } else {
+          throw createError; // 다른 오류는 재발생
+        }
+      }
       
-      // 사용자 프로필 업데이트
+      // 2. 사용자 프로필 업데이트
       await updateProfile(user, {
         displayName: admin.name
       });
       
-      // Firestore에 관리자 정보 저장
+      // 3. Firestore에 관리자 정보 저장 (admins 컬렉션에만 저장)
       await setDoc(doc(db, 'admins', user.uid), {
         email: admin.email,
         name: admin.name,
         role: 'admin',
         createdAt: new Date().toISOString(),
-        permissions: ['all'] // 모든 권한
+        permissions: ['all'], // 모든 권한
+        isAdmin: true // 관리자 식별자
       });
       
-      // employees 컬렉션에도 추가 (직원 관리 시스템에서 조회되도록)
-      await setDoc(doc(db, 'employees', user.uid), {
-        empNo: `ADM${Date.now().toString().slice(-6)}`, // 관리자 사번
-        name: admin.name,
-        email: admin.email,
-        role: 'admin',
-        totalLeaves: 25, // 관리자는 25일 연차
-        carryOverLeaves: 0,
-        annualLeaves: 25,
-        usedLeaves: 0,
-        remainingLeaves: 25,
-        createdAt: new Date().toISOString()
-      });
-      
-      console.log(`✅ ${admin.email} 관리자 계정 생성 완료`);
+      console.log(`✅ ${admin.email} 관리자 권한 설정 완료`);
       
     } catch (error: any) {
       if (error.code === 'auth/email-already-in-use') {

@@ -9,15 +9,19 @@ const AdminLeaves: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 직원 데이터 가져오기
+    // 직원 데이터 가져오기 (관리자 제외)
     const fetchEmployees = async () => {
       try {
         const employeesSnapshot = await getDocs(collection(db, 'employees'));
-        const employeesData = employeesSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Employee[];
-        setEmployees(employeesData);
+        const employeesData = employeesSnapshot.docs
+          .map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          })) as Employee[];
+        
+        // 관리자는 휴가 관리 대상에서 제외 (일반 직원만 표시)
+        const regularEmployees = employeesData.filter(emp => emp.role !== 'admin');
+        setEmployees(regularEmployees);
       } catch (error) {
         console.error('직원 데이터 가져오기 실패:', error);
       }
@@ -201,13 +205,13 @@ const AdminLeaves: React.FC = () => {
                       {leave.reason || '사유 없음'}
                     </td>
                     <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap">
-                      <span className={`+"inline-flex px-2 py-1 text-xs font-semibold rounded-full $"+"{
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                         leave.status === '승인' || leave.status === 'approved'
                           ? 'bg-green-100 text-green-800' 
                           : leave.status === '거절' || leave.status === 'rejected'
                           ? 'bg-red-100 text-red-800'
                           : 'bg-yellow-100 text-yellow-800'
-                      }+"}`"+">
+                      }`}>
                         {leave.status === '승인' || leave.status === 'approved' ? '승인' : 
                          leave.status === '거절' || leave.status === 'rejected' ? '거절' : '대기'}
                       </span>

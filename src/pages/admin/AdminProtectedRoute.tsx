@@ -18,24 +18,15 @@ const AdminProtectedRoute: React.FC = () => {
       }
 
       try {
-        // admins 컬렉션에서 사용자 확인
+        // 관리자는 admins 컬렉션에서만 확인 (화이트리스트 제거)
         const adminDoc = await getDoc(doc(db, 'admins', user.uid));
         
-        if (adminDoc.exists()) {
+        if (adminDoc.exists() && adminDoc.data()?.isAdmin === true) {
           setIsAdmin(true);
         } else {
-          // employees 컬렉션에서 role이 admin인지 확인
-          const empDoc = await getDoc(doc(db, 'employees', user.uid));
-          if (empDoc.exists() && empDoc.data()?.role === 'admin') {
-            setIsAdmin(true);
-          } else {
-            // 관리자 이메일 화이트리스트 확인
-            const adminEmails = [
-              'hankjae@db-info.co.kr',
-              '6511kesuk@db-info.co.kr'
-            ];
-            setIsAdmin(adminEmails.includes(user.email || ''));
-          }
+          // 관리자가 아닌 경우 접근 거부
+          setIsAdmin(false);
+          console.log('관리자 권한이 없습니다:', user.email);
         }
       } catch (error) {
         console.error('관리자 권한 확인 실패:', error);
