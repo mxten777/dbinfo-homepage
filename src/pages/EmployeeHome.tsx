@@ -29,9 +29,11 @@ const EmployeeHome: React.FC = () => {
         empNo: emp.data().empNo ?? '',
         name: emp.data().name ?? '',
         email: emp.data().email ?? '',
-        totalLeaves: emp.data().totalLeaves ?? 0,
+        carryOverLeaves: emp.data().carryOverLeaves ?? 0,
+        annualLeaves: emp.data().annualLeaves ?? 0,
+        totalLeaves: emp.data().totalLeaves ?? ((emp.data().carryOverLeaves ?? 0) + (emp.data().annualLeaves ?? 0)),
         usedLeaves: emp.data().usedLeaves ?? 0,
-        remainingLeaves: emp.data().remainingLeaves ?? 0
+        remainingLeaves: emp.data().remainingLeaves ?? ((emp.data().totalLeaves ?? ((emp.data().carryOverLeaves ?? 0) + (emp.data().annualLeaves ?? 0))) - (emp.data().usedLeaves ?? 0))
       } : null);
     };
     fetchData();
@@ -52,9 +54,12 @@ const EmployeeHome: React.FC = () => {
       const newLeave: Omit<Leave, 'id'> = {
         employeeId: user.uid,
         employeeName: employee?.name || user.email || '',
+        name: employee?.name || user.email?.split('@')[0] || '',
+        startDate: form.startDate,
+        endDate: form.endDate,
         date: `${form.startDate}~${form.endDate}`,
         reason: form.reason,
-        status: '신청',
+        status: '신청' as const,
         createdAt: now.toISOString()
       };
       // Firestore에 저장
@@ -105,6 +110,11 @@ const EmployeeHome: React.FC = () => {
                   <span className="mr-4">총 연차: <b>{employee.totalLeaves}</b></span>
                   <span className="mr-4">사용: <b>{employee.usedLeaves}</b></span>
                   <span>잔여: <b className="text-blue-600">{employee.remainingLeaves}</b></span>
+                  {(employee.carryOverLeaves || employee.annualLeaves) && (
+                    <div className="mt-1 text-xs text-gray-500">
+                      (이월: {employee.carryOverLeaves || 0} + 올해: {employee.annualLeaves || 0})
+                    </div>
+                  )}
                 </div>
               )}
             </div>

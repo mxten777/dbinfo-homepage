@@ -22,8 +22,10 @@ const AdminLeaves: React.FC = () => {
     try {
       await addDoc(collection(db, 'leaves'), {
         name: form.name,
+        employeeName: form.name,
         startDate: form.startDate,
         endDate: form.endDate,
+        date: `${form.startDate}~${form.endDate}`,
         reason: form.reason,
         createdAt: new Date().toISOString(),
         status: '신청',
@@ -62,27 +64,52 @@ const AdminLeaves: React.FC = () => {
       const leaveSnap = await getDocs(collection(db, 'leaves'));
       const leave = leaveSnap.docs.find(doc => doc.id === leaveId)?.data();
       if (!leave) throw new Error('신청 정보를 찾을 수 없습니다.');
-      // 기간 계산 (startDate, endDate)
-      if (!leave.startDate || !leave.endDate) throw new Error('신청 기간 정보가 올바르지 않습니다.');
-      const start = new Date(leave.startDate);
-      const end = new Date(leave.endDate);
-      // YYYY-MM-DD 형식으로 변환
-      // const formatDate = (d: Date) => d.toISOString().slice(0, 10);
+      
+      // 날짜 정보 확인 (startDate, endDate 또는 date 필드에서)
+      let startDate: string, endDate: string;
+      
+      if (leave.startDate && leave.endDate) {
+        // 새로운 형식: startDate, endDate 필드가 있는 경우
+        startDate = leave.startDate;
+        endDate = leave.endDate;
+      } else if (leave.date && leave.date.includes('~')) {
+        // 기존 형식: date 필드에서 시작일~종료일 형태
+        [startDate, endDate] = leave.date.split('~');
+      } else {
+        throw new Error('신청 기간 정보가 올바르지 않습니다.');
+      }
+      
+      // 기간 계산
+      const start = new Date(startDate);
+      const end = new Date(endDate);
       const days = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-      // 직원 정보 조회
+      
+      // 직원 정보 조회 (name 또는 employeeName으로)
       const empSnap = await getDocs(collection(db, 'employees'));
-      const empDoc = empSnap.docs.find(doc => doc.data().name === leave.name);
+      const empDoc = empSnap.docs.find(doc => 
+        doc.data().name === leave.name || 
+        doc.data().name === leave.employeeName ||
+        doc.data().email === leave.employeeId
+      );
+      
       if (!empDoc) throw new Error('직원 정보를 찾을 수 없습니다.');
+      
       const emp = empDoc.data();
       const usedLeaves = (emp.usedLeaves ?? 0) + days;
-      const totalLeaves = emp.totalLeaves ?? 0;
       const carryOverLeaves = emp.carryOverLeaves ?? 0;
-      const remainingLeaves = totalLeaves + carryOverLeaves - usedLeaves;
+      const annualLeaves = emp.annualLeaves ?? 0;
+      const totalLeaves = emp.totalLeaves ?? (carryOverLeaves + annualLeaves);
+      
+      // 잔여연차 = 총연차 - 사용연차
+      const remainingLeaves = Math.max(0, totalLeaves - usedLeaves);
+      
       // 직원 정보 업데이트
       await updateDoc(doc(db, 'employees', empDoc.id), {
         usedLeaves,
-        remainingLeaves
+        remainingLeaves,
+        totalLeaves: carryOverLeaves + annualLeaves // 총연차도 업데이트
       });
+      
       // 신청 상태 승인 처리
       await updateDoc(doc(db, 'leaves', leaveId), { status: '승인' });
       fetchLeaves();
@@ -171,49 +198,66 @@ const AdminLeaves: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {leaves.map((leave, idx) => (
-                        <tr key={leave.id} className="group bg-white even:bg-blue-50/40 hover:bg-blue-100 transition border-b border-blue-50">
-                          <td className="border px-2 py-2 sm:px-4 sm:py-2 font-bold text-blue-600 text-center">{idx + 1}</td>
-                          <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">{leave.name}</td>
-                          <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">{leave.startDate ? leave.startDate.replace(/\n/g, '').slice(0, 10) : '-'}</td>
-                          <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">{leave.endDate ? leave.endDate.replace(/\n/g, '').slice(0, 10) : '-'}</td>
-                          <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap truncate" title={leave.reason}>{leave.reason}</td>
-                          <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">{leave.createdAt ? new Date(leave.createdAt).toLocaleDateString('ko-KR') : '-'}</td>
-                          <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap text-center">
-                            {leave.status === '신청' ? (
-                              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-semibold text-xs sm:text-sm">
-                                <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3" /></svg>
-                                검증
-                              </span>
-                            ) : leave.status === '승인' ? (
-                              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-100 text-green-700 font-semibold text-xs sm:text-sm">
-                                <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                                승인
-                              </span>
-                            ) : leave.status === '반려' ? (
-                              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-100 text-red-700 font-semibold text-xs sm:text-sm">
-                                <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                                반려
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gray-100 text-gray-500 font-semibold text-xs sm:text-sm">
-                                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h4v4" /></svg>
-                                {leave.status}
-                              </span>
-                            )}
-                          </td>
-                          <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap text-center">
-                            {leave.status === '신청' ? (
-                              <div className="flex gap-2 justify-center">
-                                <button className="px-2 py-1 sm:px-4 sm:py-1 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition text-xs sm:text-base" onClick={() => handleApprove(leave.id)}>승인</button>
-                                <button className="px-2 py-1 sm:px-4 sm:py-1 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition text-xs sm:text-base" onClick={() => handleReject(leave.id)}>반려</button>
-                              </div>
-                            ) : (
-                              <span className="text-gray-400">처리완료</span>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
+                      {leaves.map((leave, idx) => {
+                        // 날짜 표시를 위한 처리
+                        let displayStartDate = '-';
+                        let displayEndDate = '-';
+                        
+                        if (leave.startDate && leave.endDate) {
+                          // 새로운 형식: startDate, endDate 필드가 있는 경우
+                          displayStartDate = leave.startDate;
+                          displayEndDate = leave.endDate;
+                        } else if (leave.date && leave.date.includes('~')) {
+                          // 기존 형식: date 필드에서 시작일~종료일 형태
+                          const [start, end] = leave.date.split('~');
+                          displayStartDate = start || '-';
+                          displayEndDate = end || '-';
+                        }
+                        
+                        return (
+                          <tr key={leave.id} className="group bg-white even:bg-blue-50/40 hover:bg-blue-100 transition border-b border-blue-50">
+                            <td className="border px-2 py-2 sm:px-4 sm:py-2 font-bold text-blue-600 text-center">{idx + 1}</td>
+                            <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">{leave.name || leave.employeeName || '-'}</td>
+                            <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">{displayStartDate}</td>
+                            <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">{displayEndDate}</td>
+                            <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap truncate" title={leave.reason}>{leave.reason}</td>
+                            <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">{leave.createdAt ? new Date(leave.createdAt).toLocaleDateString('ko-KR') : '-'}</td>
+                            <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap text-center">
+                              {leave.status === '신청' ? (
+                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-semibold text-xs sm:text-sm">
+                                  <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3" /></svg>
+                                  검증
+                                </span>
+                              ) : leave.status === '승인' ? (
+                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-100 text-green-700 font-semibold text-xs sm:text-sm">
+                                  <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                  승인
+                                </span>
+                              ) : leave.status === '반려' ? (
+                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-100 text-red-700 font-semibold text-xs sm:text-sm">
+                                  <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                  반려
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gray-100 text-gray-500 font-semibold text-xs sm:text-sm">
+                                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h4v4" /></svg>
+                                  {leave.status}
+                                </span>
+                              )}
+                            </td>
+                            <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap text-center">
+                              {leave.status === '신청' ? (
+                                <div className="flex gap-2 justify-center">
+                                  <button className="px-2 py-1 sm:px-4 sm:py-1 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition text-xs sm:text-base" onClick={() => handleApprove(leave.id)}>승인</button>
+                                  <button className="px-2 py-1 sm:px-4 sm:py-1 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition text-xs sm:text-base" onClick={() => handleReject(leave.id)}>반려</button>
+                                </div>
+                              ) : (
+                                <span className="text-gray-400">처리완료</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 )}
@@ -241,9 +285,9 @@ const AdminLeaves: React.FC = () => {
                     <tr key={emp.id} className={idx % 2 === 0 ? 'bg-white even:bg-blue-50/40 hover:bg-blue-100 transition' : 'bg-white hover:bg-blue-100 transition'}>
                       <td className="border px-2 py-2 sm:px-6 sm:py-4">{emp.email}</td>
                       <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">{emp.name}</td>
-                      <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">{(Number(emp.carryOverLeaves ?? 0) + Number(emp.annualLeaves ?? 0))}</td>
-                      <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">{emp.usedLeaves}</td>
-                      <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">{emp.remainingLeaves}</td>
+                      <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">{emp.totalLeaves || ((emp.carryOverLeaves || 0) + (emp.annualLeaves || 0))}</td>
+                      <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">{emp.usedLeaves || 0}</td>
+                      <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">{emp.remainingLeaves || ((emp.totalLeaves || ((emp.carryOverLeaves || 0) + (emp.annualLeaves || 0))) - (emp.usedLeaves || 0))}</td>
                     </tr>
                   ))}
                 </tbody>

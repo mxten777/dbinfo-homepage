@@ -31,9 +31,12 @@ export interface Leave {
   id: string;
   employeeId: string;
   employeeName: string;
-  date: string; // 사용일자(직원이 입력)
+  name?: string; // 관리자가 직접 입력할 때 사용
+  startDate?: string; // 시작일 (YYYY-MM-DD 형식)
+  endDate?: string; // 종료일 (YYYY-MM-DD 형식)
+  date: string; // 사용일자(직원이 입력, "YYYY-MM-DD~YYYY-MM-DD" 형식)
   reason: string;
-  status: '신청' | '승인' | '거절';
+  status: '신청' | '승인' | '거절' | '반려';
   createdAt?: string; // 신청일자(시스템 일시)
   processedAt?: string; // 승인/반려일자(시스템 일시)
 }
