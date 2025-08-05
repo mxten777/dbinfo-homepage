@@ -1,15 +1,37 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { collection, getDocs, doc, updateDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
+import { useAuth } from '../../AuthContext';
 import type { Leave, Employee } from '../../types/employee';
 
 const AdminLeaves: React.FC = () => {
+  const { user } = useAuth();
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
 
+  console.log('AdminLeaves 컴포넌트 렌더링 시작, user:', user);
+
+  // iframe 문제 해결을 위한 임시 코드
   useEffect(() => {
-    // 직원 데이터 가져오기 (관리자 제외)
+    const removeIframes = () => {
+      const iframes = document.querySelectorAll('iframe');
+      iframes.forEach(iframe => {
+        if (iframe.style.height === '1px') {
+          iframe.style.height = '100vh';
+          iframe.style.minHeight = '800px';
+          console.log('iframe 높이 수정됨:', iframe);
+        }
+      });
+    };
+    
+    removeIframes();
+    const interval = setInterval(removeIframes, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    // 직원 데이터 가져오기
     const fetchEmployees = async () => {
       try {
         const employeesSnapshot = await getDocs(collection(db, 'employees'));
@@ -19,9 +41,8 @@ const AdminLeaves: React.FC = () => {
             ...doc.data()
           })) as Employee[];
         
-        // 관리자는 휴가 관리 대상에서 제외 (일반 직원만 표시)
-        const regularEmployees = employeesData.filter(emp => emp.role !== 'admin');
-        setEmployees(regularEmployees);
+        console.log('🔵 전체 직원 데이터:', employeesData);
+        setEmployees(employeesData);
       } catch (error) {
         console.error('직원 데이터 가져오기 실패:', error);
       }
@@ -39,6 +60,8 @@ const AdminLeaves: React.FC = () => {
           endDate: doc.data().endDate?.toDate?.() || doc.data().endDate,
           createdAt: doc.data().createdAt?.toDate?.() || doc.data().createdAt
         })) as Leave[];
+        
+        console.log('🟠 전체 연차 데이터:', leavesData);
         setLeaves(leavesData);
         setLoading(false);
       },
@@ -53,16 +76,49 @@ const AdminLeaves: React.FC = () => {
   }, []);
 
   const getEmployeeInfo = (leave: Leave) => {
-    const employee = employees.find(emp => 
-      emp.id === leave.employeeId || 
-      emp.email === leave.employeeId ||
-      emp.name === leave.name || 
-      emp.name === leave.employeeName
-    );
+    console.log(`🔍 매칭 시도 - Leave ID: ${leave.id}, employeeId: ${leave.employeeId}`);
     
+    // 1차: Firestore 문서 ID로 매칭 (관리자 대리신청)
+    let employee = employees.find(emp => emp.id === leave.employeeId);
+    if (employee) {
+      console.log('✅ 1차 매칭 성공 (Firestore ID):', employee.name);
+      return { name: employee.name, email: employee.email };
+    }
+    
+    // 2차: Firebase Auth UID로 매칭 (직원 직접 신청)
+    if (leave.employeeId) {
+      employee = employees.find(emp => emp.uid === leave.employeeId);
+      if (employee) {
+        console.log('✅ 2차 매칭 성공 (Firebase UID):', employee.name);
+        return { name: employee.name, email: employee.email };
+      }
+    }
+    
+    // 3차: 이메일로 매칭
+    if (leave.employeeId?.includes('@')) {
+      employee = employees.find(emp => emp.email === leave.employeeId);
+      if (employee) {
+        console.log('✅ 3차 매칭 성공 (이메일):', employee.name);
+        return { name: employee.name, email: employee.email };
+      }
+    }
+    
+    // 4차: 이름으로 매칭 (fallback)
+    if (leave.employeeName || leave.name) {
+      employee = employees.find(emp => 
+        emp.name === leave.employeeName || emp.name === leave.name
+      );
+      if (employee) {
+        console.log('✅ 4차 매칭 성공 (이름):', employee.name);
+        return { name: employee.name, email: employee.email };
+      }
+    }
+    
+    // 매칭 실패 시 fallback
+    console.log('❌ 매칭 실패 - fallback 사용');
     return {
-      name: employee?.name || leave.employeeName || leave.name || '알 수 없음',
-      email: employee?.email || leave.employeeId || ''
+      name: leave.employeeName || leave.name || '알 수 없음',
+      email: leave.employeeId?.includes('@') ? leave.employeeId : ''
     };
   };
 
@@ -138,6 +194,7 @@ const AdminLeaves: React.FC = () => {
   };
 
   if (loading) {
+    console.log('AdminLeaves: 로딩 중...');
     return (
       <div className="flex justify-center items-center h-64">
         <div className="text-lg">로딩 중...</div>
@@ -145,9 +202,14 @@ const AdminLeaves: React.FC = () => {
     );
   }
 
+  console.log('AdminLeaves: 메인 컴포넌트 렌더링, leaves 개수:', leaves.length);
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">연차 관리</h1>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">전체 연차 현황</h1>
+        <p className="text-gray-600">모든 직원의 연차 신청 현황을 확인할 수 있습니다.</p>
+      </div>
       
       {leaves.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-8 text-center">
@@ -161,6 +223,9 @@ const AdminLeaves: React.FC = () => {
                 <tr>
                   <th className="px-2 py-3 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     직원 정보
+                  </th>
+                  <th className="px-2 py-3 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    유형
                   </th>
                   <th className="px-2 py-3 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     연차 기간
@@ -183,14 +248,29 @@ const AdminLeaves: React.FC = () => {
                 {leaves.map((leave) => (
                   <tr key={leave.id} className="hover:bg-gray-50">
                     <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">
-                      <div>
-                        <div className="font-semibold text-gray-900">
-                          {getEmployeeInfo(leave).name}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {getEmployeeInfo(leave).email}
-                        </div>
-                      </div>
+                      {(() => {
+                        const employeeInfo = getEmployeeInfo(leave);
+                        return (
+                          <div>
+                            <div className="font-semibold text-gray-900">
+                              {employeeInfo.name}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {employeeInfo.email}
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </td>
+                    <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        leave.type === '연차' ? 'bg-blue-100 text-blue-800' :
+                        leave.type === '반차' ? 'bg-green-100 text-green-800' :
+                        leave.type === '병가' ? 'bg-red-100 text-red-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {leave.type || '연차'}
+                      </span>
                     </td>
                     <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900">
                       <div>
@@ -220,14 +300,16 @@ const AdminLeaves: React.FC = () => {
                       {(leave.status === '신청' || leave.status === 'pending') && (
                         <>
                           <button
-                            onClick={() => updateLeaveStatus(leave.id!, '승인')}
+                            onClick={() => leave.id && updateLeaveStatus(leave.id, '승인')}
                             className="text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 px-3 py-1 rounded transition-colors"
+                            disabled={!leave.id}
                           >
                             승인
                           </button>
                           <button
-                            onClick={() => updateLeaveStatus(leave.id!, '거절')}
+                            onClick={() => leave.id && updateLeaveStatus(leave.id, '거절')}
                             className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded transition-colors"
+                            disabled={!leave.id}
                           >
                             거절
                           </button>

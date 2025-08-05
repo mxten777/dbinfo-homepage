@@ -38,6 +38,7 @@ const EmployeeHome: React.FC = () => {
         const empData = empDoc.data();
         setEmployee({
           id: empDoc.id,
+          uid: empData.uid ?? user?.uid ?? '',
           empNo: empData.empNo ?? '',
           name: empData.name ?? '',
           email: empData.email ?? '',
@@ -179,7 +180,7 @@ const EmployeeHome: React.FC = () => {
             </div>
             <div>
               <div className="text-lg font-bold text-blue-700">
-                {employee ? employee.name : (user?.email?.split('@')[0] || '사용자')}
+                {employee?.name || '이름없음'}
               </div>
               <div className="text-gray-600 text-sm">
                 {employee?.email || user?.email || ''}

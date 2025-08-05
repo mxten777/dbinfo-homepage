@@ -12,6 +12,8 @@ import AdminProtectedRoute from './pages/admin/AdminProtectedRoute';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminHome from './pages/admin/AdminHome';
 import AdminLeaves from './pages/admin/AdminLeaves';
+import AdminLeaveRequest from './pages/admin/AdminLeaveRequest';
+import AdminLeaveApproval from './pages/admin/AdminLeaveApproval';
 import AdminProjectStatus from './pages/admin/AdminProjectStatus';
 import AdminEmployeeManage from './pages/AdminEmployeeManage';
 import AdminCompanyNewsManage from './pages/admin/AdminCompanyNewsManage';
@@ -65,6 +67,8 @@ function AppRoutesWithHeader() {
             <Route element={<AdminLayout />}>
               <Route path="home" element={<AdminHome />} />
               <Route path="leaves" element={<AdminLeaves />} />
+              <Route path="leave-request" element={<AdminLeaveRequest />} />
+              <Route path="leave-approval" element={<AdminLeaveApproval />} />
               <Route path="project-status" element={<AdminProjectStatus />} />
               <Route path="employee-manage" element={<AdminEmployeeManage />} />
               <Route path="company-news-manage" element={<AdminCompanyNewsManage />} />

@@ -1,4 +1,8 @@
 import React, { useState } from 'react';
+// 자동 일괄 보정용 Firebase Admin REST API 활용
+// import { getDocs, collection, updateDoc, doc } from 'firebase/firestore';
+// import { db } from '../firebaseConfig';
+// 이미 import된 firebase/firestore 함수 및 db는 중복 import하지 않음
 import { useAuth } from '../AuthContext';
 import { uploadUniqueEmployees, clearEmployees, clearLeaves } from '../components/Footer';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +12,13 @@ import { resetAllAdminPasswords } from '../resetAdminPassword';
 import { resetAdminSystem, createFreshAdminAccounts } from '../resetAdminSystem';
 
 const AdminHome: React.FC = () => {
+  // 자동 일괄 보정 함수 (REST API 활용 예시)
+  // 실제 REST API가 없으므로, 아래 코드는 예시로만 남겨둡니다.
+  // const handleAutoFixEmployeeUids = async () => {
+  //   ...자동 일괄 보정 로직...
+  // };
+  // 직원 UID 일괄 보정 함수
+  // 직원 UID 일괄 보정 함수는 서버 구현 필요. 프론트엔드에서는 전체 사용자 목록을 직접 가져올 수 없습니다.
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [uploadMessage, setUploadMessage] = useState('');
@@ -200,6 +211,8 @@ UID: ${user.uid}
     <div className="p-8 max-w-4xl mx-auto">
       <h2 className="text-2xl font-bold mb-8 text-center">관리자 메뉴</h2>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+        {/* 직원 UID 자동 일괄 보정 버튼 (REST API 구현 필요, 현재는 비활성화) */}
+        {/* 직원 UID 일괄 보정 버튼 제거 (함수 미구현) */}
         {/* 직원정보등록 */}
         <div className="bg-gradient-to-br from-cyan-500 to-cyan-300 shadow-lg rounded-xl p-6 flex flex-col items-center hover:scale-105 transition-transform cursor-pointer" onClick={() => navigate('/admin-employee-manage')}>
           <span className="text-white text-xl font-bold mb-2">직원정보 등록</span>

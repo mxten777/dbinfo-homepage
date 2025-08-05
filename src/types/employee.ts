@@ -1,5 +1,5 @@
 export interface Leave {
-  id: string;
+  id?: string;
   employeeId: string;
   employeeName?: string;
   name?: string;
@@ -10,10 +10,15 @@ export interface Leave {
   type: '연차' | '반차' | '병가' | '기타';
   status: '신청' | '승인' | '거절' | 'pending' | 'approved' | 'rejected';
   createdAt: string;
+  requestedBy?: string;
+  isAdminRequest?: boolean;
+  isAdmin?: boolean;
+  email?: string;
 }
 
 export interface Employee {
   id: string;
+  uid?: string; // Firebase Auth UID
   empNo: string;
   name: string;
   email: string;

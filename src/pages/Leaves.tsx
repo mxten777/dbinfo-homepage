@@ -1,21 +1,64 @@
 import React, { useEffect, useState } from 'react';
 import { collection, getDocs, updateDoc, doc, addDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
+import { useAuth } from '../AuthContext';
 import type { Leave, Employee } from '../types/employee';
 
 const Leaves: React.FC = () => {
+  // 연차 일수 자동 계산 함수
+  const calculateLeaveDays = (start: string, end: string, type: string) => {
+    if (!start || !end) return 0;
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const diff = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24) + 1;
+    if (type === '반차') return 0.5;
+    return diff;
+  };
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [newLeave, setNewLeave] = useState({
-    employeeId: '',
     startDate: '',
     endDate: '',
     reason: '',
     type: '연차' as '연차' | '반차' | '병가' | '기타'
   });
+
+  // newLeave 타입 명확화
+  type NewLeaveType = {
+    startDate: string;
+    endDate: string;
+    reason: string;
+    type: '연차' | '반차' | '병가' | '기타';
+    employeeId?: string;
+    employeeName?: string;
+    name?: string;
+    email?: string;
+  };
+  const [newLeave2, setNewLeave2] = useState<NewLeaveType>({
+    startDate: '',
+    endDate: '',
+    reason: '',
+    type: '연차',
+    employeeId: '',
+    employeeName: '',
+    name: '',
+    email: ''
+  });
+  const { user } = useAuth();
+  const [employee, setEmployee] = useState<Employee | null>(null);
+
+  useEffect(() => {
+    // 로그인한 직원 정보 가져오기
+    const fetchEmployee = async () => {
+      const employeesSnap = await getDocs(collection(db, 'employees'));
+      const empDoc = employeesSnap.docs.find(doc => doc.data().uid === user?.uid);
+      if (empDoc) setEmployee({ id: empDoc.id, ...empDoc.data() } as Employee);
+    };
+    if (user?.uid) fetchEmployee();
+  }, [user]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -54,6 +97,27 @@ const Leaves: React.FC = () => {
         status: newStatus
       });
 
+      // 승인일 때 직원 usedLeaves/remainingLeaves 반영
+      if (newStatus === '승인') {
+        const leave = leaves.find(l => l.id === leaveId);
+        if (leave) {
+          // leave.type이 반차면 0.5, 아니면 자동계산
+          const days = leave.type === '반차'
+            ? 0.5
+            : calculateLeaveDays(leave.startDate, leave.endDate, leave.type);
+          // 직원 찾기 (uid 또는 id)
+          const emp = employees.find(emp => emp.id === leave.employeeId || emp.uid === leave.employeeId);
+          if (emp) {
+            const newUsed = (emp.usedLeaves ?? 0) + days;
+            const newRemain = (emp.remainingLeaves ?? (emp.totalLeaves ?? 0)) - days;
+            await updateDoc(doc(db, 'employees', emp.id), {
+              usedLeaves: newUsed,
+              remainingLeaves: newRemain
+            });
+          }
+        }
+      }
+
       setLeaves(prev => 
         prev.map(leave => 
           leave.id === leaveId 
@@ -71,58 +135,49 @@ const Leaves: React.FC = () => {
   };
 
   const getEmployeeName = (employeeId: string) => {
-    const employee = employees.find(emp => emp.id === employeeId);
-    return employee?.name || '알 수 없음';
+    // id 또는 uid로 매칭
+    const employee = employees.find(emp => emp.id === employeeId || emp.uid === employeeId);
+    return employee?.name ?? '알 수 없음';
   };
 
   const getEmployeeEmail = (employeeId: string) => {
-    const employee = employees.find(emp => emp.id === employeeId);
-    return employee?.email || '';
+    // id 또는 uid로 매칭
+    const employee = employees.find(emp => emp.id === employeeId || emp.uid === employeeId);
+    return employee?.email ?? '';
   };
 
   const handleAddLeave = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!newLeave.employeeId || !newLeave.startDate || !newLeave.endDate || !newLeave.reason) {
+    if (!employee || !newLeave2.startDate || !newLeave2.endDate || !newLeave2.reason) {
       setMessage('모든 필드를 입력해주세요.');
       return;
     }
-
     try {
-      const leaveData = {
-        employeeId: newLeave.employeeId,
-        startDate: newLeave.startDate,
-        endDate: newLeave.endDate,
-        reason: newLeave.reason,
-        type: newLeave.type,
-        status: '신청' as const,
-        createdAt: new Date().toISOString()
+      const leaveData: Leave = {
+        employeeId: employee.uid ?? '',
+        employeeName: employee.name,
+        name: employee.name,
+        startDate: newLeave2.startDate,
+        endDate: newLeave2.endDate,
+        reason: newLeave2.reason,
+        type: newLeave2.type,
+        status: '신청',
+        createdAt: new Date().toISOString(),
+        requestedBy: employee.email ?? '',
+        email: employee.email ?? '',
+        // 관리자 대리신청과 동일하게 isAdminRequest: false로 명시
+        isAdminRequest: false
       };
-
       const docRef = await addDoc(collection(db, 'leaves'), leaveData);
-      
-      const newLeaveWithId: Leave = {
-        id: docRef.id,
-        employeeId: leaveData.employeeId,
-        startDate: leaveData.startDate,
-        endDate: leaveData.endDate,
-        reason: leaveData.reason,
-        type: leaveData.type,
-        status: leaveData.status,
-        createdAt: leaveData.createdAt
-      };
-
-      setLeaves(prev => [...prev, newLeaveWithId]);
+      setLeaves(prev => [...prev, { ...leaveData, id: docRef.id }]);
       setMessage('연차 신청이 성공적으로 등록되었습니다.');
       setShowAddForm(false);
-      setNewLeave({
-        employeeId: '',
+      setNewLeave2({
         startDate: '',
         endDate: '',
         reason: '',
         type: '연차'
       });
-      
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
       console.error('연차 신청 실패:', error);
@@ -169,6 +224,13 @@ const Leaves: React.FC = () => {
           <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
             <h2 className="text-xl font-semibold text-gray-800 mb-6">새 연차 신청</h2>
             <form onSubmit={handleAddLeave} className="space-y-6">
+              {/* 신청 일수 자동 계산 UI */}
+              <div className="mb-4">
+                <div className="text-blue-700 font-bold text-lg">
+                  신청 일수: {calculateLeaveDays(newLeave.startDate, newLeave.endDate, newLeave.type)}일
+                  {newLeave.type === '반차' && <span className="text-xs text-gray-500 ml-2">(반차는 0.5일로 계산)</span>}
+                </div>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -303,10 +365,16 @@ const Leaves: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
                           <div className="font-semibold text-gray-900">
-                            {getEmployeeName(leave.employeeId)}
+                            {/* 직원 정보가 있으면 이름, 없으면 leave.name 또는 leave.employeeName 또는 leave.employeeId */}
+                            {getEmployeeName(leave.employeeId) !== '알 수 없음'
+                              ? getEmployeeName(leave.employeeId)
+                              : (leave.employeeName || leave.name || leave.employeeId)}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {getEmployeeEmail(leave.employeeId)}
+                            {/* 직원 정보가 있으면 이메일, 없으면 leave.email 또는 leave.requestedBy */}
+                            {getEmployeeEmail(leave.employeeId) !== ''
+                              ? getEmployeeEmail(leave.employeeId)
+                              : (leave.email || leave.requestedBy || '')}
                           </div>
                         </div>
                       </td>
