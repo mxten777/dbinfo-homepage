@@ -274,7 +274,7 @@ const Leaves: React.FC = () => {
                     직원정보
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">
-                    연차기간
+                    유형 / 기간
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">
                     사유
@@ -312,8 +312,15 @@ const Leaves: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         <div className="flex flex-col">
-                          <span className="font-medium">{leave.type}</span>
-                          <span className="text-xs text-gray-500">
+                          <span className={`inline-block px-2 py-1 rounded text-xs font-bold ${
+                            leave.type === '연차' ? 'bg-blue-100 text-blue-700' :
+                            leave.type === '반차' ? 'bg-green-100 text-green-700' :
+                            leave.type === '병가' ? 'bg-red-100 text-red-700' :
+                            'bg-gray-100 text-gray-700'
+                          }`}>
+                            {leave.type || '연차'}
+                          </span>
+                          <span className="text-xs text-gray-500 mt-1">
                             {leave.date || `${leave.startDate} ~ ${leave.endDate}`}
                           </span>
                         </div>
