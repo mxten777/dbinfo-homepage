@@ -46,5 +46,12 @@ export const adminMenus: AdminMenu[] = [
     icon: FaUserPlus,
     to: '/admin/company-news-manage',
   },
+  {
+    label: '관리자대리 신청',
+    desc: '관리자 대리 신청 및 승인',
+    color: 'bg-pink-400',
+    icon: FaUserShield,
+    to: '/admin/deputy-request',
+  },
 ];
-import { FaCalendarCheck, FaProjectDiagram, FaUserEdit, FaUserPlus, FaEraser } from 'react-icons/fa';
+import { FaCalendarCheck, FaProjectDiagram, FaUserEdit, FaUserPlus, FaEraser, FaUserShield } from 'react-icons/fa';
