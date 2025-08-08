@@ -1,3 +1,4 @@
+import AdminDeputyApproval from './pages/admin/AdminDeputyApproval';
 /// <reference types="react" />
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './AuthContext';
@@ -9,6 +10,7 @@ import ProjectList from './pages/ProjectList';
 import Leaves from './pages/Leaves';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminProtectedRoute from './pages/admin/AdminProtectedRoute';
+import AdminDeputyRequest from './pages/admin/AdminDeputyRequest';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminHome from './pages/admin/AdminHome';
 import AdminLeaves from './pages/admin/AdminLeaves';
@@ -75,6 +77,8 @@ function AppRoutesWithHeader() {
               <Route path="employee-upload" element={<DummyPage title="직원정보 업로드" />} />
               <Route path="leave-reset" element={<DummyPage title="연차기록 초기화" />} />
               <Route path="employee-leave-edit" element={<AdminEmployeeLeaveEdit />} />
+              <Route path="deputy-request" element={<AdminDeputyRequest />} />
+              <Route path="deputy-approval" element={<AdminDeputyApproval />} />
             </Route>
           </Route>
           <Route path="/employee-login" element={<EmployeeLogin />} />

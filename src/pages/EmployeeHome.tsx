@@ -9,6 +9,15 @@ import { useAuth } from '../AuthContext';
 import CompanyNewsList from '../components/CompanyNewsList';
 
 const EmployeeHome: React.FC = () => {
+  // 연차 일수 자동 계산 함수
+  const calculateLeaveDays = (start: string, end: string, type: string) => {
+    if (!start || !end) return 0;
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const diff = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24) + 1;
+    if (type === '반차') return 0.5;
+    return diff;
+  };
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   // 불필요한 상태 제거
@@ -126,6 +135,9 @@ const EmployeeHome: React.FC = () => {
     }
     try {
       const now = new Date();
+      const days = form.type === '반차'
+        ? 0.5
+        : ((new Date(form.endDate).getTime() - new Date(form.startDate).getTime()) / (1000 * 60 * 60 * 24) + 1);
       const newLeave: Omit<Leave, 'id'> = {
         employeeId: user.uid,
         employeeName: employee?.name || user.email?.split('@')[0] || '',
@@ -136,7 +148,8 @@ const EmployeeHome: React.FC = () => {
         reason: form.reason,
         type: form.type,
         status: '신청' as const,
-        createdAt: now.toISOString()
+        createdAt: now.toISOString(),
+        days
       };
       // Firestore에 저장
       const firestore = await import('firebase/firestore');
@@ -295,12 +308,77 @@ const EmployeeHome: React.FC = () => {
         </div>
         {/* 연차신청 카드 */}
         <div className="mb-10">
-          <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-lg p-8 flex flex-col gap-6 border border-gray-100">
-            <div className="flex items-center gap-2 mb-3">
-              <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+          <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+            {/* 타이틀 영역 */}
+            <div className="flex items-center gap-2 mb-6">
+              <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 012 2z" /></svg>
               <h2 className="text-xl font-bold text-blue-600">연차신청</h2>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {/* 입력영역 */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-4">
+        {/* 연차신청 내역 테이블 */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mt-8">
+          <h2 className="text-lg font-bold text-blue-700 mb-4">내 연차 신청 내역</h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full">
+              <thead className="bg-blue-50">
+                <tr>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">유형</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">기간</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">신청 일수</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">사유</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">상태</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">신청일</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {leaves.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-8 text-center text-gray-500">신청 내역이 없습니다.</td>
+                  </tr>
+                ) : (
+                  leaves.map((leave) => (
+                    <tr key={leave.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-2 whitespace-nowrap">
+                        <span className={`inline-block px-2 py-1 rounded text-xs font-bold ${
+                          leave.type === '연차' ? 'bg-blue-100 text-blue-700' :
+                          leave.type === '반차' ? 'bg-green-100 text-green-700' :
+                          leave.type === '병가' ? 'bg-red-100 text-red-700' :
+                          'bg-gray-100 text-gray-700'
+                        }`}>
+                          {leave.type}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                        {leave.startDate} ~ {leave.endDate}
+                      </td>
+                      <td className="px-4 py-2 whitespace-nowrap text-sm text-blue-700 font-bold">
+                        {leave.days !== undefined ? leave.days : (leave.type === '반차' ? 0.5 : ((new Date(leave.endDate).getTime() - new Date(leave.startDate).getTime()) / (1000 * 60 * 60 * 24) + 1))}일
+                      </td>
+                      <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                        {leave.reason}
+                      </td>
+                      <td className="px-4 py-2 whitespace-nowrap">
+                        <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          leave.status === '승인' 
+                            ? 'bg-green-100 text-green-800'
+                            : leave.status === '거절'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {leave.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                        {leave.createdAt ? new Date(leave.createdAt).toLocaleDateString('ko-KR') : '-'}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
               <div>
                 <label className="block font-semibold mb-2 text-gray-700">연차 유형</label>
                 <select
@@ -316,27 +394,35 @@ const EmployeeHome: React.FC = () => {
                   <option value="기타">기타</option>
                 </select>
               </div>
-              <div>
-                <label className="block font-semibold mb-2 text-gray-700">시작일</label>
-                <input
-                  type="date"
-                  name="startDate"
-                  value={form.startDate}
-                  onChange={handleFormChange}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-blue-400"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block font-semibold mb-2 text-gray-700">종료일</label>
-                <input
-                  type="date"
-                  name="endDate"
-                  value={form.endDate}
-                  onChange={handleFormChange}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-blue-400"
-                  required
-                />
+              <div className="col-span-2 flex items-end gap-4">
+                <div className="flex-1">
+                  <label className="block font-semibold mb-2 text-gray-700">시작일</label>
+                  <input
+                    type="date"
+                    name="startDate"
+                    value={form.startDate}
+                    onChange={handleFormChange}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-blue-400"
+                    required
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block font-semibold mb-2 text-gray-700">종료일</label>
+                  <input
+                    type="date"
+                    name="endDate"
+                    value={form.endDate}
+                    onChange={handleFormChange}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-blue-400"
+                    required
+                  />
+                </div>
+                <div className="flex items-center h-full pb-2">
+                  <span className="text-blue-700 font-bold text-base whitespace-nowrap">
+                    신청 일수: {calculateLeaveDays(form.startDate, form.endDate, form.type)}일
+                    {form.type === '반차' && <span className="text-xs text-gray-500 ml-2">(반차는 0.5일로 계산)</span>}
+                  </span>
+                </div>
               </div>
               <div>
                 <label className="block font-semibold mb-2 text-gray-700">사유</label>
@@ -375,6 +461,7 @@ const EmployeeHome: React.FC = () => {
                     <tr className="bg-blue-50 text-blue-900">
                       <th className="border px-4 py-2 rounded-tl-lg">유형</th>
                       <th className="border px-4 py-2">기간</th>
+                      <th className="border px-4 py-2">신청 일수</th>
                       <th className="border px-4 py-2">사유</th>
                       <th className="border px-4 py-2">신청일자</th>
                       <th className="border px-4 py-2">상태</th>
@@ -394,6 +481,9 @@ const EmployeeHome: React.FC = () => {
                           </span>
                         </td>
                         <td className="border px-4 py-2 font-semibold">{l.date}</td>
+                        <td className="border px-4 py-2 font-bold text-blue-700">
+                          {l.days !== undefined ? l.days : (l.type === '반차' ? 0.5 : ((new Date(l.endDate).getTime() - new Date(l.startDate).getTime()) / (1000 * 60 * 60 * 24) + 1))}일
+                        </td>
                         <td className="border px-4 py-2">{l.reason}</td>
                         <td className="border px-4 py-2">{l.createdAt ? new Date(l.createdAt).toLocaleDateString('ko-KR') : '-'}</td>
                         <td className="border px-4 py-2 font-bold">

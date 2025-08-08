@@ -53,5 +53,12 @@ export const adminMenus: AdminMenu[] = [
     icon: FaUserShield,
     to: '/admin/deputy-request',
   },
+  {
+    label: '승인/반려처리',
+    desc: '직원 및 대리신청 승인/반려 처리',
+    color: 'bg-teal-400',
+    icon: FaCheckCircle,
+    to: '/admin/deputy-approval',
+  },
 ];
-import { FaCalendarCheck, FaProjectDiagram, FaUserEdit, FaUserPlus, FaEraser, FaUserShield } from 'react-icons/fa';
+import { FaCalendarCheck, FaProjectDiagram, FaUserEdit, FaUserPlus, FaEraser, FaUserShield, FaCheckCircle } from 'react-icons/fa';

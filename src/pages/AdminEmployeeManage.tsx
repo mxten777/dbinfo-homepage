@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth, db } from '../firebaseConfig';
+import { FaTrash } from 'react-icons/fa';
 // Header import가 있다면 주석처리 또는 제거 (이 파일에는 Header import 없음)
 // 카드형 입력폼에 필요한 필드 추가 (주민번호, 성별, 직위, 부서, 직종, 입사일, 연락처)
 type EmployeeForm = {
@@ -19,15 +20,23 @@ type EmployeeForm = {
   phone: string;
   carryOverLeaves: number;
   annualLeaves: number;
-  usedLeaves: number;
-  remainingLeaves: number;
 };
 
 const initialForm: EmployeeForm = {
-  empNo: '', name: '', regNo: '', gender: '', position: '', department: '', jobType: '', joinDate: '', email: '', phone: '', carryOverLeaves: 0, annualLeaves: 0, usedLeaves: 0, remainingLeaves: 0
+  empNo: '', name: '', regNo: '', gender: '', position: '', department: '', jobType: '', joinDate: '', email: '', phone: '', carryOverLeaves: 0, annualLeaves: 0
 };
 
 const AdminEmployeeManage: React.FC = () => {
+// 직원의 연차 신청 내역 전체 삭제 함수
+const deleteAllLeavesForEmployee = async (employeeUid: string) => {
+  if (!window.confirm('해당 직원의 모든 연차 신청 내역을 삭제하시겠습니까?')) return;
+  const leavesSnap = await getDocs(collection(db, 'leaves'));
+  const targetLeaves = leavesSnap.docs.filter(d => d.data().employeeId === employeeUid);
+  for (const leaveDoc of targetLeaves) {
+    await deleteDoc(doc(db, 'leaves', leaveDoc.id));
+  }
+  alert('연차 신청 내역이 모두 삭제되었습니다.');
+};
   const navigate = useNavigate();
   const [employees, setEmployees] = useState<any[]>([]);
   const [form, setForm] = useState<EmployeeForm>(initialForm);
@@ -136,10 +145,8 @@ const AdminEmployeeManage: React.FC = () => {
         joinDate: emp.joinDate || '',
         email: emp.email || '',
         phone: emp.phone || '',
-        carryOverLeaves: emp.carryOverLeaves || 0,
-        annualLeaves: emp.annualLeaves || 0,
-        usedLeaves: emp.usedLeaves || 0,
-        remainingLeaves: emp.remainingLeaves || 0
+    carryOverLeaves: emp.carryOverLeaves || 0,
+    annualLeaves: emp.annualLeaves || 0
       });
   };
 
@@ -205,14 +212,6 @@ const AdminEmployeeManage: React.FC = () => {
           <input name="annualLeaves" type="number" value={form.annualLeaves} onChange={handleFormChange} className="border-2 border-blue-200 rounded-lg px-3 py-2 w-full text-lg focus:outline-none focus:ring-2 focus:ring-blue-300" />
         </div>
         <div>
-          <label className="block text-base font-bold mb-2 text-gray-700">연차사용일수</label>
-          <input name="usedLeaves" type="number" value={form.usedLeaves} onChange={handleFormChange} className="border-2 border-blue-200 rounded-lg px-3 py-2 w-full text-lg focus:outline-none focus:ring-2 focus:ring-blue-300" />
-        </div>
-        <div>
-          <label className="block text-base font-bold mb-2 text-gray-700">잔여연차</label>
-          <input name="remainingLeaves" type="number" value={form.remainingLeaves} readOnly className="border-2 border-blue-200 rounded-lg px-3 py-2 w-full text-lg bg-gray-100" />
-        </div>
-        <div>
           <label className="block text-base font-bold mb-2 text-gray-700">이메일</label>
           <input name="email" value={form.email} onChange={handleFormChange} className="border-2 border-blue-200 rounded-lg px-3 py-2 w-full text-lg focus:outline-none focus:ring-2 focus:ring-blue-300" />
         </div>
@@ -245,6 +244,7 @@ const AdminEmployeeManage: React.FC = () => {
                 <th className="border px-4 py-3 whitespace-nowrap">잔여연차</th>
                 <th className="border px-4 py-3 whitespace-nowrap">이메일</th>
                 <th className="border px-4 py-3 whitespace-nowrap">연락처</th>
+                 <th className="border px-4 py-3 whitespace-nowrap">UID</th>
                 <th className="border px-4 py-3 whitespace-nowrap">수정</th>
                 <th className="border px-4 py-3 whitespace-nowrap">삭제</th>
               </tr>
@@ -267,11 +267,15 @@ const AdminEmployeeManage: React.FC = () => {
                   <td className="border px-4 py-2 whitespace-nowrap">{emp.remainingLeaves ?? '-'}</td>
                   <td className="border px-4 py-2 whitespace-nowrap">{emp.email || '-'}</td>
                   <td className="border px-4 py-2 whitespace-nowrap">{emp.phone || '-'}</td>
+                   <td className="border px-4 py-2 whitespace-nowrap">{emp.uid || '-'}</td>
                   <td className="border px-4 py-2 whitespace-nowrap">
                     <button onClick={() => handleEditClick(emp)} className="px-3 py-1 bg-yellow-200 text-yellow-900 rounded-lg font-bold shadow hover:bg-yellow-300 transition">수정</button>
                   </td>
                   <td className="border px-4 py-2 whitespace-nowrap">
                     <button onClick={() => handleDelete(emp.id!)} className="px-3 py-1 bg-red-500 text-white rounded-lg font-bold shadow hover:bg-red-600 transition">삭제</button>
+                    <button onClick={() => deleteAllLeavesForEmployee(emp.uid)} title="연차 신청 내역 전체 삭제" className="ml-2 px-2 py-1 bg-gray-200 text-gray-700 rounded-lg font-bold shadow hover:bg-red-400 hover:text-white transition flex items-center gap-1">
+                      <FaTrash /> 전체삭제
+                    </button>
                   </td>
                 </tr>
               ))}

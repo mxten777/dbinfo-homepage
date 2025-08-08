@@ -44,5 +44,4 @@ const AdminHome: React.FC = () => {
     </div>
   );
 };
-
 export default AdminHome;

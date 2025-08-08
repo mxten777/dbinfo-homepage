@@ -4,6 +4,19 @@ import { db } from '../firebaseConfig';
 import { useAuth } from '../AuthContext';
 import type { Leave, Employee } from '../types/employee';
 
+// newLeave 타입 명확화 (파일 상단에 한 번만 선언)
+type NewLeaveType = {
+  startDate: string;
+  endDate: string;
+  reason: string;
+  type: '연차' | '반차' | '병가' | '기타';
+  employeeId?: string;
+  employeeName?: string;
+  name?: string;
+  email?: string;
+  days?: number;
+};
+
 const Leaves: React.FC = () => {
   // 연차 일수 자동 계산 함수
   const calculateLeaveDays = (start: string, end: string, type: string) => {
@@ -19,24 +32,6 @@ const Leaves: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newLeave, setNewLeave] = useState({
-    startDate: '',
-    endDate: '',
-    reason: '',
-    type: '연차' as '연차' | '반차' | '병가' | '기타'
-  });
-
-  // newLeave 타입 명확화
-  type NewLeaveType = {
-    startDate: string;
-    endDate: string;
-    reason: string;
-    type: '연차' | '반차' | '병가' | '기타';
-    employeeId?: string;
-    employeeName?: string;
-    name?: string;
-    email?: string;
-  };
   const [newLeave2, setNewLeave2] = useState<NewLeaveType>({
     startDate: '',
     endDate: '',
@@ -45,8 +40,11 @@ const Leaves: React.FC = () => {
     employeeId: '',
     employeeName: '',
     name: '',
-    email: ''
+    email: '',
+    days: 0
   });
+
+  // 중복 선언 제거됨
   const { user } = useAuth();
   const [employee, setEmployee] = useState<Employee | null>(null);
 
@@ -162,11 +160,11 @@ const Leaves: React.FC = () => {
         reason: newLeave2.reason,
         type: newLeave2.type,
         status: '신청',
-        createdAt: new Date().toISOString(),
+        days: calculateLeaveDays(newLeave2.startDate, newLeave2.endDate, newLeave2.type),
         requestedBy: employee.email ?? '',
         email: employee.email ?? '',
-        // 관리자 대리신청과 동일하게 isAdminRequest: false로 명시
-        isAdminRequest: false
+        isAdminRequest: false,
+        createdAt: new Date().toISOString()
       };
       const docRef = await addDoc(collection(db, 'leaves'), leaveData);
       setLeaves(prev => [...prev, { ...leaveData, id: docRef.id }]);
@@ -176,7 +174,12 @@ const Leaves: React.FC = () => {
         startDate: '',
         endDate: '',
         reason: '',
-        type: '연차'
+        type: '연차',
+        employeeId: '',
+        employeeName: '',
+        name: '',
+        email: '',
+        days: 0
       });
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
@@ -224,13 +227,6 @@ const Leaves: React.FC = () => {
           <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
             <h2 className="text-xl font-semibold text-gray-800 mb-6">새 연차 신청</h2>
             <form onSubmit={handleAddLeave} className="space-y-6">
-              {/* 신청 일수 자동 계산 UI */}
-              <div className="mb-4">
-                <div className="text-blue-700 font-bold text-lg">
-                  신청 일수: {calculateLeaveDays(newLeave.startDate, newLeave.endDate, newLeave.type)}일
-                  {newLeave.type === '반차' && <span className="text-xs text-gray-500 ml-2">(반차는 0.5일로 계산)</span>}
-                </div>
-              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -238,7 +234,7 @@ const Leaves: React.FC = () => {
                   </label>
                   <select
                     // employeeId는 newLeave에 없음. 필요시 newLeave2.employeeId 사용 또는 제거
-                    onChange={(e) => setNewLeave(prev => ({ ...prev, employeeId: e.target.value }))}
+                    onChange={(e) => setNewLeave2(prev => ({ ...prev, employeeId: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   >
@@ -256,8 +252,8 @@ const Leaves: React.FC = () => {
                     연차 유형 *
                   </label>
                   <select
-                    value={newLeave.type}
-                    onChange={(e) => setNewLeave(prev => ({ ...prev, type: e.target.value as any }))}
+                    value={newLeave2.type}
+                    onChange={(e) => setNewLeave2(prev => ({ ...prev, type: e.target.value as any }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="연차">연차</option>
@@ -273,8 +269,15 @@ const Leaves: React.FC = () => {
                   </label>
                   <input
                     type="date"
-                    value={newLeave.startDate}
-                    onChange={(e) => setNewLeave(prev => ({ ...prev, startDate: e.target.value }))}
+                    value={newLeave2.startDate}
+                    onChange={(e) => {
+                      const startDate = e.target.value;
+                      setNewLeave2(prev => ({
+                        ...prev,
+                        startDate,
+                        days: calculateLeaveDays(startDate, prev.endDate, prev.type)
+                      }));
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   />
@@ -286,11 +289,23 @@ const Leaves: React.FC = () => {
                   </label>
                   <input
                     type="date"
-                    value={newLeave.endDate}
-                    onChange={(e) => setNewLeave(prev => ({ ...prev, endDate: e.target.value }))}
+                    value={newLeave2.endDate}
+                    onChange={(e) => {
+                      const endDate = e.target.value;
+                      setNewLeave2(prev => ({
+                        ...prev,
+                        endDate,
+                        days: calculateLeaveDays(prev.startDate, endDate, prev.type)
+                      }));
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   />
+                  {/* 신청 일수 입력 필드 바로 아래에 표시 */}
+                  <div className="mt-2 text-blue-700 font-bold text-base">
+                    신청 일수: {calculateLeaveDays(newLeave2.startDate, newLeave2.endDate, newLeave2.type)}일
+                    {newLeave2.type === '반차' && <span className="text-xs text-gray-500 ml-2">(반차는 0.5일로 계산)</span>}
+                  </div>
                 </div>
               </div>
 
@@ -299,8 +314,8 @@ const Leaves: React.FC = () => {
                   신청 사유 *
                 </label>
                 <textarea
-                  value={newLeave.reason}
-                  onChange={(e) => setNewLeave(prev => ({ ...prev, reason: e.target.value }))}
+                  value={newLeave2.reason}
+                  onChange={(e) => setNewLeave2(prev => ({ ...prev, reason: e.target.value }))}
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="연차 신청 사유를 입력하세요"
