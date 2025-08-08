@@ -1,48 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaCalendarCheck, FaProjectDiagram, FaUserEdit, FaUserPlus, FaEraser, FaTrash } from 'react-icons/fa';
+import { FaTrash } from 'react-icons/fa';
+import { adminMenus } from './adminMenus';
 import { db } from '../../firebaseConfig';
 import { collection, getDocs, deleteDoc, updateDoc } from 'firebase/firestore';
 
-const topMenus = [
-  {
-    label: '직원관리',
-    desc: '직원 정보 등록, 수정, 현황 관리',
-    color: 'bg-blue-400',
-    icon: <FaUserEdit size={32} className="mb-2" />,
-    to: '/admin/employee-manage',
-  },
-  {
-    label: '프로젝트관리',
-    desc: '프로젝트 등록, 수정, 삭제, 조회',
-    color: 'bg-green-400',
-    icon: <FaProjectDiagram size={32} className="mb-2" />,
-    to: '/admin/project-status',
-  },
-  {
-    label: '연차관리',
-    desc: '직원 연차 신청 및 승인/반려 관리',
-    color: 'bg-cyan-400',
-    icon: <FaCalendarCheck size={32} className="mb-2" />,
-    to: '/admin/leaves',
-  },
-];
-const bottomMenus = [
-  {
-    label: '연차정보 초기화',
-    desc: '직원 연차정보 일괄 수정',
-    color: 'bg-yellow-400',
-    icon: <FaEraser size={32} className="mb-2" />,
-    to: '/admin/employee-leave-edit',
-  },
-  {
-    label: '사내소식관리',
-    desc: '사내 소식 등록 및 관리',
-    color: 'bg-indigo-400',
-    icon: <FaUserPlus size={32} className="mb-2" />,
-    to: '/admin/company-news-manage',
-  },
-];
 
 // 사용하지 않는 oneTimeMenus 제거
 
@@ -115,22 +77,13 @@ const AdminHome: React.FC = () => {
     <div className="min-h-screen bg-gray-50 py-10 px-2 flex flex-col items-center">
       <div className="w-full max-w-5xl mx-auto">
         <h1 className="text-3xl font-extrabold text-center text-blue-700 mb-8 tracking-wide">관리자 메뉴</h1>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {topMenus.map((menu) => (
-            <div key={menu.label} className={`${menu.color} rounded-xl shadow p-6 text-white font-bold text-lg flex flex-col items-center justify-center cursor-pointer hover:scale-105 transition`} onClick={() => navigate(menu.to)}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          {adminMenus.map(menu => (
+            <button key={menu.label} className={`rounded-xl shadow-lg p-8 text-white text-center font-bold text-lg ${menu.color}`} onClick={() => navigate(menu.to)}>
               {menu.icon}
-              <span className="text-xl font-bold mb-1">{menu.label}</span>
-              <span className="text-sm font-normal text-white/90">{menu.desc}</span>
-            </div>
-          ))}
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {bottomMenus.map((menu) => (
-            <div key={menu.label} className={`${menu.color} rounded-xl shadow p-6 text-white font-bold text-lg flex flex-col items-center justify-center cursor-pointer hover:scale-105 transition`} onClick={() => navigate(menu.to)}>
-              {menu.icon}
-              <span className="text-xl font-bold mb-1">{menu.label}</span>
-              <span className="text-sm font-normal text-white/90">{menu.desc}</span>
-            </div>
+              <div className="mt-2 mb-1">{menu.label}</div>
+              <div className="text-xs font-normal text-white/80">{menu.desc}</div>
+            </button>
           ))}
         </div>
         

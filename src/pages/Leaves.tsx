@@ -237,7 +237,7 @@ const Leaves: React.FC = () => {
                     직원 선택 *
                   </label>
                   <select
-                    value={newLeave.employeeId}
+                    // employeeId는 newLeave에 없음. 필요시 newLeave2.employeeId 사용 또는 제거
                     onChange={(e) => setNewLeave(prev => ({ ...prev, employeeId: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
@@ -414,13 +414,13 @@ const Leaves: React.FC = () => {
                         {leave.status === '신청' && (
                           <div className="flex space-x-2">
                             <button
-                              onClick={() => handleStatusChange(leave.id, '승인')}
+                              onClick={() => leave.id ? handleStatusChange(leave.id, '승인') : undefined}
                               className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-medium"
                             >
                               승인
                             </button>
                             <button
-                              onClick={() => handleStatusChange(leave.id, '거절')}
+                              onClick={() => leave.id ? handleStatusChange(leave.id, '거절') : undefined}
                               className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs font-medium"
                             >
                               거절
