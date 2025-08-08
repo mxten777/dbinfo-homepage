@@ -8,8 +8,9 @@ export interface Leave {
   date?: string;
   reason: string;
   type: '연차' | '반차' | '병가' | '기타';
-  status: '신청' | '승인' | '거절' | 'pending' | 'approved' | 'rejected';
+  status: '신청' | '승인' | '거절' | '대기' | 'pending' | 'approved' | 'rejected';
   createdAt: string;
+  processedAt?: string;
   requestedBy?: string;
   isAdminRequest?: boolean;
   isAdmin?: boolean;

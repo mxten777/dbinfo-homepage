@@ -147,9 +147,10 @@ const EmployeeHome: React.FC = () => {
         date: `${form.startDate}~${form.endDate}`,
         reason: form.reason,
         type: form.type,
-        status: '신청' as const,
+        status: '대기' as const, // 신청 시 상태를 '대기'로 저장
         createdAt: now.toISOString(),
-        days
+        days,
+        isAdminRequest: false // 직원 직접 신청임을 명시
       };
       // Firestore에 저장
       const firestore = await import('firebase/firestore');
@@ -318,60 +319,45 @@ const EmployeeHome: React.FC = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-4">
         {/* 연차신청 내역 테이블 */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mt-8">
-          <h2 className="text-lg font-bold text-blue-700 mb-4">내 연차 신청 내역</h2>
+          <h2 className="text-lg font-bold text-blue-700 mb-4">처리 완료 신청 (최신순)</h2>
           <div className="overflow-x-auto">
             <table className="min-w-full">
               <thead className="bg-blue-50">
                 <tr>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">직원명</th>
                   <th className="px-4 py-2 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">유형</th>
                   <th className="px-4 py-2 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">기간</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">신청 일수</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">일수</th>
                   <th className="px-4 py-2 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">사유</th>
                   <th className="px-4 py-2 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">상태</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">신청일</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">구분</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">처리일자</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {leaves.length === 0 ? (
+                {leaves.filter(l => l.status === '승인' || l.status === '거절').length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-gray-500">신청 내역이 없습니다.</td>
+                    <td colSpan={8} className="px-4 py-8 text-center text-gray-500">처리된 신청이 없습니다.</td>
                   </tr>
                 ) : (
-                  leaves.map((leave) => (
+                  leaves.filter(l => l.status === '승인' || l.status === '거절').map((leave) => (
                     <tr key={leave.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-2 whitespace-nowrap">
-                        <span className={`inline-block px-2 py-1 rounded text-xs font-bold ${
-                          leave.type === '연차' ? 'bg-blue-100 text-blue-700' :
-                          leave.type === '반차' ? 'bg-green-100 text-green-700' :
-                          leave.type === '병가' ? 'bg-red-100 text-red-700' :
-                          'bg-gray-100 text-gray-700'
-                        }`}>
-                          {leave.type}
-                        </span>
-                      </td>
-                      <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
-                        {leave.startDate} ~ {leave.endDate}
-                      </td>
-                      <td className="px-4 py-2 whitespace-nowrap text-sm text-blue-700 font-bold">
-                        {leave.days !== undefined ? leave.days : (leave.type === '반차' ? 0.5 : ((new Date(leave.endDate).getTime() - new Date(leave.startDate).getTime()) / (1000 * 60 * 60 * 24) + 1))}일
-                      </td>
-                      <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
-                        {leave.reason}
-                      </td>
+                      <td className="px-4 py-2 whitespace-nowrap">{leave.employeeName || leave.name || '-'}</td>
+                      <td className="px-4 py-2 whitespace-nowrap">{leave.type}</td>
+                      <td className="px-4 py-2 whitespace-nowrap">{leave.startDate} ~ {leave.endDate}</td>
+                      <td className="px-4 py-2 whitespace-nowrap">{leave.days}일</td>
+                      <td className="px-4 py-2 whitespace-nowrap">{leave.reason}</td>
                       <td className="px-4 py-2 whitespace-nowrap">
                         <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                           leave.status === '승인' 
                             ? 'bg-green-100 text-green-800'
-                            : leave.status === '거절'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-yellow-100 text-yellow-800'
+                            : 'bg-red-100 text-red-800'
                         }`}>
                           {leave.status}
                         </span>
                       </td>
-                      <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
-                        {leave.createdAt ? new Date(leave.createdAt).toLocaleDateString('ko-KR') : '-'}
-                      </td>
+                      <td className="px-4 py-2 whitespace-nowrap">{leave.isAdminRequest ? '대리신청' : '직원신청'}</td>
+                      <td className="px-4 py-2 whitespace-nowrap">{leave.processedAt ? leave.processedAt : leave.createdAt ? new Date(leave.createdAt).toLocaleDateString('ko-KR') : '-'}</td>
                     </tr>
                   ))
                 )}
