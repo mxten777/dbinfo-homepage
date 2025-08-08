@@ -80,7 +80,7 @@ const AdminHome: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {adminMenus.map(menu => (
             <button key={menu.label} className={`rounded-xl shadow-lg p-8 text-white text-center font-bold text-lg ${menu.color}`} onClick={() => navigate(menu.to)}>
-              {menu.icon}
+              <menu.icon />
               <div className="mt-2 mb-1">{menu.label}</div>
               <div className="text-xs font-normal text-white/80">{menu.desc}</div>
             </button>
