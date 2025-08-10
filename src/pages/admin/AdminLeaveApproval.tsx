@@ -4,28 +4,26 @@ import { db } from '../../firebaseConfig';
 import type { Leave, Employee } from '../../types/employee';
 
 const AdminLeaveApproval: React.FC = () => {
+  // 직원 데이터 재조회 함수
+  const fetchEmployees = async () => {
+    try {
+      const employeesSnapshot = await getDocs(collection(db, 'employees'));
+      const employeesData = employeesSnapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Employee[];
+      setEmployees(employeesData);
+    } catch (error) {
+      console.error('직원 데이터 가져오기 실패:', error);
+    }
+  };
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
+  const [filter, setFilter] = useState<'all' | '신청' | '승인' | '반려'>('all');
 
   useEffect(() => {
-    // 직원 데이터 가져오기
-    const fetchEmployees = async () => {
-      try {
-        const employeesSnapshot = await getDocs(collection(db, 'employees'));
-        const employeesData = employeesSnapshot.docs
-          .map(doc => ({
-            id: doc.id,
-            ...doc.data()
-          })) as Employee[];
-        
-        setEmployees(employeesData);
-      } catch (error) {
-        console.error('직원 데이터 가져오기 실패:', error);
-      }
-    };
-
     // 연차 신청 실시간 가져오기
     const unsubscribe = onSnapshot(
       query(collection(db, 'leaves'), orderBy('createdAt', 'desc')),
@@ -45,7 +43,6 @@ const AdminLeaveApproval: React.FC = () => {
         setLoading(false);
       }
     );
-
     fetchEmployees();
     return () => unsubscribe();
   }, []);
@@ -77,13 +74,39 @@ const AdminLeaveApproval: React.FC = () => {
     };
   };
 
-  const updateLeaveStatus = async (leaveId: string, status: '승인' | '거절') => {
+  const updateLeaveStatus = async (leaveId: string, status: '승인' | '반려') => {
     try {
       await updateDoc(doc(db, 'leaves', leaveId), {
         status,
         updatedAt: new Date().toISOString(),
         approvedBy: 'admin' // 승인자 정보
       });
+
+      // 승인일 때 직원 연차 반영
+      if (status === '승인') {
+        const leave = leaves.find(l => l.id === leaveId);
+        if (leave) {
+          // leave.days 필드가 있으면 우선 사용, 없으면 기존 계산
+          const days = typeof leave.days === 'number' ? leave.days : (leave.type === '반차' ? 0.5 : calculateLeaveDays(leave.startDate, leave.endDate));
+          // 직원 매칭: uid > id > email
+          let emp = employees.find(emp => emp.uid === leave.employeeId);
+          if (!emp) emp = employees.find(emp => emp.id === leave.employeeId);
+          if (!emp && leave.employeeId?.includes('@')) emp = employees.find(emp => emp.email === leave.employeeId);
+          if (emp) {
+            const newUsed = (emp.usedLeaves ?? 0) + days;
+            const newRemain = (emp.totalLeaves ?? 0) - newUsed;
+            await updateDoc(doc(db, 'employees', emp.id), {
+              usedLeaves: newUsed,
+              remainingLeaves: newRemain
+            });
+            console.log(`[updateDoc] 직원 연차 반영 성공: ${emp.id} used=${newUsed} remain=${newRemain}`);
+          } else {
+            console.warn(`[updateDoc] 직원 정보 매칭 실패: leave.employeeId=${leave.employeeId}`);
+          }
+        }
+  // 승인 후 직원 데이터 즉시 갱신
+  await fetchEmployees();
+      }
     } catch (error) {
       console.error('연차 상태 업데이트 실패:', error);
       alert('상태 업데이트에 실패했습니다.');
@@ -147,18 +170,18 @@ const AdminLeaveApproval: React.FC = () => {
 
   const filteredLeaves = leaves.filter(leave => {
     if (filter === 'all') return true;
-    if (filter === 'pending') return leave.status === '신청';
-    if (filter === 'approved') return leave.status === '승인';
-    if (filter === 'rejected') return leave.status === '거절';
+    if (filter === '신청') return leave.status === '신청';
+    if (filter === '승인') return leave.status === '승인';
+    if (filter === '반려') return leave.status === '반려';
     return true;
   });
 
   const getStatusCounts = () => {
     return {
       all: leaves.length,
-      pending: leaves.filter(l => l.status === '신청').length,
-      approved: leaves.filter(l => l.status === '승인').length,
-      rejected: leaves.filter(l => l.status === '거절').length,
+      신청: leaves.filter(l => l.status === '신청').length,
+      승인: leaves.filter(l => l.status === '승인').length,
+      반려: leaves.filter(l => l.status === '반려').length,
     };
   };
 
@@ -192,34 +215,34 @@ const AdminLeaveApproval: React.FC = () => {
           전체 ({statusCounts.all})
         </button>
         <button
-          onClick={() => setFilter('pending')}
+          onClick={() => setFilter('신청')}
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            filter === 'pending' 
+            filter === '신청' 
               ? 'bg-yellow-600 text-white' 
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
-          대기 중 ({statusCounts.pending})
+          신청 ({statusCounts.신청})
         </button>
         <button
-          onClick={() => setFilter('approved')}
+          onClick={() => setFilter('승인')}
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            filter === 'approved' 
+            filter === '승인' 
               ? 'bg-green-600 text-white' 
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
-          승인됨 ({statusCounts.approved})
+          승인 ({statusCounts.승인})
         </button>
         <button
-          onClick={() => setFilter('rejected')}
+          onClick={() => setFilter('반려')}
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            filter === 'rejected' 
+            filter === '반려' 
               ? 'bg-red-600 text-white' 
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
-          거절됨 ({statusCounts.rejected})
+          반려 ({statusCounts.반려})
         </button>
       </div>
       
@@ -227,9 +250,9 @@ const AdminLeaveApproval: React.FC = () => {
         <div className="bg-white rounded-lg shadow p-8 text-center">
           <p className="text-gray-500 text-lg">
             {filter === 'all' ? '연차 신청이 없습니다.' : 
-             filter === 'pending' ? '대기 중인 연차 신청이 없습니다.' :
-             filter === 'approved' ? '승인된 연차 신청이 없습니다.' :
-             '거절된 연차 신청이 없습니다.'}
+             filter === '신청' ? '신청된 연차가 없습니다.' :
+             filter === '승인' ? '승인된 연차가 없습니다.' :
+             '반려된 연차가 없습니다.'}
           </p>
         </div>
       ) : (
@@ -304,12 +327,12 @@ const AdminLeaveApproval: React.FC = () => {
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                           leave.status === '승인'
                             ? 'bg-green-100 text-green-800' 
-                            : leave.status === '거절'
+                            : leave.status === '반려'
                             ? 'bg-red-100 text-red-800'
                             : 'bg-yellow-100 text-yellow-800'
                         }`}>
                           {leave.status === '승인' ? '승인' : 
-                           leave.status === '거절' ? '거절' : '대기'}
+                           leave.status === '반려' ? '반려' : '신청'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -323,11 +346,11 @@ const AdminLeaveApproval: React.FC = () => {
                               승인
                             </button>
                             <button
-                              onClick={() => leave.id && updateLeaveStatus(leave.id, '거절')}
+                              onClick={() => leave.id && updateLeaveStatus(leave.id, '반려')}
                               className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
                               disabled={!leave.id}
                             >
-                              거절
+                              반려
                             </button>
                           </div>
                         ) : (

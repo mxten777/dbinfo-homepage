@@ -17,7 +17,7 @@ import AdminLeaves from './pages/admin/AdminLeaves';
 import AdminLeaveRequest from './pages/admin/AdminLeaveRequest';
 import AdminLeaveApproval from './pages/admin/AdminLeaveApproval';
 import AdminProjectStatus from './pages/admin/AdminProjectStatus';
-import AdminEmployeeManage from './pages/AdminEmployeeManage';
+import AdminEmployeeManage from './pages/AdminEmployeeManage'; // export default로 오류 해결
 import AdminCompanyNewsManage from './pages/admin/AdminCompanyNewsManage';
 import AdminEmployeeLeaveEdit from './pages/admin/AdminEmployeeLeaveEdit';
 import EmployeeLogin from './pages/EmployeeLogin';

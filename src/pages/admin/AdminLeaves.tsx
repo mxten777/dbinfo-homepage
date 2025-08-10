@@ -122,7 +122,7 @@ const AdminLeaves: React.FC = () => {
     };
   };
 
-  const updateLeaveStatus = async (leaveId: string, status: '승인' | '거절' | 'approved' | 'rejected') => {
+  const updateLeaveStatus = async (leaveId: string, status: '승인' | '반려' | '신청') => {
     try {
       await updateDoc(doc(db, 'leaves', leaveId), {
         status,
@@ -286,18 +286,18 @@ const AdminLeaves: React.FC = () => {
                     </td>
                     <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        leave.status === '승인' || leave.status === 'approved'
+                        leave.status === '승인'
                           ? 'bg-green-100 text-green-800' 
-                          : leave.status === '거절' || leave.status === 'rejected'
+                          : leave.status === '반려'
                           ? 'bg-red-100 text-red-800'
                           : 'bg-yellow-100 text-yellow-800'
                       }`}>
-                        {leave.status === '승인' || leave.status === 'approved' ? '승인' : 
-                         leave.status === '거절' || leave.status === 'rejected' ? '거절' : '대기'}
+                        {leave.status === '승인' ? '승인' : 
+                         leave.status === '반려' ? '반려' : '신청'}
                       </span>
                     </td>
                     <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                      {(leave.status === '신청' || leave.status === 'pending') && (
+                      {leave.status === '신청' && (
                         <>
                           <button
                             onClick={() => leave.id && updateLeaveStatus(leave.id, '승인')}
@@ -307,15 +307,15 @@ const AdminLeaves: React.FC = () => {
                             승인
                           </button>
                           <button
-                            onClick={() => leave.id && updateLeaveStatus(leave.id, '거절')}
+                            onClick={() => leave.id && updateLeaveStatus(leave.id, '반려')}
                             className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded transition-colors"
                             disabled={!leave.id}
                           >
-                            거절
+                            반려
                           </button>
                         </>
                       )}
-                      {(leave.status !== '신청' && leave.status !== 'pending') && (
+                      {leave.status !== '신청' && (
                         <span className="text-gray-400">처리 완료</span>
                       )}
                     </td>

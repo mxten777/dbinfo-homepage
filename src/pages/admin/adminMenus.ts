@@ -8,6 +8,7 @@ export interface AdminMenu {
   icon: IconType;
   to: string;
   onClick?: () => void;
+  style?: React.CSSProperties;
 }
 
 export const adminMenus: AdminMenu[] = [
@@ -33,13 +34,6 @@ export const adminMenus: AdminMenu[] = [
     to: '/admin/leaves',
   },
   {
-    label: '연차정보 초기화',
-    desc: '직원 연차정보 일괄 수정',
-    color: 'bg-yellow-400',
-    icon: FaEraser,
-    to: '/admin/employee-leave-edit',
-  },
-  {
     label: '사내소식관리',
     desc: '사내 소식 등록 및 관리',
     color: 'bg-indigo-400',
@@ -61,4 +55,4 @@ export const adminMenus: AdminMenu[] = [
     to: '/admin/deputy-approval',
   },
 ];
-import { FaCalendarCheck, FaProjectDiagram, FaUserEdit, FaUserPlus, FaEraser, FaUserShield, FaCheckCircle } from 'react-icons/fa';
+import { FaCalendarCheck, FaProjectDiagram, FaUserEdit, FaUserPlus, FaUserShield, FaCheckCircle } from 'react-icons/fa';

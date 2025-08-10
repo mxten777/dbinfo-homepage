@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
-
 
 const initialForm = {
   title: '',
@@ -12,7 +10,7 @@ const initialForm = {
 };
 
 const AdminCompanyNewsManage: React.FC = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate(); // 사용하지 않으므로 제거
   const [newsList, setNewsList] = useState<any[]>([]);
   const [form, setForm] = useState(initialForm);
   const [editId, setEditId] = useState<string | null>(null);
@@ -66,65 +64,66 @@ const AdminCompanyNewsManage: React.FC = () => {
   };
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <h2 className="text-3xl font-extrabold mb-6 text-blue-800 tracking-tight text-center drop-shadow">사내소식 등록/수정/삭제</h2>
-      {message && <div className="mb-4 text-green-600 font-semibold text-lg text-center">{message}</div>}
-      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-blue-50 to-white rounded-2xl shadow-2xl p-8 mb-10 grid grid-cols-1 md:grid-cols-2 gap-6 border border-blue-100">
-        <div className="md:col-span-2">
-          <label className="block text-base font-bold mb-2 text-gray-700">제목</label>
-          <input name="title" value={form.title} onChange={handleChange} className="border-2 border-blue-200 rounded-lg px-3 py-2 w-full text-lg focus:outline-none focus:ring-2 focus:ring-blue-300" required />
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-10 px-2 flex flex-col items-center">
+      <div className="w-full max-w-4xl mx-auto flex flex-col gap-10">
+        <div className="bg-white rounded-2xl shadow-xl border border-blue-100 p-8">
+          <h2 className="text-2xl font-extrabold mb-6 text-blue-700 tracking-tight">사내소식 등록/수정/삭제</h2>
+          {message && <div className="mb-4 text-green-600 font-semibold text-lg text-center">{message}</div>}
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+            <div className="md:col-span-2">
+              <label className="block font-bold mb-2 text-gray-700 text-base">제목</label>
+              <input name="title" value={form.title} onChange={handleChange} className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-blue-400 text-base" required />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block font-bold mb-2 text-gray-700 text-base">내용</label>
+              <textarea name="content" value={form.content} onChange={handleChange} className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-blue-400 text-base min-h-[100px]" required />
+            </div>
+            <div>
+              <label className="block font-bold mb-2 text-gray-700 text-base">작성자</label>
+              <input name="author" value={form.author} onChange={handleChange} className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-blue-400 text-base" />
+            </div>
+            <div>
+              <label className="block font-bold mb-2 text-gray-700 text-base">등록일</label>
+              <input name="date" type="date" value={form.date} onChange={handleChange} className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-blue-400 text-base" />
+            </div>
+            <div className="md:col-span-2 flex gap-4 mt-4 justify-center">
+              <button type="submit" className="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-blue-700 transition-all duration-150">{editId ? '수정' : '등록'}</button>
+              {editId && <button type="button" className="px-8 py-3 bg-gray-400 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-gray-500 transition-all duration-150" onClick={()=>{setForm(initialForm);setEditId(null);}}>취소</button>}
+            </div>
+          </form>
         </div>
-        <div className="md:col-span-2">
-          <label className="block text-base font-bold mb-2 text-gray-700">내용</label>
-          <textarea name="content" value={form.content} onChange={handleChange} className="border-2 border-blue-200 rounded-lg px-3 py-2 w-full text-lg focus:outline-none focus:ring-2 focus:ring-blue-300 min-h-[100px]" required />
-        </div>
-        <div>
-          <label className="block text-base font-bold mb-2 text-gray-700">작성자</label>
-          <input name="author" value={form.author} onChange={handleChange} className="border-2 border-blue-200 rounded-lg px-3 py-2 w-full text-lg focus:outline-none focus:ring-2 focus:ring-blue-300" />
-        </div>
-        <div>
-          <label className="block text-base font-bold mb-2 text-gray-700">등록일</label>
-          <input name="date" type="date" value={form.date} onChange={handleChange} className="border-2 border-blue-200 rounded-lg px-3 py-2 w-full text-lg focus:outline-none focus:ring-2 focus:ring-blue-300" />
-        </div>
-        <div className="md:col-span-2 flex gap-4 mt-4 justify-center">
-          <button type="submit" className="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-blue-700 transition-all duration-150">{editId ? '수정' : '등록'}</button>
-          {editId && <button type="button" className="px-8 py-3 bg-gray-400 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-gray-500 transition-all duration-150" onClick={()=>{setForm(initialForm);setEditId(null);}}>취소</button>}
-        </div>
-      </form>
-      <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-4xl mx-auto mt-6">
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white rounded-lg overflow-hidden">
-            <thead className="bg-blue-100 sticky top-0 z-10">
-              <tr>
-                <th className="border px-4 py-2">제목</th>
-                <th className="border px-4 py-2">내용</th>
-                <th className="border px-4 py-2">작성자</th>
-                <th className="border px-4 py-2">등록일</th>
-                <th className="border px-4 py-2">수정</th>
-                <th className="border px-4 py-2">삭제</th>
-              </tr>
-            </thead>
-            <tbody>
-              {newsList.map(news => (
-                <tr key={news.id} className="hover:bg-blue-50 transition">
-                  <td className="border px-4 py-2 whitespace-nowrap truncate max-w-[200px]">{news.title}</td>
-                  <td className="border px-4 py-2 whitespace-nowrap truncate max-w-[300px]">{news.content}</td>
-                  <td className="border px-4 py-2">{news.author || '-'}</td>
-                  <td className="border px-4 py-2">{news.date || '-'}</td>
-                  <td className="border px-4 py-2">
-                    <button onClick={() => handleEdit(news)} className="px-3 py-1 bg-yellow-200 text-yellow-900 rounded-lg font-bold shadow hover:bg-yellow-300 transition">수정</button>
-                  </td>
-                  <td className="border px-4 py-2">
-                    <button onClick={() => handleDelete(news.id!)} className="px-3 py-1 bg-red-500 text-white rounded-lg font-bold shadow hover:bg-red-600 transition">삭제</button>
-                  </td>
+        <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-4xl mx-auto mt-6">
+          <div className="overflow-x-auto">
+            <table className="min-w-full bg-white rounded-lg overflow-hidden">
+              <thead className="bg-blue-100 sticky top-0 z-10">
+                <tr>
+                  <th className="border px-4 py-2">제목</th>
+                  <th className="border px-4 py-2">내용</th>
+                  <th className="border px-4 py-2">작성자</th>
+                  <th className="border px-4 py-2">등록일</th>
+                  <th className="border px-4 py-2">수정</th>
+                  <th className="border px-4 py-2">삭제</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {newsList.map(news => (
+                  <tr key={news.id} className="hover:bg-blue-50 transition">
+                    <td className="border px-4 py-2 whitespace-nowrap truncate max-w-[200px]">{news.title}</td>
+                    <td className="border px-4 py-2 whitespace-nowrap truncate max-w-[300px]">{news.content}</td>
+                    <td className="border px-4 py-2">{news.author || '-'}</td>
+                    <td className="border px-4 py-2">{news.date || '-'}</td>
+                    <td className="border px-4 py-2">
+                      <button onClick={() => handleEdit(news)} className="px-3 py-1 bg-yellow-200 text-yellow-900 rounded-lg font-bold shadow hover:bg-yellow-300 transition">수정</button>
+                    </td>
+                    <td className="border px-4 py-2">
+                      <button onClick={() => handleDelete(news.id!)} className="px-3 py-1 bg-red-500 text-white rounded-lg font-bold shadow hover:bg-red-600 transition">삭제</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
-      <div className="flex justify-center my-8">
-        <button className="bg-gray-200 px-6 py-2 rounded-full shadow text-lg font-semibold hover:bg-gray-300" onClick={() => navigate('/admin/home')}>관리자 홈으로</button>
       </div>
     </div>
   );

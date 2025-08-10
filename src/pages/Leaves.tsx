@@ -37,10 +37,6 @@ const Leaves: React.FC = () => {
     endDate: '',
     reason: '',
     type: '연차',
-    employeeId: '',
-    employeeName: '',
-    name: '',
-    email: '',
     days: 0
   });
 
@@ -58,60 +54,68 @@ const Leaves: React.FC = () => {
     if (user?.uid) fetchEmployee();
   }, [user]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [leavesSnap, employeesSnap] = await Promise.all([
-          getDocs(collection(db, 'leaves')),
-          getDocs(collection(db, 'employees'))
-        ]);
+  const fetchData = async () => {
+    try {
+      const [leavesSnap, employeesSnap] = await Promise.all([
+        getDocs(collection(db, 'leaves')),
+        getDocs(collection(db, 'employees'))
+      ]);
 
-        const leavesData = leavesSnap.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        } as Leave));
+      const leavesData = leavesSnap.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as Leave));
 
-        const employeesData = employeesSnap.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        } as Employee));
+      const employeesData = employeesSnap.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as Employee));
 
-        setLeaves(leavesData);
-        setEmployees(employeesData);
-      } catch (error) {
-        console.error('데이터 로드 실패:', error);
-        setMessage('데이터 로드에 실패했습니다.');
-      } finally {
-        setLoading(false);
+      setEmployees(employeesData);
+      // 직원 본인 연차만 필터링
+      if (user?.uid) {
+        setLeaves(leavesData.filter(l => l.employeeId === user.uid));
+      } else {
+        setLeaves([]);
       }
-    };
+    } catch (error) {
+      console.error('데이터 로드 실패:', error);
+      setMessage('데이터 로드에 실패했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
-  }, []);
+  }, [user]);
 
-  const handleStatusChange = async (leaveId: string, newStatus: '승인' | '거절') => {
+  const handleStatusChange = async (leaveId: string, newStatus: '승인' | '반려' | '신청') => {
     try {
       await updateDoc(doc(db, 'leaves', leaveId), {
         status: newStatus
       });
+      console.log(`[updateDoc] leave status 변경 성공: ${leaveId} → ${newStatus}`);
 
-      // 승인일 때 직원 usedLeaves/remainingLeaves 반영
+      // 승인일 때 직원 usedLeaves/remainingLeaves 반영 (관리자 승인과 동일하게)
       if (newStatus === '승인') {
         const leave = leaves.find(l => l.id === leaveId);
         if (leave) {
-          // leave.type이 반차면 0.5, 아니면 자동계산
-          const days = leave.type === '반차'
-            ? 0.5
-            : calculateLeaveDays(leave.startDate, leave.endDate, leave.type);
-          // 직원 찾기 (uid 또는 id)
-          const emp = employees.find(emp => emp.id === leave.employeeId || emp.uid === leave.employeeId);
+          const days = leave.type === '반차' ? 0.5 : calculateLeaveDays(leave.startDate, leave.endDate, leave.type);
+          // 직원 매칭: uid > id > email
+          let emp = employees.find(emp => emp.uid === leave.employeeId);
+          if (!emp) emp = employees.find(emp => emp.id === leave.employeeId);
+          if (!emp && leave.employeeId?.includes('@')) emp = employees.find(emp => emp.email === leave.employeeId);
           if (emp) {
             const newUsed = (emp.usedLeaves ?? 0) + days;
-            const newRemain = (emp.remainingLeaves ?? (emp.totalLeaves ?? 0)) - days;
+            const newRemain = (emp.totalLeaves ?? 0) - newUsed;
             await updateDoc(doc(db, 'employees', emp.id), {
               usedLeaves: newUsed,
               remainingLeaves: newRemain
             });
+            console.log(`[updateDoc] 직원 연차 반영 성공: ${emp.id} used=${newUsed} remain=${newRemain}`);
+          } else {
+            console.warn(`[updateDoc] 직원 정보 매칭 실패: leave.employeeId=${leave.employeeId}`);
           }
         }
       }
@@ -124,25 +128,17 @@ const Leaves: React.FC = () => {
         )
       );
 
+      // 승인/반려 후 직원/연차 데이터 재조회
+      await fetchData();
+
       setMessage(`연차 신청이 ${newStatus}되었습니다.`);
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
-      console.error('상태 변경 실패:', error);
+      console.error('[updateDoc] 상태 변경 실패:', error);
       setMessage('상태 변경에 실패했습니다.');
     }
   };
 
-  const getEmployeeName = (employeeId: string) => {
-    // id 또는 uid로 매칭
-    const employee = employees.find(emp => emp.id === employeeId || emp.uid === employeeId);
-    return employee?.name ?? '알 수 없음';
-  };
-
-  const getEmployeeEmail = (employeeId: string) => {
-    // id 또는 uid로 매칭
-    const employee = employees.find(emp => emp.id === employeeId || emp.uid === employeeId);
-    return employee?.email ?? '';
-  };
 
   const handleAddLeave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,20 +147,19 @@ const Leaves: React.FC = () => {
       return;
     }
     try {
-      const leaveData: Leave = {
-        employeeId: employee.uid ?? '',
-        employeeName: employee.name,
-        name: employee.name,
-        startDate: newLeave2.startDate,
-        endDate: newLeave2.endDate,
-        reason: newLeave2.reason,
-        type: newLeave2.type,
-        status: '신청',
-        days: calculateLeaveDays(newLeave2.startDate, newLeave2.endDate, newLeave2.type),
-        requestedBy: employee.email ?? '',
-        email: employee.email ?? '',
-        isAdminRequest: false,
-        createdAt: new Date().toISOString()
+        const leaveData: Leave = {
+          id: '',
+          employeeId: employee.uid ?? '',
+          employeeName: employee.name,
+          name: employee.name,
+          startDate: newLeave2.startDate,
+          endDate: newLeave2.endDate,
+          reason: newLeave2.reason,
+          type: newLeave2.type,
+          status: '신청',
+          days: calculateLeaveDays(newLeave2.startDate, newLeave2.endDate, newLeave2.type),
+          isAdminRequest: false,
+          createdAt: Date.now(),
       };
       const docRef = await addDoc(collection(db, 'leaves'), leaveData);
       setLeaves(prev => [...prev, { ...leaveData, id: docRef.id }]);
@@ -211,7 +206,25 @@ const Leaves: React.FC = () => {
             <span>{showAddForm ? '취소' : '+ 연차 신청'}</span>
           </button>
         </div>
-        
+
+        {/* 연차 요약 카드 */}
+        {employee && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-white shadow rounded-lg p-4 text-center">
+              <div className="text-sm text-gray-500 mb-1">총 연차</div>
+              <div className="text-2xl font-bold text-blue-700">{employee.totalLeaves ?? 0}일</div>
+            </div>
+            <div className="bg-white shadow rounded-lg p-4 text-center">
+              <div className="text-sm text-gray-500 mb-1">사용 연차</div>
+              <div className="text-2xl font-bold text-green-600">{employee.usedLeaves ?? 0}일</div>
+            </div>
+            <div className="bg-white shadow rounded-lg p-4 text-center">
+              <div className="text-sm text-gray-500 mb-1">잔여 연차</div>
+              <div className="text-2xl font-bold text-cyan-600">{employee.remainingLeaves ?? 0}일</div>
+            </div>
+          </div>
+        )}
+
         {message && (
           <div className={`mb-6 p-4 border rounded-lg ${
             message.includes('실패') 
@@ -228,24 +241,6 @@ const Leaves: React.FC = () => {
             <h2 className="text-xl font-semibold text-gray-800 mb-6">새 연차 신청</h2>
             <form onSubmit={handleAddLeave} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    직원 선택 *
-                  </label>
-                  <select
-                    // employeeId는 newLeave에 없음. 필요시 newLeave2.employeeId 사용 또는 제거
-                    onChange={(e) => setNewLeave2(prev => ({ ...prev, employeeId: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  >
-                    <option value="">직원을 선택하세요</option>
-                    {employees.map(employee => (
-                      <option key={employee.id} value={employee.id}>
-                        {employee.name} ({employee.email})
-                      </option>
-                    ))}
-                  </select>
-                </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -264,23 +259,7 @@ const Leaves: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    시작일 *
-                  </label>
-                  <input
-                    type="date"
-                    value={newLeave2.startDate}
-                    onChange={(e) => {
-                      const startDate = e.target.value;
-                      setNewLeave2(prev => ({
-                        ...prev,
-                        startDate,
-                        days: calculateLeaveDays(startDate, prev.endDate, prev.type)
-                      }));
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
+                {/* 직원 선택 드롭다운 제거됨 */}
                 </div>
 
                 <div>
@@ -347,50 +326,26 @@ const Leaves: React.FC = () => {
             <table className="min-w-full">
               <thead className="bg-blue-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">
-                    직원정보
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">
-                    유형 / 기간
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">
-                    사유
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">
-                    신청일
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">
-                    상태
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">
-                    관리
-                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">직원정보</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">유형 / 기간</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">사유</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">신청일</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">상태</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-blue-900 uppercase tracking-wider">관리</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {leaves.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
-                      연차 신청 내역이 없습니다.
-                    </td>
+                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">연차 신청 내역이 없습니다.</td>
                   </tr>
                 ) : (
                   leaves.map((leave) => (
                     <tr key={leave.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
-                          <div className="font-semibold text-gray-900">
-                            {/* 직원 정보가 있으면 이름, 없으면 leave.name 또는 leave.employeeName 또는 leave.employeeId */}
-                            {getEmployeeName(leave.employeeId) !== '알 수 없음'
-                              ? getEmployeeName(leave.employeeId)
-                              : (leave.employeeName || leave.name || leave.employeeId)}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {/* 직원 정보가 있으면 이메일, 없으면 leave.email 또는 leave.requestedBy */}
-                            {getEmployeeEmail(leave.employeeId) !== ''
-                              ? getEmployeeEmail(leave.employeeId)
-                              : (leave.email || leave.requestedBy || '')}
-                          </div>
+                          <div className="font-semibold text-gray-900">{employee?.name}</div>
+                          <div className="text-sm text-gray-500">{employee?.email}</div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -403,22 +358,16 @@ const Leaves: React.FC = () => {
                           }`}>
                             {leave.type || '연차'}
                           </span>
-                          <span className="text-xs text-gray-500 mt-1">
-                            {leave.date || `${leave.startDate} ~ ${leave.endDate}`}
-                          </span>
+                          <span className="text-xs text-gray-500 mt-1">{leave.createdAt ? new Date(leave.createdAt).toLocaleDateString('ko-KR') : `${leave.startDate} ~ ${leave.endDate}`}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        {leave.reason}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {leave.createdAt ? new Date(leave.createdAt).toLocaleDateString('ko-KR') : '-'}
-                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-900">{leave.reason}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{leave.createdAt ? new Date(leave.createdAt).toLocaleDateString('ko-KR') : '-'}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                           leave.status === '승인' 
                             ? 'bg-green-100 text-green-800'
-                            : leave.status === '거절'
+                            : leave.status === '반려'
                             ? 'bg-red-100 text-red-800'
                             : 'bg-yellow-100 text-yellow-800'
                         }`}>
@@ -427,20 +376,12 @@ const Leaves: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         {leave.status === '신청' && (
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() => leave.id ? handleStatusChange(leave.id, '승인') : undefined}
-                              className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-medium"
-                            >
-                              승인
-                            </button>
-                            <button
-                              onClick={() => leave.id ? handleStatusChange(leave.id, '거절') : undefined}
-                              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs font-medium"
-                            >
-                              거절
-                            </button>
-                          </div>
+                          <button
+                            onClick={() => leave.id ? handleStatusChange(leave.id, '반려') : undefined}
+                            className="bg-gray-400 hover:bg-gray-500 text-white px-3 py-1 rounded text-xs font-medium"
+                          >
+                            신청 취소
+                          </button>
                         )}
                       </td>
                     </tr>

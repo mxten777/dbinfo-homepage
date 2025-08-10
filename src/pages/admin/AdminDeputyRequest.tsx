@@ -1,11 +1,27 @@
 import React, { useState, useEffect } from 'react';
+// import { Link } from 'react-router-dom'; // 미사용 import 제거
 import { db } from '../../firebaseConfig';
 import { collection, getDocs, addDoc, updateDoc, doc } from 'firebase/firestore';
 
 interface Employee {
   id: string;
+  uid?: string;
+  empNo?: string;
   name: string;
   email: string;
+  carryOverLeaves?: number;
+  annualLeaves?: number;
+  totalLeaves: number;
+  usedLeaves: number;
+  remainingLeaves: number;
+  regNo?: string;
+  gender?: string;
+  position?: string;
+  department?: string;
+  jobType?: string;
+  joinDate?: string;
+  phone?: string;
+  role?: string;
 }
 
 interface DeputyRequest {
@@ -17,7 +33,7 @@ interface DeputyRequest {
   endDate: string;
   days: number;
   reason: string;
-  status: string;
+  status: '신청' | '승인' | '반려';
 }
 
 const AdminDeputyRequest: React.FC = () => {
@@ -34,7 +50,26 @@ const AdminDeputyRequest: React.FC = () => {
   useEffect(() => {
     const fetchEmployees = async () => {
       const snap = await getDocs(collection(db, 'employees'));
-      setEmployees(snap.docs.map(doc => ({ id: doc.id, name: doc.data().name, email: doc.data().email })));
+      setEmployees(snap.docs.map(doc => ({
+        id: doc.id,
+        uid: doc.data().uid,
+        empNo: doc.data().empNo,
+        name: doc.data().name,
+        email: doc.data().email,
+        carryOverLeaves: doc.data().carryOverLeaves,
+        annualLeaves: doc.data().annualLeaves,
+        totalLeaves: doc.data().totalLeaves,
+        usedLeaves: doc.data().usedLeaves,
+        remainingLeaves: doc.data().remainingLeaves,
+        regNo: doc.data().regNo,
+        gender: doc.data().gender,
+        position: doc.data().position,
+        department: doc.data().department,
+        jobType: doc.data().jobType,
+        joinDate: doc.data().joinDate,
+        phone: doc.data().phone,
+        role: doc.data().role
+      })));
     };
     fetchEmployees();
   }, []);
@@ -43,7 +78,31 @@ const AdminDeputyRequest: React.FC = () => {
   useEffect(() => {
     const fetchRequests = async () => {
       const snap = await getDocs(collection(db, 'deputyRequests'));
-      setRequests(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as DeputyRequest)));
+      setRequests(
+        snap.docs.map(doc => {
+          const data = doc.data();
+          // status 변환
+          let status: '신청' | '승인' | '반려';
+          if (data.status === '신청' || data.status === '승인' || data.status === '반려') status = data.status;
+          else status = '신청';
+          // type 변환
+          let type: '연차' | '반차' | '병가' | '기타';
+          if (data.type === '연차' || data.type === '반차' || data.type === '병가' || data.type === '기타') type = data.type;
+          else type = '연차';
+          const req: DeputyRequest = {
+            id: doc.id,
+            employeeId: data.employeeId || '',
+            employeeName: data.employeeName || '',
+            type,
+            startDate: data.startDate || '',
+            endDate: data.endDate || '',
+            days: typeof data.days === 'number' ? data.days : 1,
+            reason: data.reason || '',
+            status,
+          };
+          return req;
+        })
+      );
     };
     fetchRequests();
   }, []);
@@ -70,10 +129,10 @@ const AdminDeputyRequest: React.FC = () => {
       endDate,
       days,
       reason,
-      status: '대기',
+      status: '신청',
     };
     const docRef = await addDoc(collection(db, 'deputyRequests'), newRequest);
-  setRequests((prev: DeputyRequest[]) => [...prev, { id: docRef.id, ...newRequest }]);
+  setRequests((prev: DeputyRequest[]) => [...prev, { id: docRef.id, ...newRequest, status: '신청' as '신청' | '승인' | '반려' }]);
     setEmployeeId('');
     setType('연차');
     setStartDate('');
@@ -86,31 +145,51 @@ const AdminDeputyRequest: React.FC = () => {
   const handleApprove = async (id: string) => {
     const req = requests.find(r => r.id === id);
     if (!req) return;
-    await updateDoc(doc(db, 'deputyRequests', id), { status: '승인' });
-  setRequests((prev: DeputyRequest[]) => prev.map((r: DeputyRequest) => r.id === id ? { ...r, status: '승인' } : r));
-    // 연차 자동 반영
-    await addDoc(collection(db, 'leaves'), {
-      employeeId: req.employeeId,
-      employeeName: req.employeeName,
-      type: req.type,
-      startDate: req.startDate,
-      endDate: req.endDate,
-      days: req.days,
-      reason: req.reason,
-      status: '승인',
-      createdAt: new Date().toISOString(),
-      isAdminRequest: true,
-    });
+    try {
+      await updateDoc(doc(db, 'deputyRequests', id), { status: '승인' });
+      console.log(`[updateDoc] deputyRequest status 변경 성공: ${id} → 승인`);
+      setRequests((prev: DeputyRequest[]) => prev.map((r: DeputyRequest) => r.id === id ? { ...r, status: '승인' } : r));
+  // 직원 찾기: uid > id > email
+  const emp = employees.find(e => e.uid === req.employeeId || e.id === req.employeeId || e.email === req.employeeId);
+  const employeeIdForLeave = emp ? emp.uid ?? emp.id : req.employeeId;
+      await addDoc(collection(db, 'leaves'), {
+        employeeId: employeeIdForLeave,
+        employeeName: req.employeeName,
+        type: req.type,
+        startDate: req.startDate,
+        endDate: req.endDate,
+        days: req.days,
+        reason: req.reason,
+        status: '승인',
+        createdAt: new Date().toISOString(),
+        isAdminRequest: true,
+      });
+      // 직원 usedLeaves/remainingLeaves 반영
+      if (emp) {
+        const days = req.type === '반차' ? 0.5 : req.days;
+        const newUsed = (emp.usedLeaves ?? 0) + days;
+        const newRemain = (emp.totalLeaves ?? 0) - newUsed;
+        await updateDoc(doc(db, 'employees', emp.id), {
+          usedLeaves: newUsed,
+          remainingLeaves: newRemain
+        });
+        console.log(`[updateDoc] 직원 연차 반영 성공: ${emp.id} used=${newUsed} remain=${newRemain}`);
+      } else {
+        console.warn(`[updateDoc] 직원 정보 매칭 실패: req.employeeId=${req.employeeId}`);
+      }
+    } catch (error) {
+      console.error('[updateDoc] 대리신청 승인 처리 실패:', error);
+    }
   };
   const handleReject = async (id: string) => {
-    await updateDoc(doc(db, 'deputyRequests', id), { status: '반려' });
+  await updateDoc(doc(db, 'deputyRequests', id), { status: '반려' });
   setRequests((prev: DeputyRequest[]) => prev.map((r: DeputyRequest) => r.id === id ? { ...r, status: '반려' } : r));
   };
 
   return (
-    <div className="p-8 max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6 text-center">관리자 대리 신청</h2>
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6 mb-8">
+    <div className="bg-white min-h-screen flex flex-col items-center pt-6">
+      <h2 className="text-xl font-bold mb-4 text-left w-full max-w-xl">관리자 대리 신청</h2>
+      <form onSubmit={handleSubmit} className="w-full max-w-xl border rounded p-4 mb-6 bg-white">
         <div className="mb-4">
           <label className="block mb-1 font-semibold">직원 선택</label>
           <select value={employeeId} onChange={e => setEmployeeId(e.target.value)} className="w-full border rounded px-3 py-2" required>
@@ -147,25 +226,25 @@ const AdminDeputyRequest: React.FC = () => {
           <label className="block mb-1 font-semibold">사유</label>
           <textarea value={reason} onChange={e => setReason(e.target.value)} className="w-full border rounded px-3 py-2" required />
         </div>
-        <button type="submit" className="bg-pink-500 text-white px-4 py-2 rounded font-bold">신청하기</button>
+  <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded font-bold w-full">신청하기</button>
       </form>
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-bold mb-4">신청 목록</h3>
+      <div className="w-full max-w-xl border rounded p-4 bg-white">
+        <h3 className="text-base font-bold mb-3">신청 목록</h3>
         {requests.length === 0 ? (
-          <p className="text-gray-500">신청 내역이 없습니다.</p>
+          <p className="text-gray-400">신청 내역이 없습니다.</p>
         ) : (
           <ul>
             {requests.map(r => (
-              <li key={r.id} className="mb-4 border-b pb-2">
-                <div className="font-semibold">{r.employeeName}</div>
-                <div className="text-sm text-gray-700 mb-1">유형: {r.type} | 기간: {r.startDate} ~ {r.endDate} | 일수: {r.days}</div>
-                <div className="text-sm text-gray-700 mb-1">사유: {r.reason}</div>
-                <div className="text-sm mb-2">상태: <span className={r.status === '승인' ? 'text-green-600' : r.status === '반려' ? 'text-red-600' : 'text-gray-600'}>{r.status}</span></div>
-                {r.status === '대기' && (
+              <li key={r.id} className="mb-3 border-b pb-2">
+                <div className="font-semibold text-sm">{r.employeeName}</div>
+                <div className="text-xs text-gray-600 mb-1">유형: {r.type} | 기간: {r.startDate} ~ {r.endDate} | 일수: {r.days}</div>
+                <div className="text-xs text-gray-600 mb-1">사유: {r.reason}</div>
+                <div className="text-xs mb-2">상태: <span className={r.status === '승인' ? 'text-green-600' : r.status === '반려' ? 'text-red-600' : 'text-gray-600'}>{r.status}</span></div>
+                {r.status === '신청' && (
                   <div className="flex gap-2">
-                    <button onClick={() => handleApprove(r.id)} className="bg-green-500 text-white px-3 py-1 rounded">승인</button>
-                    <button onClick={() => handleReject(r.id)} className="bg-red-500 text-white px-3 py-1 rounded">반려</button>
+                    <button onClick={() => handleApprove(r.id)} className="bg-green-600 text-white px-2 py-1 rounded text-xs">승인</button>
+                    <button onClick={() => handleReject(r.id)} className="bg-red-600 text-white px-2 py-1 rounded text-xs">반려</button>
                   </div>
                 )}
               </li>

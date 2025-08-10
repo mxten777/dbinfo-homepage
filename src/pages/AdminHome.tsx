@@ -12,23 +12,39 @@ const AdminHome: React.FC = () => {
     <div className="p-8 max-w-4xl mx-auto">
       <h2 className="text-2xl font-bold mb-8 text-center">관리자 메뉴</h2>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
-        {adminMenus.map((menu: AdminMenu) => (
-          <div
-            key={menu.label}
-            className={`shadow-lg rounded-xl p-6 flex flex-col items-center hover:scale-105 transition-transform cursor-pointer ${menu.color}`}
-            onClick={() => {
-              if (menu.onClick) {
-                menu.onClick();
-              } else {
-                navigate(menu.to);
-              }
-            }}
-          >
-            {React.createElement(menu.icon as React.ElementType, { className: "text-white text-3xl mb-2" })}
-            <span className="text-white text-xl font-bold mb-2">{menu.label}</span>
-            <span className="text-white/80 text-sm">{menu.desc}</span>
-          </div>
-        ))}
+        {adminMenus
+          .filter(menu => menu.label !== '직원등록' && menu.label !== '연차정보 초기화')
+          .map((menu: AdminMenu) => (
+            <div
+              key={menu.label}
+              className={`shadow-lg rounded-xl p-6 flex flex-col items-center hover:scale-105 transition-transform cursor-pointer ${menu.color}`}
+              onClick={() => {
+                if (menu.onClick) {
+                  menu.onClick();
+                } else {
+                  navigate(menu.to);
+                }
+              }}
+            >
+              {React.createElement(menu.icon as React.ElementType, { className: "text-white text-3xl mb-2" })}
+              <span className="text-white font-bold mb-2 text-xl">{menu.label}</span>
+              <span className="text-white/80 text-sm">{menu.desc}</span>
+            </div>
+          ))}
+      </div>
+      <div className="flex flex-col items-center gap-2 mb-8">
+        <button
+          className="px-6 py-2 bg-gray-100 text-blue-700 rounded shadow font-bold text-lg underline decoration-blue-700 decoration-2 hover:bg-gray-200 transition"
+          onClick={() => navigate('/admin/employee-manage')}
+        >
+          직원등록 (직원관리에서 통합)
+        </button>
+        <button
+          className="px-6 py-2 bg-gray-100 text-blue-700 rounded shadow font-bold text-lg underline decoration-blue-700 decoration-2 hover:bg-gray-200 transition"
+          onClick={() => navigate('/admin/employee-manage')}
+        >
+          연차초기화 (직원관리에서 통합)
+        </button>
       </div>
       <div className="flex justify-center">
         <button
