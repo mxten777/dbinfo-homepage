@@ -1,65 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { collection, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore';
-import { addDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import type { Employee, Leave } from '../types/employee';
 
-type EmployeeForm = {
-  empNo: string;
-  name: string;
-  regNo: string;
-  gender: string;
-  position: string;
-  department: string;
-  jobType: string;
-  joinDate: string;
-  email: string;
-  phone: string;
-  carryOverLeaves: number;
-  annualLeaves: number;
-  totalLeaves?: number;
-  role: string;
-  id?: string;
-  usedLeaves?: number;
-  remainingLeaves?: number;
-  uid?: string;
-};
-const initialForm: EmployeeForm = {
-  empNo: '', name: '', regNo: '', gender: '', position: '', department: '', jobType: '', joinDate: '', email: '', phone: '', carryOverLeaves: 0, annualLeaves: 0, role: 'employee'
-};
-
 const AdminEmployeeManage: React.FC = () => {
-  // 직원 수정 클릭 핸들러
-  const handleEditClick = (emp: Employee) => {
-    setForm({
-      empNo: emp.empNo || '',
-      name: emp.name || '',
-      regNo: emp.regNo || '',
-      gender: emp.gender || '',
-      position: emp.position || '',
-      department: emp.department || '',
-      jobType: emp.jobType || '',
-      joinDate: emp.joinDate || '',
-      email: emp.email || '',
-      phone: emp.phone || '',
-      carryOverLeaves: emp.carryOverLeaves ?? 0,
-      annualLeaves: emp.annualLeaves ?? 0,
-      totalLeaves: emp.totalLeaves ?? 0,
-      role: emp.role || 'employee',
-      id: emp.id,
-      usedLeaves: emp.usedLeaves ?? 0,
-      remainingLeaves: emp.remainingLeaves ?? 0,
-      uid: emp.uid || '',
-    });
-    setEditId(emp.id!);
-  };
+  const [message, setMessage] = useState('');
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [leaves, setLeaves] = useState<Leave[]>([]);
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetResult, setResetResult] = useState<string>('');
+  const navigate = useNavigate();
 
   // 직원 삭제 핸들러
   const handleDelete = async (id: string) => {
     if (!window.confirm('정말 삭제하시겠습니까?')) return;
-  await deleteDoc(doc(db, 'employees', String(id)));
+    await deleteDoc(doc(db, 'employees', String(id)));
     setEmployees((prev: Employee[]) => prev.filter(e => e.id !== id));
     setMessage('삭제되었습니다.');
     setTimeout(() => setMessage(''), 2000);
@@ -69,9 +26,8 @@ const AdminEmployeeManage: React.FC = () => {
   const handleLeaveApproval = async (leave: Leave, status: '승인' | '반려') => {
     try {
       const now = Date.now();
-  await updateDoc(doc(db, 'leaves', String(leave.id)), { status, updatedAt: now });
+      await updateDoc(doc(db, 'leaves', String(leave.id)), { status, updatedAt: now });
       if (status === '승인') {
-        // Leave 타입에 employeeId, name만 사용
         const emp = employees.find(e => e.id === leave.employeeId || e.name === leave.employeeName);
         if (emp) {
           const used = Number(emp.usedLeaves ?? 0) + Number(leave.days ?? 0);
@@ -88,24 +44,7 @@ const AdminEmployeeManage: React.FC = () => {
       setTimeout(() => setMessage(''), 2000);
     }
   };
-  // 임시비밀번호 생성 함수
-  const generateRandomPassword = (length = 10) => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let pwd = '';
-    for (let i = 0; i < length; i++) {
-      pwd += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return pwd;
-  };
-  const [form, setForm] = useState<EmployeeForm>(initialForm);
-  const [message, setMessage] = useState('');
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [leaves, setLeaves] = useState<Leave[]>([]);
-  const [editId, setEditId] = useState<string | null>(null);
-  const [showResetModal, setShowResetModal] = useState(false);
-  const [resetLoading, setResetLoading] = useState(false);
-  const [resetResult, setResetResult] = useState<string>('');
-  const navigate = useNavigate();
+
   // 연차 기록 초기화
   const handleResetLeaves = async () => {
     setResetLoading(true);
@@ -126,7 +65,7 @@ const AdminEmployeeManage: React.FC = () => {
     setTimeout(() => setResetResult(''), 3000);
     setShowResetModal(false);
     // 최신 데이터 반영
-  const empSnap = await getDocs(collection(db, 'employees'));
+    const empSnap = await getDocs(collection(db, 'employees'));
     setEmployees(empSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Employee)));
   };
 
@@ -143,122 +82,12 @@ const AdminEmployeeManage: React.FC = () => {
     fetchData();
   }, []);
 
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    setForm((prev: EmployeeForm) => ({ ...prev, [name]: type === 'number' ? Number(value) : value }));
-  };
-
-  const handleAddOrEdit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editId) {
-  await updateDoc(doc(db, 'employees', String(editId)), { ...form });
-      setEmployees((prev: Employee[]) => prev.map((e: Employee) => e.id === editId ? { ...e, ...form } : e));
-      setMessage('수정되었습니다.');
-      setTimeout(() => setMessage(''), 2000);
-      setForm(initialForm);
-      setEditId(null);
-    } else {
-      // 신규 등록: Firebase Auth 계정 생성 + Firestore 저장
-      if (!form.email) {
-        setMessage('이메일을 입력하세요.');
-        setTimeout(() => setMessage(''), 2000);
-        return;
-      }
-      try {
-        const auth = getAuth();
-        const tempPassword = generateRandomPassword();
-        const userCredential = await createUserWithEmailAndPassword(auth, form.email, tempPassword);
-        const totalLeaves = (Number(form.carryOverLeaves) || 0) + (Number(form.annualLeaves) || 0);
-        const newEmp = { ...form, uid: userCredential.user.uid, usedLeaves: 0, remainingLeaves: totalLeaves, totalLeaves };
-  const empRef = await addDoc(collection(db, 'employees'), newEmp);
-        setEmployees((prev: Employee[]) => [...prev, { id: empRef.id, ...newEmp }]);
-        setMessage(`등록 완료! 임시비밀번호: ${tempPassword}`);
-        setTimeout(() => setMessage(''), 8000);
-        setForm(initialForm);
-        setEditId(null);
-      } catch (err: any) {
-        console.error('직원 등록 실패:', err);
-        let errorMsg = '등록 실패: 다시 시도해 주세요.';
-        if (err.code === 'auth/email-already-in-use') {
-          errorMsg = '등록 실패: 이미 사용 중인 이메일입니다.';
-        } else if (err.code === 'auth/invalid-password') {
-          errorMsg = '등록 실패: 비밀번호 규칙을 확인하세요.';
-        } else if (err.message) {
-          errorMsg = `등록 실패: ${err.message}`;
-        }
-        setMessage(errorMsg);
-        setTimeout(() => setMessage(''), 8000);
-      }
-    }
-  };
-
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto flex flex-col gap-8">
       {/* 메시지 출력 */}
       {message && (
         <div className="mb-4 text-center text-lg font-bold text-blue-700 bg-blue-100 rounded-xl py-2 shadow">{message}</div>
       )}
-      {/* 직원 등록/수정 폼 */}
-      <form onSubmit={handleAddOrEdit} className="mb-8 bg-white rounded-xl shadow-lg p-6 border border-gray-200 flex flex-col gap-4">
-        {/* 등록/수정 타이틀 */}
-        <div className="mb-4 text-2xl font-extrabold text-blue-700 text-center drop-shadow">
-          {editId ? '직원 정보 수정' : '직원 등록'}
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex flex-col gap-1">
-            <label className="font-bold text-gray-700">사원번호</label>
-            <input name="empNo" value={form.empNo} onChange={handleFormChange} className="border p-2 rounded" />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="font-bold text-gray-700">이름</label>
-            <input name="name" value={form.name} onChange={handleFormChange} className="border p-2 rounded" />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="font-bold text-gray-700">주민번호</label>
-            <input name="regNo" value={form.regNo} onChange={handleFormChange} className="border p-2 rounded" />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="font-bold text-gray-700">성별</label>
-            <input name="gender" value={form.gender} onChange={handleFormChange} className="border p-2 rounded" />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="font-bold text-gray-700">직급</label>
-            <input name="position" value={form.position} onChange={handleFormChange} className="border p-2 rounded" />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="font-bold text-gray-700">부서</label>
-            <input name="department" value={form.department} onChange={handleFormChange} className="border p-2 rounded" />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="font-bold text-gray-700">직종</label>
-            <input name="jobType" value={form.jobType} onChange={handleFormChange} className="border p-2 rounded" />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="font-bold text-gray-700">입사일</label>
-            <input name="joinDate" value={form.joinDate} onChange={handleFormChange} className="border p-2 rounded" />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="font-bold text-gray-700">이메일</label>
-            <input name="email" value={form.email} onChange={handleFormChange} className="border p-2 rounded" />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="font-bold text-gray-700">전화번호</label>
-            <input name="phone" value={form.phone} onChange={handleFormChange} className="border p-2 rounded" />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="font-bold text-gray-700">이월연차</label>
-            <input name="carryOverLeaves" type="number" value={form.carryOverLeaves} onChange={handleFormChange} className="border p-2 rounded" />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="font-bold text-gray-700">연차</label>
-            <input name="annualLeaves" type="number" value={form.annualLeaves} onChange={handleFormChange} className="border p-2 rounded" />
-          </div>
-        </div>
-        <div className="flex gap-4 mt-4">
-          <button type="submit" className="px-6 py-2 bg-blue-600 text-white rounded-full font-bold shadow hover:bg-blue-700 transition">{editId ? '수정' : '등록'}</button>
-          <button type="button" className="px-6 py-2 bg-gray-300 text-gray-700 rounded-full font-bold shadow hover:bg-gray-400 transition" onClick={()=>{setForm(initialForm); setEditId(null);}}>초기화</button>
-        </div>
-      </form>
       {/* 연차 기록 초기화 버튼 및 결과 */}
       <div className="flex gap-4 items-center mb-4">
         <button className="px-6 py-2 bg-green-600 text-white rounded-full font-bold shadow hover:bg-green-700 transition" onClick={()=>setShowResetModal(true)}>연차 기록 전체 초기화</button>
@@ -299,7 +128,6 @@ const AdminEmployeeManage: React.FC = () => {
               <th className="border px-2 py-2 whitespace-nowrap">전화번호</th>
               <th className="border px-2 py-2 whitespace-nowrap">권한</th>
               <th className="border px-2 py-2 whitespace-nowrap">UID</th>
-              <th className="border px-2 py-2 whitespace-nowrap">수정</th>
               <th className="border px-2 py-2 whitespace-nowrap">삭제</th>
             </tr>
           </thead>
@@ -323,11 +151,6 @@ const AdminEmployeeManage: React.FC = () => {
                 <td className="border px-2 py-2 whitespace-nowrap">{emp.phone || '-'}</td>
                 <td className="border px-2 py-2 whitespace-nowrap">{emp.role === 'admin' ? '관리자' : '일반직원'}</td>
                 <td className="border px-2 py-2 whitespace-nowrap">{emp.uid || '-'}</td>
-                <td className="border px-2 py-2 whitespace-nowrap text-center">
-                  <button onClick={() => handleEditClick(emp)} className="px-2 py-1 md:px-3 md:py-1 bg-yellow-300 text-yellow-900 rounded-lg font-bold shadow hover:bg-yellow-400 transition text-xs md:text-sm flex items-center gap-1">
-                    <span>✏️</span> 수정
-                  </button>
-                </td>
                 <td className="border px-2 py-2 whitespace-nowrap text-center">
                   <button onClick={() => handleDelete(emp.id!)} className="px-2 py-1 md:px-3 md:py-1 bg-red-500 text-white rounded-lg font-bold shadow hover:bg-red-600 transition text-xs md:text-sm flex items-center gap-1">
                     <span>🗑️</span> 삭제

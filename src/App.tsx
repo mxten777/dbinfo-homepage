@@ -1,4 +1,5 @@
 import AdminDeputyApproval from './pages/admin/AdminDeputyApproval';
+import ErrorBoundary from './components/ErrorBoundary';
 /// <reference types="react" />
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './AuthContext';
@@ -18,6 +19,7 @@ import AdminLeaveRequest from './pages/admin/AdminLeaveRequest';
 import AdminLeaveApproval from './pages/admin/AdminLeaveApproval';
 import AdminProjectStatus from './pages/admin/AdminProjectStatus';
 import AdminEmployeeManage from './pages/AdminEmployeeManage'; // export default로 오류 해결
+import AdminEmployeeRegister from './pages/admin/AdminEmployeeRegister';
 import AdminCompanyNewsManage from './pages/admin/AdminCompanyNewsManage';
 import AdminEmployeeLeaveEdit from './pages/admin/AdminEmployeeLeaveEdit';
 import EmployeeLogin from './pages/EmployeeLogin';
@@ -51,41 +53,44 @@ function AppRoutesWithHeader() {
       {!isAdminRoute && <BrandBar />}
       {!isAdminRoute && !hideHeader && <Header />}
       <main className="min-h-[60vh]">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/projects" element={
-            <ProtectedRoute>
-              <Projects />
-            </ProtectedRoute>
-          } />
-          <Route path="/project-list" element={<ProjectList />} />
-          <Route path="/leaves" element={
-            <ProtectedRoute>
-              <Leaves />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/*" element={<AdminProtectedRoute />}>
-            <Route element={<AdminLayout />}>
-              <Route path="home" element={<AdminHome />} />
-              <Route path="leaves" element={<AdminLeaves />} />
-              <Route path="leave-request" element={<AdminLeaveRequest />} />
-              <Route path="leave-approval" element={<AdminLeaveApproval />} />
-              <Route path="project-status" element={<AdminProjectStatus />} />
-              <Route path="employee-manage" element={<AdminEmployeeManage />} />
-              <Route path="company-news-manage" element={<AdminCompanyNewsManage />} />
-              <Route path="employee-upload" element={<DummyPage title="직원정보 업로드" />} />
-              <Route path="leave-reset" element={<DummyPage title="연차기록 초기화" />} />
-              <Route path="employee-leave-edit" element={<AdminEmployeeLeaveEdit />} />
-              <Route path="deputy-request" element={<AdminDeputyRequest />} />
-              <Route path="deputy-approval" element={<AdminDeputyApproval />} />
+        <ErrorBoundary>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/projects" element={
+              <ProtectedRoute>
+                <Projects />
+              </ProtectedRoute>
+            } />
+            <Route path="/project-list" element={<ProjectList />} />
+            <Route path="/leaves" element={
+              <ProtectedRoute>
+                <Leaves />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/*" element={<AdminProtectedRoute />}>
+              <Route element={<AdminLayout />}>
+                <Route path="home" element={<AdminHome />} />
+                <Route path="leaves" element={<AdminLeaves />} />
+                <Route path="leave-request" element={<AdminLeaveRequest />} />
+                <Route path="leave-approval" element={<AdminLeaveApproval />} />
+                <Route path="project-status" element={<AdminProjectStatus />} />
+                <Route path="employee-manage" element={<AdminEmployeeManage />} />
+                <Route path="register" element={<AdminEmployeeRegister />} />
+                <Route path="company-news-manage" element={<AdminCompanyNewsManage />} />
+                <Route path="employee-upload" element={<DummyPage title="직원정보 업로드" />} />
+                <Route path="leave-reset" element={<DummyPage title="연차기록 초기화" />} />
+                <Route path="employee-leave-edit" element={<AdminEmployeeLeaveEdit />} />
+                <Route path="deputy-request" element={<AdminDeputyRequest />} />
+                <Route path="deputy-approval" element={<AdminDeputyApproval />} />
+              </Route>
             </Route>
-          </Route>
-          <Route path="/employee-login" element={<EmployeeLogin />} />
-          <Route path="/employee-home" element={<EmployeeHome />} />
-          <Route path="/admin-employee-edit" element={<AdminEmployeeEdit />} />
-          <Route path="/admin-employee-manage" element={<AdminEmployeeManage />} />
-        </Routes>
+            <Route path="/employee-login" element={<EmployeeLogin />} />
+            <Route path="/employee-home" element={<EmployeeHome />} />
+            <Route path="/admin-employee-edit" element={<AdminEmployeeEdit />} />
+            <Route path="/admin-employee-manage" element={<AdminEmployeeManage />} />
+          </Routes>
+        </ErrorBoundary>
       </main>
       {!isAdminRoute && <Footer />}
     </>

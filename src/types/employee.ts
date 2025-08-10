@@ -17,22 +17,23 @@
   isAdminRequest?: boolean;
   }
   export interface Employee {
-    id: string;
-    uid?: string; // Firebase 
-    empNo: string;
-    name: string;
-    email: string;
-    carryOverLeaves?: number;
-    annualLeaves?: number;
-    totalLeaves: number;
-    usedLeaves: number;
-    remainingLeaves: number;
-    regNo?: string;
-    gender?: string;
-    position?: string;
-    department?: string;
-    jobType?: string;
-    joinDate?: string;
-    phone?: string;
-    role?: string;
+  id: string;
+  uid?: string; // Firebase 
+  empNo: string;
+  name: string;
+  email: string;
+  carryOverLeaves?: number;
+  annualLeaves?: number;
+  totalLeaves: number;
+  usedLeaves: number;
+  remainingLeaves: number;
+  regNo?: string;
+  gender?: string;
+  position?: string;
+  department?: string;
+  jobType?: string;
+  joinDate?: string;
+  phone?: string;
+  role?: string;
+  password?: string; // 패스워드(직원 등록/수정용)
   }

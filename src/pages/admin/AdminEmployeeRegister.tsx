@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, addDoc, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { db } from '../../firebaseConfig';
 import { Link } from 'react-router-dom';
 
 const initialForm = {
-  empNo: '', name: '', regNo: '', gender: '', position: '', department: '', jobType: '', joinDate: '', email: '', phone: '', role: 'employee'
+  empNo: '', name: '', regNo: '', gender: '', position: '', department: '', jobType: '', joinDate: '', email: '', phone: '', role: 'employee', password: ''
 };
 
 const AdminEmployeeRegister: React.FC = () => {
@@ -78,29 +79,35 @@ const AdminEmployeeRegister: React.FC = () => {
     e.preventDefault();
     console.log('등록 버튼 클릭됨');
     try {
-      // 임시 uid 생성 (UUID)
-      const tempUid = 'tmp_' + Math.random().toString(36).substring(2, 12) + Date.now();
+      // Firebase Auth 계정 생성
+      const auth = getAuth();
+      const userCredential = await createUserWithEmailAndPassword(auth, form.email, form.password);
+      const uid = userCredential.user.uid;
       const employeeData = {
         ...form,
-        uid: tempUid,
-        employeeId: tempUid,
+        uid,
+        employeeId: uid,
         usedLeaves: 0,
         remainingLeaves: 15,
         totalLeaves: 15,
-        role: form.role // 역할 저장
+        role: form.role,
+        password: form.password // Firestore에도 저장(실제 운영시 해시 권장)
       };
-      console.log('직원 등록 시도:', employeeData);
-      const docRef = await addDoc(collection(db, 'employees'), employeeData);
-      console.log('직원 등록 성공:', docRef.id);
-      setMessage('직원정보가 등록되었습니다. (임시 uid: ' + tempUid + ')');
+  await addDoc(collection(db, 'employees'), employeeData);
+      setMessage('직원정보가 등록되었습니다. (임시 패스워드: ' + form.password + ')');
       setForm(initialForm);
-      // 등록 후 /admin/home으로 이동
       setTimeout(() => {
         navigate('/admin/home');
       }, 1000);
-    } catch (err) {
+    } catch (err: any) {
       console.error('직원 등록 에러:', err);
-      setMessage('직원 등록 중 오류가 발생했습니다.');
+      let msg = '직원 등록 중 오류가 발생했습니다.';
+      if (err.code === 'auth/email-already-in-use') {
+        msg = '이미 사용 중인 이메일입니다.';
+      } else if (err.code === 'auth/invalid-password') {
+        msg = '비밀번호 규칙을 확인하세요.';
+      }
+      setMessage(msg);
     }
   };
 
@@ -118,6 +125,7 @@ const AdminEmployeeRegister: React.FC = () => {
         </button>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 mb-8">
   <input name="empNo" value={form.empNo} onChange={handleChange} placeholder="사번" aria-label="사번" className="border rounded px-3 py-2" required />
+  <input name="password" type="password" value={form.password} onChange={handleChange} placeholder="패스워드" aria-label="패스워드" className="border rounded px-3 py-2" required />
   <input name="name" value={form.name} onChange={handleChange} placeholder="이름" aria-label="이름" className="border rounded px-3 py-2" required />
   <input name="regNo" value={form.regNo} onChange={handleChange} placeholder="주민번호" aria-label="주민번호" className="border rounded px-3 py-2" />
   <input name="gender" value={form.gender} onChange={handleChange} placeholder="성별" aria-label="성별" className="border rounded px-3 py-2" />

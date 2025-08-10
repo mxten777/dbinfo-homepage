@@ -48,6 +48,7 @@ const AdminEmployeeEdit: React.FC = () => {
         annualLeaves: Number(editForm.annualLeaves),
         usedLeaves: Number(editForm.usedLeaves),
         remainingLeaves: Number(editForm.remainingLeaves),
+        ...(editForm.password ? { password: editForm.password } : {}) // 패스워드 변경 시만 반영
       });
       setMessage('수정 완료');
       setEditId(null);
@@ -82,6 +83,7 @@ const AdminEmployeeEdit: React.FC = () => {
           {employees.map(emp => (
             <tr key={emp.id}>
               <td className="border px-2 py-1">{editId === emp.id ? <input name="empNo" value={editForm.empNo || ''} onChange={handleFormChange} className="w-24 border rounded px-1" /> : emp.empNo}</td>
+              <td className="border px-2 py-1">{editId === emp.id ? <input name="password" type="password" value={editForm.password || ''} onChange={handleFormChange} className="w-24 border rounded px-1" placeholder="패스워드(변경시 입력)" /> : '***'}</td>
               <td className="border px-2 py-1">{editId === emp.id ? <input name="name" value={editForm.name || ''} onChange={handleFormChange} className="w-24 border rounded px-1" /> : emp.name}</td>
               <td className="border px-2 py-1">{editId === emp.id ? <input name="email" value={editForm.email || ''} onChange={handleFormChange} className="w-32 border rounded px-1" /> : emp.email || '-'}</td>
               <td className="border px-2 py-1">{editId === emp.id ? <input name="carryOverLeaves" type="number" value={editForm.carryOverLeaves || ''} onChange={handleFormChange} className="w-16 border rounded px-1" /> : emp.carryOverLeaves}</td>
