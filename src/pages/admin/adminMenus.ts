@@ -56,4 +56,4 @@ export const adminMenus: AdminMenu[] = [
     },
   // ...기존 승인/반려처리 메뉴 제거
   ];
-import { FaUserPlus, FaUserEdit, FaProjectDiagram, FaCalendarCheck, FaUserShield, FaCheckCircle } from 'react-icons/fa';
+import { FaUserPlus, FaUserEdit, FaProjectDiagram, FaCalendarCheck, FaUserShield } from 'react-icons/fa';

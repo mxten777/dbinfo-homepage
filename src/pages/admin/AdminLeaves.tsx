@@ -97,8 +97,8 @@ const AdminLeaves: React.FC = () => {
                 <td className="px-6 py-4 text-center space-x-2">
                   {leave.status === '신청' && (
                     <>
-                      <button className="px-4 py-1 rounded bg-green-100 text-green-700 font-bold hover:bg-green-200 transition" onClick={() => updateLeaveStatus(leave.id, '승인')}>승인</button>
-                      <button className="px-4 py-1 rounded bg-red-100 text-red-700 font-bold hover:bg-red-200 transition" onClick={() => updateLeaveStatus(leave.id, '반려')}>반려</button>
+                      <button className="px-4 py-1 rounded bg-green-100 text-green-700 font-bold hover:bg-green-200 transition" onClick={() => leave.id && updateLeaveStatus(leave.id, '승인')}>승인</button>
+<button className="px-4 py-1 rounded bg-red-100 text-red-700 font-bold hover:bg-red-200 transition" onClick={() => leave.id && updateLeaveStatus(leave.id, '반려')}>반려</button>
                     </>
                   )}
                   {leave.status !== '신청' && (
