@@ -1,331 +1,115 @@
 ﻿import React, { useState, useEffect } from 'react';
-import { collection, getDocs, doc, updateDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, doc, updateDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
-import { useAuth } from '../../AuthContext';
-import type { Leave, Employee } from '../../types/employee';
+import type { Leave } from '../../types/employee';
 
 const AdminLeaves: React.FC = () => {
-  const { user } = useAuth();
   const [leaves, setLeaves] = useState<Leave[]>([]);
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  console.log('AdminLeaves 컴포넌트 렌더링 시작, user:', user);
-
-  // iframe 문제 해결을 위한 임시 코드
   useEffect(() => {
-    const removeIframes = () => {
-      const iframes = document.querySelectorAll('iframe');
-      iframes.forEach(iframe => {
-        if (iframe.style.height === '1px') {
-          iframe.style.height = '100vh';
-          iframe.style.minHeight = '800px';
-          console.log('iframe 높이 수정됨:', iframe);
-        }
+    // leaves와 deputyRequests 통합
+    const unsubLeaves = onSnapshot(collection(db, 'leaves'), snap => {
+      const leaveData = snap.docs.map(doc => ({ ...doc.data(), id: doc.id, isAdminRequest: false }) as Leave);
+      setLeaves(prev => {
+        // deputyRequests는 아래에서 합침
+        const onlyDeputy = prev.filter(l => l.isAdminRequest);
+        return [...leaveData, ...onlyDeputy];
       });
+    });
+    const unsubDeputy = onSnapshot(collection(db, 'deputyRequests'), snap => {
+      const deputyData = snap.docs.map(doc => ({ ...doc.data(), id: doc.id, isAdminRequest: true }) as Leave);
+      setLeaves(prev => {
+        // leaves는 위에서 합침
+        const onlyLeaves = prev.filter(l => !l.isAdminRequest);
+        return [...onlyLeaves, ...deputyData];
+      });
+    });
+    return () => {
+      unsubLeaves();
+      unsubDeputy();
     };
-    
-    removeIframes();
-    const interval = setInterval(removeIframes, 1000);
-    return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    // 직원 데이터 가져오기
-    const fetchEmployees = async () => {
-      try {
-        const employeesSnapshot = await getDocs(collection(db, 'employees'));
-        const employeesData = employeesSnapshot.docs
-          .map(doc => ({
-            id: doc.id,
-            ...doc.data()
-          })) as Employee[];
-        
-        console.log('🔵 전체 직원 데이터:', employeesData);
-        setEmployees(employeesData);
-      } catch (error) {
-        console.error('직원 데이터 가져오기 실패:', error);
-      }
-    };
-
-    // 연차 신청 실시간 가져오기
-    const unsubscribe = onSnapshot(
-      query(collection(db, 'leaves'), orderBy('createdAt', 'desc')),
-      (snapshot) => {
-        const leavesData = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          // 날짜 객체를 문자열로 변환
-          startDate: doc.data().startDate?.toDate?.() || doc.data().startDate,
-          endDate: doc.data().endDate?.toDate?.() || doc.data().endDate,
-          createdAt: doc.data().createdAt?.toDate?.() || doc.data().createdAt
-        })) as Leave[];
-        
-        console.log('🟠 전체 연차 데이터:', leavesData);
-        setLeaves(leavesData);
-        setLoading(false);
-      },
-      (error) => {
-        console.error('연차 데이터 실시간 가져오기 실패:', error);
-        setLoading(false);
-      }
-    );
-
-    fetchEmployees();
-    return () => unsubscribe();
-  }, []);
-
-  const getEmployeeInfo = (leave: Leave) => {
-    console.log(`🔍 매칭 시도 - Leave ID: ${leave.id}, employeeId: ${leave.employeeId}`);
-    
-    // 1차: Firestore 문서 ID로 매칭 (관리자 대리신청)
-    let employee = employees.find(emp => emp.id === leave.employeeId);
-    if (employee) {
-      console.log('✅ 1차 매칭 성공 (Firestore ID):', employee.name);
-      return { name: employee.name, email: employee.email };
-    }
-    
-    // 2차: Firebase Auth UID로 매칭 (직원 직접 신청)
-    if (leave.employeeId) {
-      employee = employees.find(emp => emp.uid === leave.employeeId);
-      if (employee) {
-        console.log('✅ 2차 매칭 성공 (Firebase UID):', employee.name);
-        return { name: employee.name, email: employee.email };
-      }
-    }
-    
-    // 3차: 이메일로 매칭
-    if (leave.employeeId?.includes('@')) {
-      employee = employees.find(emp => emp.email === leave.employeeId);
-      if (employee) {
-        console.log('✅ 3차 매칭 성공 (이메일):', employee.name);
-        return { name: employee.name, email: employee.email };
-      }
-    }
-    
-    // 4차: 이름으로 매칭 (fallback)
-    if (leave.employeeName || leave.name) {
-      employee = employees.find(emp => 
-        emp.name === leave.employeeName || emp.name === leave.name
-      );
-      if (employee) {
-        console.log('✅ 4차 매칭 성공 (이름):', employee.name);
-        return { name: employee.name, email: employee.email };
-      }
-    }
-    
-    // 매칭 실패 시 fallback
-    console.log('❌ 매칭 실패 - fallback 사용');
-    return {
-      name: leave.employeeName || leave.name || '알 수 없음',
-      email: leave.employeeId?.includes('@') ? leave.employeeId : ''
-    };
-  };
-
-  const updateLeaveStatus = async (leaveId: string, status: '승인' | '반려' | '신청') => {
+  // 승인/반려 처리
+  const updateLeaveStatus = async (id: string, status: '승인' | '반려') => {
     try {
-      await updateDoc(doc(db, 'leaves', leaveId), {
-        status,
-        updatedAt: new Date()
-      });
-    } catch (error) {
-      console.error('연차 상태 업데이트 실패:', error);
-      alert('상태 업데이트에 실패했습니다.');
-    }
-  };
-
-  const formatDate = (date: any): string => {
-    if (!date) return '날짜 없음';
-    
-    // Date 객체인 경우
-    if (date instanceof Date) {
-      return date.toLocaleDateString('ko-KR');
-    }
-    
-    // 문자열인 경우
-    if (typeof date === 'string') {
-      const parsedDate = new Date(date);
-      if (!isNaN(parsedDate.getTime())) {
-        return parsedDate.toLocaleDateString('ko-KR');
+      // leaves와 deputyRequests 모두에서 id를 찾음
+      const leaveRef = doc(db, 'leaves', id);
+      const deputyRef = doc(db, 'deputyRequests', id);
+      // 우선 deputyRequests에서 시도, 없으면 leaves에서 시도
+      try {
+        await updateDoc(deputyRef, { status });
+      } catch {
+        await updateDoc(leaveRef, { status });
       }
-      return date;
+    } catch (err) {
+      alert('상태 변경 실패: ' + err);
     }
-    
-    // Firestore Timestamp인 경우
-    if (date.toDate && typeof date.toDate === 'function') {
-      return date.toDate().toLocaleDateString('ko-KR');
-    }
-    
-    return '날짜 형식 오류';
   };
 
-  const calculateLeaveDays = (startDate: any, endDate: any): number => {
-    if (!startDate || !endDate) return 0;
-    
-    let start: Date;
-    let end: Date;
-    
-    // Date 객체로 변환
-    if (startDate instanceof Date) {
-      start = startDate;
-    } else if (typeof startDate === 'string') {
-      start = new Date(startDate);
-    } else if (startDate.toDate) {
-      start = startDate.toDate();
-    } else {
-      return 0;
-    }
-    
-    if (endDate instanceof Date) {
-      end = endDate;
-    } else if (typeof endDate === 'string') {
-      end = new Date(endDate);
-    } else if (endDate.toDate) {
-      end = endDate.toDate();
-    } else {
-      return 0;
-    }
-    
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) return 0;
-    
-    const diffTime = Math.abs(end.getTime() - start.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-    return diffDays;
-  };
-
-  if (loading) {
-    console.log('AdminLeaves: 로딩 중...');
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-lg">로딩 중...</div>
-      </div>
-    );
-  }
-
-  console.log('AdminLeaves: 메인 컴포넌트 렌더링, leaves 개수:', leaves.length);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">전체 연차 현황</h1>
-        <p className="text-gray-600">모든 직원의 연차 신청 현황을 확인할 수 있습니다.</p>
+    <div className="p-8 max-w-5xl mx-auto">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h2 className="text-3xl font-bold mb-1">전체 연차 현황</h2>
+          <p className="text-gray-500">모든 직원의 연차 신청 현황을 확인할 수 있습니다.</p>
+        </div>
+        <button
+          className="px-5 py-2 rounded-lg bg-sky-600 text-white font-bold shadow hover:bg-sky-700 transition"
+          onClick={() => window.location.href = '/admin'}
+        >관리자 홈</button>
       </div>
-      
-      {leaves.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-8 text-center">
-          <p className="text-gray-500 text-lg">연차 신청이 없습니다.</p>
-        </div>
-      ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-2 py-3 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    직원 정보
-                  </th>
-                  <th className="px-2 py-3 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    유형
-                  </th>
-                  <th className="px-2 py-3 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    연차 기간
-                  </th>
-                  <th className="px-2 py-3 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    일수
-                  </th>
-                  <th className="px-2 py-3 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    사유
-                  </th>
-                  <th className="px-2 py-3 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    상태
-                  </th>
-                  <th className="px-2 py-3 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    작업
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {leaves.map((leave) => (
-                  <tr key={leave.id} className="hover:bg-gray-50">
-                    <td className="border px-2 py-2 sm:px-4 sm:py-2 whitespace-nowrap">
-                      {(() => {
-                        const employeeInfo = getEmployeeInfo(leave);
-                        return (
-                          <div>
-                            <div className="font-semibold text-gray-900">
-                              {employeeInfo.name}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {employeeInfo.email}
-                            </div>
-                          </div>
-                        );
-                      })()}
-                    </td>
-                    <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        leave.type === '연차' ? 'bg-blue-100 text-blue-800' :
-                        leave.type === '반차' ? 'bg-green-100 text-green-800' :
-                        leave.type === '병가' ? 'bg-red-100 text-red-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {leave.type || '연차'}
-                      </span>
-                    </td>
-                    <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900">
-                      <div>
-                        <div>{formatDate(leave.startDate)}</div>
-                        <div className="text-gray-500">~ {formatDate(leave.endDate)}</div>
-                      </div>
-                    </td>
-                    <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-sm text-gray-900">
-                      {calculateLeaveDays(leave.startDate, leave.endDate)}일
-                    </td>
-                    <td className="px-2 py-2 sm:px-6 sm:py-4 text-sm text-gray-900 max-w-xs truncate">
-                      {leave.reason || '사유 없음'}
-                    </td>
-                    <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        leave.status === '승인'
-                          ? 'bg-green-100 text-green-800' 
-                          : leave.status === '반려'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {leave.status === '승인' ? '승인' : 
-                         leave.status === '반려' ? '반려' : '신청'}
-                      </span>
-                    </td>
-                    <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                      {leave.status === '신청' && (
-                        <>
-                          <button
-                            onClick={() => leave.id && updateLeaveStatus(leave.id, '승인')}
-                            className="text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 px-3 py-1 rounded transition-colors"
-                            disabled={!leave.id}
-                          >
-                            승인
-                          </button>
-                          <button
-                            onClick={() => leave.id && updateLeaveStatus(leave.id, '반려')}
-                            className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded transition-colors"
-                            disabled={!leave.id}
-                          >
-                            반려
-                          </button>
-                        </>
-                      )}
-                      {leave.status !== '신청' && (
-                        <span className="text-gray-400">처리 완료</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+      <div className="overflow-x-auto bg-white rounded-xl shadow-lg">
+        <table className="min-w-full text-sm">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="px-6 py-4 text-left">직원 정보</th>
+              <th className="px-6 py-4 text-center">유형</th>
+              <th className="px-6 py-4 text-center">연차 기간</th>
+              <th className="px-6 py-4 text-center">일수</th>
+              <th className="px-6 py-4 text-center">사유</th>
+              <th className="px-6 py-4 text-center">상태</th>
+              <th className="px-6 py-4 text-center">구분</th>
+              <th className="px-6 py-4 text-center">작업</th>
+            </tr>
+          </thead>
+          <tbody>
+            {leaves.map((leave) => (
+              <tr key={leave.id} className="border-b hover:bg-gray-50 transition">
+                <td className="px-6 py-4">
+                  <div className="font-semibold text-base">{leave.employeeName ? leave.employeeName : (leave.name ? leave.name : '이름없음')}</div>
+                </td>
+                <td className="px-6 py-4 text-center">
+                  <span className="inline-block px-2 py-1 rounded bg-blue-100 text-blue-700 font-bold">{leave.type}</span>
+                </td>
+                <td className="px-6 py-4 text-center">
+                  {(leave.startDate || '') + ' ~ ' + (leave.endDate || '')}
+                </td>
+                <td className="px-6 py-4 text-center">{leave.days}일</td>
+                <td className="px-6 py-4 text-center">{leave.reason || '-'}</td>
+                <td className="px-6 py-4 text-center">
+                  <span className={`inline-block px-4 py-1 rounded-full font-semibold ${leave.status === '신청' ? 'bg-yellow-100 text-yellow-700' : leave.status === '승인' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{leave.status}</span>
+                </td>
+                <td className="px-6 py-4 text-center">
+                  <span className={`inline-block px-3 py-1 rounded ${leave.isAdminRequest ? 'bg-purple-100 text-purple-700' : 'bg-sky-100 text-sky-700'}`}>{leave.isAdminRequest ? '대리신청' : '직원신청'}</span>
+                </td>
+                <td className="px-6 py-4 text-center space-x-2">
+                  {leave.status === '신청' && (
+                    <>
+                      <button className="px-4 py-1 rounded bg-green-100 text-green-700 font-bold hover:bg-green-200 transition" onClick={() => updateLeaveStatus(leave.id, '승인')}>승인</button>
+                      <button className="px-4 py-1 rounded bg-red-100 text-red-700 font-bold hover:bg-red-200 transition" onClick={() => updateLeaveStatus(leave.id, '반려')}>반려</button>
+                    </>
+                  )}
+                  {leave.status !== '신청' && (
+                    <span className="text-gray-400">처리 완료</span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

@@ -34,11 +34,11 @@ export const adminMenus: AdminMenu[] = [
       to: '/admin/project-status',
     },
     {
-      label: '연차관리',
-      desc: '직원 연차 신청 및 승인/반려 관리',
+      label: '직원연차 관리',
+      desc: '직원 및 대리신청 승인/반려 관리',
       color: 'bg-cyan-400',
       icon: FaCalendarCheck,
-      to: '/admin/leaves',
+      to: '/admin/deputy-approval',
     },
     {
       label: '사내소식관리',
@@ -54,12 +54,6 @@ export const adminMenus: AdminMenu[] = [
       icon: FaUserShield,
       to: '/admin/deputy-request',
     },
-    {
-      label: '승인/반려처리',
-      desc: '직원 및 대리신청 승인/반려 처리',
-      color: 'bg-teal-400',
-      icon: FaCheckCircle,
-      to: '/admin/deputy-approval',
-    }
+  // ...기존 승인/반려처리 메뉴 제거
   ];
 import { FaUserPlus, FaUserEdit, FaProjectDiagram, FaCalendarCheck, FaUserShield, FaCheckCircle } from 'react-icons/fa';

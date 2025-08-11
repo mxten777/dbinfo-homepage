@@ -6,7 +6,9 @@ import { db } from '../../firebaseConfig';
 import { Link } from 'react-router-dom';
 
 const initialForm = {
-  empNo: '', name: '', regNo: '', gender: '', position: '', department: '', jobType: '', joinDate: '', email: '', phone: '', role: 'employee', password: ''
+  empNo: '', name: '', regNo: '', gender: '', position: '', department: '', jobType: '', joinDate: '', email: '', phone: '', role: 'employee', password: '',
+  carryOverLeaves: 0, // 이월연차
+  annualLeaves: 0     // 발생연차
 };
 
 const AdminEmployeeRegister: React.FC = () => {
@@ -72,7 +74,13 @@ const AdminEmployeeRegister: React.FC = () => {
     };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    // 숫자 필드는 자동 변환
+    if (name === 'carryOverLeaves' || name === 'annualLeaves') {
+      setForm({ ...form, [name]: Number(value) });
+    } else {
+      setForm({ ...form, [name]: value });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -83,17 +91,18 @@ const AdminEmployeeRegister: React.FC = () => {
       const auth = getAuth();
       const userCredential = await createUserWithEmailAndPassword(auth, form.email, form.password);
       const uid = userCredential.user.uid;
+      const totalLeaves = Number(form.carryOverLeaves) + Number(form.annualLeaves);
       const employeeData = {
         ...form,
         uid,
         employeeId: uid,
         usedLeaves: 0,
-        remainingLeaves: 15,
-        totalLeaves: 15,
+        remainingLeaves: totalLeaves,
+        totalLeaves,
         role: form.role,
         password: form.password // Firestore에도 저장(실제 운영시 해시 권장)
       };
-  await addDoc(collection(db, 'employees'), employeeData);
+      await addDoc(collection(db, 'employees'), employeeData);
       setMessage('직원정보가 등록되었습니다. (임시 패스워드: ' + form.password + ')');
       setForm(initialForm);
       setTimeout(() => {
@@ -114,7 +123,10 @@ const AdminEmployeeRegister: React.FC = () => {
 
   return (
     <div className="max-w-xl mx-auto p-8 bg-white rounded-xl shadow mt-8">
-      <h2 className="text-3xl font-extrabold text-blue-700 mb-6">직원 등록</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-3xl font-extrabold text-blue-700">직원 등록</h2>
+        <Link to="/admin/home" className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded font-semibold shadow">관리자 홈</Link>
+      </div>
         <button
           type="button"
           className="bg-green-500 text-white rounded px-4 py-2 font-bold mb-4"
@@ -124,6 +136,17 @@ const AdminEmployeeRegister: React.FC = () => {
           employeeId 일괄 uid로 변환
         </button>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 mb-8">
+        <div className="flex gap-2">
+          <div className="flex flex-col w-1/2">
+            <label htmlFor="carryOverLeaves" className="text-sm font-semibold text-gray-700 mb-1">이월연차</label>
+            <input name="carryOverLeaves" id="carryOverLeaves" type="number" value={form.carryOverLeaves} onChange={handleChange} placeholder="이월연차" aria-label="이월연차" className="border rounded px-3 py-2 bg-gray-100 text-gray-600 placeholder-gray-400" min={0} />
+          </div>
+          <div className="flex flex-col w-1/2">
+            <label htmlFor="annualLeaves" className="text-sm font-semibold text-gray-700 mb-1">발생연차</label>
+            <input name="annualLeaves" id="annualLeaves" type="number" value={form.annualLeaves} onChange={handleChange} placeholder="발생연차" aria-label="발생연차" className="border rounded px-3 py-2 bg-gray-100 text-gray-600 placeholder-gray-400" min={0} />
+          </div>
+        </div>
+        <div className="font-bold text-blue-700">총연차: {Number(form.carryOverLeaves) + Number(form.annualLeaves)}일</div>
   <input name="empNo" value={form.empNo} onChange={handleChange} placeholder="사번" aria-label="사번" className="border rounded px-3 py-2" required />
   <input name="password" type="password" value={form.password} onChange={handleChange} placeholder="패스워드" aria-label="패스워드" className="border rounded px-3 py-2" required />
   <input name="name" value={form.name} onChange={handleChange} placeholder="이름" aria-label="이름" className="border rounded px-3 py-2" required />

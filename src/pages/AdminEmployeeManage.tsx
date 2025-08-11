@@ -5,12 +5,18 @@ import { db } from '../firebaseConfig';
 import type { Employee, Leave } from '../types/employee';
 
 const AdminEmployeeManage: React.FC = () => {
+  // 진입 확인용 테스트
+  console.log('AdminEmployeeManage 컴포넌트 진입!');
+  // 화면 최상단에 테스트용 텍스트와 버튼 추가
+  const testAlert = () => alert('직원관리 화면입니다! (경로 진입 확인)');
   const [message, setMessage] = useState('');
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [showResetModal, setShowResetModal] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
   const [resetResult, setResetResult] = useState<string>('');
+  const [editEmp, setEditEmp] = useState<Employee | null>(null); // 수정 모달용
+  const [editLoading, setEditLoading] = useState(false);
   const navigate = useNavigate();
 
   // 직원 삭제 핸들러
@@ -19,6 +25,30 @@ const AdminEmployeeManage: React.FC = () => {
     await deleteDoc(doc(db, 'employees', String(id)));
     setEmployees((prev: Employee[]) => prev.filter(e => e.id !== id));
     setMessage('삭제되었습니다.');
+    setTimeout(() => setMessage(''), 2000);
+  };
+
+  // 직원 정보 수정 핸들러
+  const handleEditSave = async () => {
+    if (!editEmp) return;
+    setEditLoading(true);
+    try {
+      await updateDoc(doc(db, 'employees', String(editEmp.id)), {
+        name: editEmp.name,
+        department: editEmp.department,
+        position: editEmp.position,
+        phone: editEmp.phone,
+        email: editEmp.email,
+        jobType: editEmp.jobType,
+        // 필요한 필드 추가
+      });
+      setEmployees((prev) => prev.map(e => e.id === editEmp.id ? { ...e, ...editEmp } : e));
+      setMessage('수정 완료!');
+      setEditEmp(null);
+    } catch {
+      setMessage('수정 실패: 다시 시도해 주세요.');
+    }
+    setEditLoading(false);
     setTimeout(() => setMessage(''), 2000);
   };
 
@@ -84,6 +114,37 @@ const AdminEmployeeManage: React.FC = () => {
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto flex flex-col gap-8">
+      {/* 직원 정보 수정 모달 */}
+      {editEmp && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-2xl p-8 border-2 border-blue-300 flex flex-col gap-4 min-w-[320px] max-w-[90vw]">
+            <div className="text-xl font-bold text-blue-700 mb-2">직원 정보 수정</div>
+            <label className="font-semibold">이름</label>
+            <input className="border rounded px-3 py-2 mb-2" value={editEmp.name ?? ''} onChange={e => setEditEmp({ ...editEmp, name: e.target.value })} />
+            <label className="font-semibold">부서</label>
+            <input className="border rounded px-3 py-2 mb-2" value={editEmp.department ?? ''} onChange={e => setEditEmp({ ...editEmp, department: e.target.value })} />
+            <label className="font-semibold">직급</label>
+            <input className="border rounded px-3 py-2 mb-2" value={editEmp.position ?? ''} onChange={e => setEditEmp({ ...editEmp, position: e.target.value })} />
+            <label className="font-semibold">전화번호</label>
+            <input className="border rounded px-3 py-2 mb-2" value={editEmp.phone ?? ''} onChange={e => setEditEmp({ ...editEmp, phone: e.target.value })} />
+            <label className="font-semibold">이메일</label>
+            <input className="border rounded px-3 py-2 mb-2" value={editEmp.email ?? ''} onChange={e => setEditEmp({ ...editEmp, email: e.target.value })} />
+            <label className="font-semibold">직종</label>
+            <input className="border rounded px-3 py-2 mb-2" value={editEmp.jobType ?? ''} onChange={e => setEditEmp({ ...editEmp, jobType: e.target.value })} />
+            <div className="flex gap-4 mt-4">
+              <button className="px-6 py-2 bg-blue-600 text-white rounded-full font-bold shadow hover:bg-blue-700 transition" onClick={handleEditSave} disabled={editLoading}>{editLoading ? '저장 중...' : '저장'}</button>
+              <button className="px-6 py-2 bg-gray-300 text-gray-700 rounded-full font-bold shadow hover:bg-gray-400 transition" onClick={() => setEditEmp(null)}>취소</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* 진입 확인용 테스트 영역 */}
+      <div className="mb-4 p-4 bg-yellow-100 border-2 border-yellow-400 rounded-xl flex flex-col items-center">
+        <h2 className="text-xl font-bold text-yellow-700 mb-2">직원관리 화면 진입 확인용</h2>
+        <button className="px-4 py-2 bg-yellow-400 text-white rounded-full font-bold shadow hover:bg-yellow-500 transition" onClick={testAlert}>
+          테스트 버튼 (클릭 시 alert)
+        </button>
+      </div>
       {/* 메시지 출력 */}
       {message && (
         <div className="mb-4 text-center text-lg font-bold text-blue-700 bg-blue-100 rounded-xl py-2 shadow">{message}</div>
@@ -151,9 +212,12 @@ const AdminEmployeeManage: React.FC = () => {
                 <td className="border px-2 py-2 whitespace-nowrap">{emp.phone || '-'}</td>
                 <td className="border px-2 py-2 whitespace-nowrap">{emp.role === 'admin' ? '관리자' : '일반직원'}</td>
                 <td className="border px-2 py-2 whitespace-nowrap">{emp.uid || '-'}</td>
-                <td className="border px-2 py-2 whitespace-nowrap text-center">
+                <td className="border px-2 py-2 whitespace-nowrap text-center flex gap-1">
                   <button onClick={() => handleDelete(emp.id!)} className="px-2 py-1 md:px-3 md:py-1 bg-red-500 text-white rounded-lg font-bold shadow hover:bg-red-600 transition text-xs md:text-sm flex items-center gap-1">
                     <span>🗑️</span> 삭제
+                  </button>
+                  <button onClick={() => setEditEmp(emp)} className="px-2 py-1 md:px-3 md:py-1 bg-blue-500 text-white rounded-lg font-bold shadow hover:bg-blue-600 transition text-xs md:text-sm flex items-center gap-1">
+                    <span>✏️</span> 수정
                   </button>
                 </td>
               </tr>

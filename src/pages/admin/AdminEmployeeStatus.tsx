@@ -4,6 +4,7 @@ import { db } from '../../firebaseConfig';
 import { useNavigate } from 'react-router-dom';
 
 const AdminEmployeeStatus: React.FC = () => {
+  console.log('패치 확인: 직원관리 화면');
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -39,8 +40,8 @@ const AdminEmployeeStatus: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-12 px-4 flex justify-center items-start">
       <div className="w-full max-w-4xl mx-auto">
-        <div className="bg-white rounded-3xl shadow-2xl p-10 border border-gray-100 flex flex-col gap-10">
-          <h1 className="text-3xl font-extrabold text-blue-700 text-center mb-2 tracking-tight">직원현황 조회</h1>
+        <div className="bg-blue-50 rounded-3xl shadow-2xl p-10 border border-blue-100 flex flex-col gap-10">
+          <h1 className="text-3xl font-extrabold text-blue-700 text-center mb-2 tracking-tight">직원 연차정보 현황(수정/삭제)</h1>
           {loading ? (
             <div className="text-center py-8 text-gray-400">직원 데이터 로딩 중...</div>
           ) : error ? (
@@ -55,6 +56,11 @@ const AdminEmployeeStatus: React.FC = () => {
                   <th className="border px-4 py-2">이메일</th>
                   <th className="border px-4 py-2">사번</th>
                   <th className="border px-4 py-2">직급</th>
+                  <th className="border px-4 py-2">이월연차</th>
+                  <th className="border px-4 py-2">발생연차</th>
+                  <th className="border px-4 py-2">총연차</th>
+                  <th className="border px-4 py-2">사용연차</th>
+                  <th className="border px-4 py-2">잔여연차</th>
                   <th className="border px-4 py-2">수정</th>
                   <th className="border px-4 py-2 rounded-tr-lg">삭제</th>
                 </tr>
@@ -66,6 +72,11 @@ const AdminEmployeeStatus: React.FC = () => {
                     <td className="border px-4 py-2 whitespace-nowrap">{emp.email}</td>
                     <td className="border px-4 py-2 whitespace-nowrap">{emp.empNo}</td>
                     <td className="border px-4 py-2 whitespace-nowrap">{emp.position}</td>
+                    <td className="border px-4 py-2 whitespace-nowrap">{emp.carryOverLeaves ?? 0}</td>
+                    <td className="border px-4 py-2 whitespace-nowrap">{emp.annualLeaves ?? 0}</td>
+                    <td className="border px-4 py-2 whitespace-nowrap">{emp.totalLeaves ?? 0}</td>
+                    <td className="border px-4 py-2 whitespace-nowrap">{emp.usedLeaves ?? 0}</td>
+                    <td className="border px-4 py-2 whitespace-nowrap">{emp.remainingLeaves ?? (emp.totalLeaves ?? 0) - (emp.usedLeaves ?? 0)}</td>
                     <td className="border px-4 py-2 whitespace-nowrap">
                       <button className="px-4 py-1 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition" onClick={() => handleEdit(emp.id)}>수정</button>
                     </td>

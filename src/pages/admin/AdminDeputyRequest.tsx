@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 // import { Link } from 'react-router-dom'; // 미사용 import 제거
 import { db } from '../../firebaseConfig';
-import { collection, getDocs, addDoc, updateDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, doc, setDoc } from 'firebase/firestore';
 
 interface Employee {
   id: string;
@@ -129,10 +129,16 @@ const AdminDeputyRequest: React.FC = () => {
       endDate,
       days,
       reason,
-      status: '신청',
+      status: '신청' as '신청' | '승인' | '반려',
+      isAdminRequest: true,
+      createdAt: Date.now(),
     };
     const docRef = await addDoc(collection(db, 'deputyRequests'), newRequest);
-  setRequests((prev: DeputyRequest[]) => [...prev, { id: docRef.id, ...newRequest, status: '신청' as '신청' | '승인' | '반려' }]);
+    await setDoc(doc(db, 'deputyRequests', docRef.id), {
+      ...newRequest,
+      id: docRef.id,
+    });
+    setRequests((prev: DeputyRequest[]) => [...prev, { id: docRef.id, ...newRequest }]);
     setEmployeeId('');
     setType('연차');
     setStartDate('');
@@ -187,64 +193,48 @@ const AdminDeputyRequest: React.FC = () => {
   };
 
   return (
-    <div className="bg-white min-h-screen flex flex-col items-center pt-6">
-      <h2 className="text-xl font-bold mb-4 text-left w-full max-w-xl">관리자 대리 신청</h2>
-      <form onSubmit={handleSubmit} className="w-full max-w-xl border rounded p-4 mb-6 bg-white">
-        <div className="mb-4">
-          <label className="block mb-1 font-semibold">직원 선택</label>
-          <select value={employeeId} onChange={e => setEmployeeId(e.target.value)} className="w-full border rounded px-3 py-2" required>
+    <div className="min-h-screen flex flex-col items-center pt-8 bg-gradient-to-br from-blue-50 to-cyan-100">
+      <div className="bg-white rounded-2xl shadow-2xl p-8 border-2 border-blue-200 flex flex-col gap-6 w-full max-w-2xl">
+        <div className="mb-2 text-3xl font-extrabold text-blue-700 text-center drop-shadow">관리자 대리 신청</div>
+        <div className="mb-4 text-gray-600 text-center text-base">관리자 부재 시 업무를 위임할 대리자를 지정할 수 있습니다.</div>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 items-center w-full">
+          <select value={employeeId} onChange={e => setEmployeeId(e.target.value)} className="border rounded px-4 py-2 w-full max-w-xs" required>
             <option value="">직원 선택</option>
             {employees.map(emp => (
               <option key={emp.id} value={emp.id}>{emp.name} ({emp.email})</option>
             ))}
           </select>
-        </div>
-        <div className="mb-4">
-          <label className="block mb-1 font-semibold">유형</label>
-          <select value={type} onChange={e => setType(e.target.value as any)} className="w-full border rounded px-3 py-2">
-            <option value="연차">연차</option>
-            <option value="반차">반차</option>
-            <option value="병가">병가</option>
-            <option value="기타">기타</option>
-          </select>
-        </div>
-        <div className="mb-4 flex gap-4">
-          <div className="flex-1">
-            <label className="block mb-1 font-semibold">시작일</label>
-            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full border rounded px-3 py-2" required />
+          <div className="flex flex-wrap gap-2 w-full max-w-xs justify-between">
+            <select value={type} onChange={e => setType(e.target.value as any)} className="border rounded px-2 py-2 w-24">
+              <option value="연차">연차</option>
+              <option value="반차">반차</option>
+              <option value="병가">병가</option>
+              <option value="기타">기타</option>
+            </select>
+            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="border rounded px-2 py-2 w-32" required />
+            <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="border rounded px-2 py-2 w-32" required />
+            <input type="number" value={days} readOnly className="border rounded px-2 py-2 w-16 bg-gray-100" />
           </div>
-          <div className="flex-1">
-            <label className="block mb-1 font-semibold">종료일</label>
-            <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full border rounded px-3 py-2" required />
-          </div>
-          <div className="flex-1">
-            <label className="block mb-1 font-semibold">일수</label>
-            <input type="number" value={days} readOnly className="w-full border rounded px-3 py-2 bg-gray-100" />
-          </div>
-        </div>
-        <div className="mb-4">
-          <label className="block mb-1 font-semibold">사유</label>
-          <textarea value={reason} onChange={e => setReason(e.target.value)} className="w-full border rounded px-3 py-2" required />
-        </div>
-  <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded font-bold w-full">신청하기</button>
-      </form>
-
-      <div className="w-full max-w-xl border rounded p-4 bg-white">
-        <h3 className="text-base font-bold mb-3">신청 목록</h3>
+          <textarea value={reason} onChange={e => setReason(e.target.value)} className="border rounded px-4 py-2 w-full max-w-xs" rows={3} placeholder="위임 사유" required />
+          <button type="submit" className="px-6 py-2 bg-blue-600 text-white rounded-full font-bold shadow hover:bg-blue-700 transition w-full max-w-xs">대리 신청</button>
+        </form>
+      </div>
+      <div className="w-full max-w-2xl border rounded-2xl p-8 bg-white mt-8 shadow-xl">
+        <h3 className="text-xl font-bold mb-4 text-blue-700">신청 목록</h3>
         {requests.length === 0 ? (
           <p className="text-gray-400">신청 내역이 없습니다.</p>
         ) : (
           <ul>
             {requests.map(r => (
-              <li key={r.id} className="mb-3 border-b pb-2">
-                <div className="font-semibold text-sm">{r.employeeName}</div>
+              <li key={r.id} className="mb-4 border-b pb-3">
+                <div className="font-semibold text-lg text-blue-700">{r.employeeName}</div>
                 <div className="text-xs text-gray-600 mb-1">유형: {r.type} | 기간: {r.startDate} ~ {r.endDate} | 일수: {r.days}</div>
                 <div className="text-xs text-gray-600 mb-1">사유: {r.reason}</div>
                 <div className="text-xs mb-2">상태: <span className={r.status === '승인' ? 'text-green-600' : r.status === '반려' ? 'text-red-600' : 'text-gray-600'}>{r.status}</span></div>
                 {r.status === '신청' && (
                   <div className="flex gap-2">
-                    <button onClick={() => handleApprove(r.id)} className="bg-green-600 text-white px-2 py-1 rounded text-xs">승인</button>
-                    <button onClick={() => handleReject(r.id)} className="bg-red-600 text-white px-2 py-1 rounded text-xs">반려</button>
+                    <button onClick={() => handleApprove(r.id)} className="bg-green-600 text-white px-3 py-1 rounded text-xs font-bold shadow hover:bg-green-700 transition">승인</button>
+                    <button onClick={() => handleReject(r.id)} className="bg-red-600 text-white px-3 py-1 rounded text-xs font-bold shadow hover:bg-red-700 transition">반려</button>
                   </div>
                 )}
               </li>
@@ -252,6 +242,9 @@ const AdminDeputyRequest: React.FC = () => {
           </ul>
         )}
       </div>
+      <button className="px-8 py-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 font-bold text-lg transition-all duration-150 flex items-center gap-2 mt-8" onClick={() => window.location.href = '/admin/home'}>
+        <span>🏠</span> 관리자 홈으로
+      </button>
     </div>
   );
 };

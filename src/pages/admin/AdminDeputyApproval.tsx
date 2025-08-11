@@ -80,7 +80,7 @@ const AdminDeputyApproval: React.FC = () => {
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto flex flex-col gap-8">
       <div className="mb-8 bg-white rounded-xl shadow-lg p-6 border border-blue-200 flex flex-col gap-4">
-        <div className="mb-4 text-2xl font-extrabold text-blue-700 text-center drop-shadow">연차신청 현황</div>
+        <div className="mb-4 text-2xl font-extrabold text-blue-700 text-center drop-shadow">직원연차 관리</div>
         {loading ? <div>로딩 중...</div> : (
           <table className="min-w-full text-sm text-left rounded-xl overflow-hidden">
             <thead>
@@ -174,7 +174,7 @@ const AdminDeputyApproval: React.FC = () => {
                       )}
                     </td>
                     <td className="border px-3 py-2 whitespace-nowrap text-gray-500 text-xs">
-                      {l.createdAt ? l.createdAt.split('T')[0] : l.endDate}
+                      {typeof l.createdAt === 'string' ? l.createdAt.split('T')[0] : l.endDate}
                     </td>
                   </tr>
                 ))}
@@ -182,6 +182,9 @@ const AdminDeputyApproval: React.FC = () => {
             </table>
           </div>
         </div>
+        <button className="px-8 py-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 font-bold text-lg transition-all duration-150 flex items-center gap-2 mt-8" onClick={() => window.location.href = '/admin/home'}>
+          <span>🏠</span> 관리자 홈으로
+        </button>
       </div>
     </div>
   );
