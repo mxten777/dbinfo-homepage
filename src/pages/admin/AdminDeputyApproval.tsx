@@ -46,7 +46,7 @@ const AdminDeputyApproval: React.FC = () => {
       await updateDoc(doc(db, 'leaves', id), { status: '승인' });
     }
     // 직원 usedLeaves/remainingLeaves 업데이트
-  const emp = employees.find(e => e.id === targetLeave.employeeId || e.name === targetLeave.employeeName);
+    const emp = employees.find(e => e.id === targetLeave.employeeId || e.name === targetLeave.employeeName);
     if (emp) {
       const used = Number(emp.usedLeaves ?? 0) + Number(targetLeave.days ?? 0);
       const remain = Number(emp.remainingLeaves ?? 0) - Number(targetLeave.days ?? 0);
@@ -57,6 +57,7 @@ const AdminDeputyApproval: React.FC = () => {
     }
     setLeaves(prev => prev.map(l => l.id === id ? { ...l, status: '승인' } : l));
   };
+
   const handleReject = async (id: string, isAdminRequest?: boolean) => {
     let targetLeave = leaves.find(l => l.id === id);
     if (!targetLeave) return;
@@ -78,59 +79,94 @@ const AdminDeputyApproval: React.FC = () => {
   });
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto flex flex-col gap-8">
-      <div className="mb-8 bg-white rounded-xl shadow-lg p-6 border border-blue-200 flex flex-col gap-4">
-        <div className="mb-4 text-2xl font-extrabold text-blue-700 text-center drop-shadow">직원연차 관리</div>
-        {loading ? <div>로딩 중...</div> : (
-          <table className="min-w-full text-sm text-left rounded-xl overflow-hidden">
-            <thead>
-              <tr className="bg-blue-50">
-                <th className="border px-3 py-2 font-bold text-blue-700">직원명</th>
-                <th className="border px-3 py-2 font-bold text-blue-700">유형</th>
-                <th className="border px-3 py-2 font-bold text-blue-700">기간</th>
-                <th className="border px-3 py-2 font-bold text-blue-700">일수</th>
-                <th className="border px-3 py-2 font-bold text-blue-700">사유</th>
-                <th className="border px-3 py-2 font-bold text-blue-700">상태</th>
-                <th className="border px-3 py-2 font-bold text-blue-700">구분</th>
-                <th className="border px-3 py-2 font-bold text-blue-700">작업</th>
-              </tr>
-            </thead>
-            <tbody>
+    <div className="p-2 md:p-8 max-w-7xl mx-auto flex flex-col gap-8">
+      <div className="mb-8 bg-white rounded-xl shadow-lg p-4 md:p-6 border border-blue-200 flex flex-col gap-4">
+        <div className="mb-4 text-xl md:text-2xl font-extrabold text-blue-700 text-center drop-shadow">직원연차 관리</div>
+        {loading ? (
+          <div>로딩 중...</div>
+        ) : (
+          <>
+            {/* 모바일 카드 UI */}
+            <div className="block md:hidden">
               {pending.length === 0 ? (
-                <tr><td colSpan={8} className="text-center py-8 text-gray-400 text-lg font-bold">신청된 연차가 없습니다.</td></tr>
-              ) : pending.map(l => (
-                <tr key={l.id} className="bg-white hover:bg-blue-50 transition">
-                  <td className="border px-3 py-2 whitespace-nowrap">{l.employeeName}</td>
-                  <td className="border px-3 py-2 whitespace-nowrap">{l.type}</td>
-                  <td className="border px-3 py-2 whitespace-nowrap">{l.startDate} ~ {l.endDate}</td>
-                  <td className="border px-3 py-2 whitespace-nowrap text-blue-700 font-bold">{l.days}</td>
-                  <td className="border px-3 py-2 whitespace-nowrap">{l.reason}</td>
-                  <td className="border px-3 py-2 whitespace-nowrap">
-                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                      l.status === '신청' ? 'bg-yellow-100 text-yellow-700' :
-                      l.status === '승인' ? 'bg-green-100 text-green-700' :
-                      'bg-red-100 text-red-700'
-                    }`}>{l.status}</span>
-                  </td>
-                  <td className="border px-3 py-2 whitespace-nowrap">
-                    {l.isAdminRequest ? (
-                      <span className="px-2 py-1 bg-gray-200 text-gray-700 rounded-full text-xs">대리신청</span>
-                    ) : (
-                      <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">직원신청</span>
-                    )}
-                  </td>
-                  <td className="border px-3 py-2 whitespace-nowrap text-center">
-                    <button onClick={() => handleApprove(l.id, l.isAdminRequest)} className="px-4 py-2 bg-green-500 text-white rounded-lg font-bold shadow hover:bg-green-600 transition mx-1">
-                      <span>✔️</span> 승인
-                    </button>
-                    <button onClick={() => handleReject(l.id, l.isAdminRequest)} className="px-4 py-2 bg-red-500 text-white rounded-lg font-bold shadow hover:bg-red-600 transition mx-1">
-                      <span>❌</span> 반려
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                <div className="text-center py-8 text-gray-400 text-lg font-bold">신청된 연차가 없습니다.</div>
+              ) : (
+                <>
+                  {pending.map((l: Leave) => (
+                    <div key={l.id} className="mb-4 p-4 rounded-xl shadow border">
+                      <div className="font-bold text-blue-700">{l.employeeName}</div>
+                      <div className="text-xs text-gray-600">{l.type} | {l.startDate} ~ {l.endDate} | {l.days}일</div>
+                      <div className="text-xs text-gray-600 mb-1">사유: {l.reason}</div>
+                      <div className="flex gap-2 mt-2">
+                        <button onClick={() => handleApprove(l.id, l.isAdminRequest)} className="flex-1 px-2 py-2 bg-green-500 text-white rounded font-bold shadow hover:bg-green-600 transition">
+                          ✔️ 승인
+                        </button>
+                        <button onClick={() => handleReject(l.id, l.isAdminRequest)} className="flex-1 px-2 py-2 bg-red-500 text-white rounded font-bold shadow hover:bg-red-600 transition">
+                          ❌ 반려
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+            {/* 기존 테이블 UI (PC) */}
+            <div className="hidden md:block">
+              <table className="min-w-full text-sm text-left rounded-xl overflow-hidden">
+                <thead>
+                  <tr className="bg-blue-50">
+                    <th className="border px-3 py-2 font-bold text-blue-700">직원명</th>
+                    <th className="border px-3 py-2 font-bold text-blue-700">유형</th>
+                    <th className="border px-3 py-2 font-bold text-blue-700">기간</th>
+                    <th className="border px-3 py-2 font-bold text-blue-700">일수</th>
+                    <th className="border px-3 py-2 font-bold text-blue-700">사유</th>
+                    <th className="border px-3 py-2 font-bold text-blue-700">상태</th>
+                    <th className="border px-3 py-2 font-bold text-blue-700">구분</th>
+                    <th className="border px-3 py-2 font-bold text-blue-700">작업</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pending.length === 0 ? (
+                    <tr><td colSpan={8} className="text-center py-8 text-gray-400 text-lg font-bold">신청된 연차가 없습니다.</td></tr>
+                  ) : (
+                    <>
+                      {pending.map((l: Leave) => (
+                        <tr key={l.id} className="bg-white hover:bg-blue-50 transition">
+                          <td className="border px-3 py-2 whitespace-nowrap">{l.employeeName}</td>
+                          <td className="border px-3 py-2 whitespace-nowrap">{l.type}</td>
+                          <td className="border px-3 py-2 whitespace-nowrap">{l.startDate} ~ {l.endDate}</td>
+                          <td className="border px-3 py-2 whitespace-nowrap text-blue-700 font-bold">{l.days}</td>
+                          <td className="border px-3 py-2 whitespace-nowrap">{l.reason}</td>
+                          <td className="border px-3 py-2 whitespace-nowrap">
+                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                              l.status === '신청' ? 'bg-yellow-100 text-yellow-700' :
+                              l.status === '승인' ? 'bg-green-100 text-green-700' :
+                              'bg-red-100 text-red-700'
+                            }`}>{l.status}</span>
+                          </td>
+                          <td className="border px-3 py-2 whitespace-nowrap">
+                            {l.isAdminRequest ? (
+                              <span className="px-2 py-1 bg-gray-200 text-gray-700 rounded-full text-xs">대리신청</span>
+                            ) : (
+                              <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">직원신청</span>
+                            )}
+                          </td>
+                          <td className="border px-3 py-2 whitespace-nowrap text-center">
+                            <button onClick={() => handleApprove(l.id, l.isAdminRequest)} className="px-4 py-2 bg-green-500 text-white rounded-lg font-bold shadow hover:bg-green-600 transition mx-1">
+                              <span>✔️</span> 승인
+                            </button>
+                            <button onClick={() => handleReject(l.id, l.isAdminRequest)} className="px-4 py-2 bg-red-500 text-white rounded-lg font-bold shadow hover:bg-red-600 transition mx-1">
+                              <span>❌</span> 반려
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
       <div className="flex flex-col items-center mt-10">
@@ -153,31 +189,33 @@ const AdminDeputyApproval: React.FC = () => {
               <tbody>
                 {processed.length === 0 ? (
                   <tr><td colSpan={8} className="text-center py-8 text-gray-400 text-lg font-bold">처리된 연차가 없습니다.</td></tr>
-                ) : processed.map(l => (
-                  <tr key={l.id} className="bg-white hover:bg-blue-50 transition">
-                    <td className="border px-3 py-2 whitespace-nowrap">{l.employeeName}</td>
-                    <td className="border px-3 py-2 whitespace-nowrap">{l.type}</td>
-                    <td className="border px-3 py-2 whitespace-nowrap">{l.startDate} ~ {l.endDate}</td>
-                    <td className="border px-3 py-2 whitespace-nowrap text-blue-700 font-bold">{l.days}</td>
-                    <td className="border px-3 py-2 whitespace-nowrap">{l.reason}</td>
-                    <td className="border px-3 py-2 whitespace-nowrap">
-                      <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                        l.status === '승인' ? 'bg-green-100 text-green-700' :
-                        'bg-red-100 text-red-700'
-                      }`}>{l.status}</span>
-                    </td>
-                    <td className="border px-3 py-2 whitespace-nowrap">
-                      {l.isAdminRequest ? (
-                        <span className="px-2 py-1 bg-gray-200 text-gray-700 rounded-full text-xs">대리신청</span>
-                      ) : (
-                        <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">직원신청</span>
-                      )}
-                    </td>
-                    <td className="border px-3 py-2 whitespace-nowrap text-gray-500 text-xs">
-                      {typeof l.createdAt === 'string' ? l.createdAt.split('T')[0] : l.endDate}
-                    </td>
-                  </tr>
-                ))}
+                ) : (
+                  processed.map((l: Leave) => (
+                    <tr key={l.id} className="bg-white hover:bg-blue-50 transition">
+                      <td className="border px-3 py-2 whitespace-nowrap">{l.employeeName}</td>
+                      <td className="border px-3 py-2 whitespace-nowrap">{l.type}</td>
+                      <td className="border px-3 py-2 whitespace-nowrap">{l.startDate} ~ {l.endDate}</td>
+                      <td className="border px-3 py-2 whitespace-nowrap text-blue-700 font-bold">{l.days}</td>
+                      <td className="border px-3 py-2 whitespace-nowrap">{l.reason}</td>
+                      <td className="border px-3 py-2 whitespace-nowrap">
+                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                          l.status === '승인' ? 'bg-green-100 text-green-700' :
+                          'bg-red-100 text-red-700'
+                        }`}>{l.status}</span>
+                      </td>
+                      <td className="border px-3 py-2 whitespace-nowrap">
+                        {l.isAdminRequest ? (
+                          <span className="px-2 py-1 bg-gray-200 text-gray-700 rounded-full text-xs">대리신청</span>
+                        ) : (
+                          <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">직원신청</span>
+                        )}
+                      </td>
+                      <td className="border px-3 py-2 whitespace-nowrap text-gray-500 text-xs">
+                        {typeof l.createdAt === 'string' ? l.createdAt.split('T')[0] : l.endDate}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -188,7 +226,6 @@ const AdminDeputyApproval: React.FC = () => {
       </div>
     </div>
   );
-}
+};
 
 export default AdminDeputyApproval;
-// ...existing code...
