@@ -1,6 +1,13 @@
 import BusinessSection from '../components/BusinessSection';
+import { useState } from 'react';
 
 export default function Home() {
+  const [showAIDetail, setShowAIDetail] = useState(false);
+  const [showSIDetail, setShowSIDetail] = useState(false);
+  const [showECommerceDetail, setShowECommerceDetail] = useState(false);
+  const [showChatBotDetail, setShowChatBotDetail] = useState(false);
+  const [showDemandDetail, setShowDemandDetail] = useState(false);
+  const [showRDDetail, setShowRDDetail] = useState(false);
   return (
     <main className="min-h-[80vh] bg-gradient-to-br from-blue-50 to-cyan-50 p-0 md:p-8">
       {/* Hero Section */}
@@ -457,50 +464,619 @@ export default function Home() {
           image="/images/sphere-01.jpg"
           title="AI DataSet Platform"
           subtitle="(인공지능 데이터셋 플랫폼)"
-          description1="인공지능을 학습시키기 위해서 필수적으로 갖춰져야 할 것은 많은 양질의 데이터입니다. 데이터가 많을수록 학습의 정확도가 높아지고 예측을 더 정확하게 할 수 있습니다."
-          description2={'기계 학습에 필요한 데이터를 수집하기 위해서는 엄청난 시간과 노력이 필요하지만 디비인포의 "인공지능 데이터셋 플랫폼"을 이용하여 손쉽게 모바일이나 웹상에서 공유되고 기록되는 정보와 데이터를 수집, 정제, 가공하여 양질의 데이터를 확보할 수 있습니다.'}
+          description1="AIDataHub – AI 개발을 위한 고품질 데이터셋을 쉽고 빠르게 확보하는 통합 데이터 플랫폼"
+          description2={
+            <>
+              목적: 인공지능 학습에 필요한 데이터를 수집 → 정제 → 검증 → 제공까지 한 번에<br/>
+              형태: 웹 기반 + API 기반 데이터 마켓플레이스<br/>
+              대상 고객: AI 개발사, 데이터 과학자, 연구기관, 공공기관, 스타트업<br/>
+              <button
+                className="mt-4 px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-full font-bold shadow hover:scale-105 transition"
+                onClick={() => setShowAIDetail(true)}
+              >
+                상세소개 보기
+              </button>
+            </>
+          }
           features={["데이터 수집/정제/가공 자동화", "대용량 데이터 라벨링 및 품질 관리", "AI 학습 데이터셋 제공"]}
         />
+
+      {/* AIDataHub 상세 모달 */}
+      {showAIDetail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-blue-100 via-cyan-100 to-indigo-100 bg-opacity-80 animate-fadein">
+          <div className="bg-white max-w-2xl w-full rounded-3xl shadow-2xl p-8 relative overflow-y-auto max-h-[90vh] border-2 border-blue-100">
+            <h2 className="text-2xl font-extrabold text-blue-700 mb-4 text-center drop-shadow">AIDataHub 서비스 소개</h2>
+            <div className="space-y-5 text-gray-900 text-[16px] leading-normal font-['Inter','Pretendard','Segoe UI',sans-serif]">
+              <div className="space-y-2">
+                <strong className="text-blue-700 text-lg md:text-xl">1. 서비스 개요</strong><br/>
+                AIDataHub – AI 개발을 위한 고품질 데이터셋을 쉽고 빠르게 확보하는 통합 데이터 플랫폼<br/>
+                목적: 인공지능 학습에 필요한 데이터를 수집 → 정제 → 검증 → 제공까지 한 번에<br/>
+                형태: 웹 기반 + API 기반 데이터 마켓플레이스<br/>
+                대상 고객: AI 개발사, 데이터 과학자, 연구기관, 공공기관, 스타트업
+              </div>
+              <div className="space-y-2">
+                <strong className="text-blue-700 text-lg md:text-xl">2. 시장 배경</strong><br/>
+                AI 학습 데이터는 양과 질이 모두 중요<br/>
+                생성형 AI·자율주행·헬스케어 분야 데이터 수요 폭발<br/>
+                데이터셋 제작·수집 비용이 높아 공유·거래 플랫폼 수요 증가<br/>
+                글로벌 AI 데이터 시장<br/>
+                → 2024년 25억 달러 규모, 연평균 성장률 25%+
+              </div>
+              <div className="space-y-2">
+                <strong className="text-blue-700 text-lg md:text-xl">3. 주요 서비스</strong><br/>
+                데이터셋 검색·다운로드<br/>
+                이미지·텍스트·음성·영상·센서 데이터 지원<br/>
+                데이터 품질검증<br/>
+                자동 라벨 정확도 평가, 이상치 탐지, 중복 제거<br/>
+                마켓플레이스<br/>
+                데이터셋 거래, 판매자 수익 분배<br/>
+                AI 라벨링·전처리<br/>
+                AI 보조 라벨링, 데이터 증강, 포맷 변환<br/>
+                API 실시간 제공<br/>
+                데이터 스트리밍, 샘플링 API, SDK 연동<br/>
+                커뮤니티 협업<br/>
+                리뷰, 오픈데이터 공유, 공동 구축 프로젝트
+              </div>
+              <div className="space-y-2">
+                <strong className="text-blue-700 text-lg md:text-xl">4. 서비스 흐름</strong><br/>
+                데이터 제공자<br/>
+                → 데이터 업로드 & 메타데이터 등록<br/>
+                → 자동 품질검증 & 라벨 보정<br/>
+                → 마켓플레이스 등록<br/>
+                데이터 구매자<br/>
+                → 검색 & 미리보기<br/>
+                → 결제 후 다운로드 / API 호출<br/>
+                → 데이터셋 프로젝트에 즉시 활용
+              </div>
+              <div className="space-y-2">
+                <strong className="text-blue-700 text-lg md:text-xl">5. 경쟁력 포인트</strong><br/>
+                원스톱 플랫폼: 수집부터 API 제공까지 한 번에<br/>
+                품질 보장: AI 기반 품질검증 시스템<br/>
+                다양한 과금 모델: 구독·건별·API 호출<br/>
+                개방형 생태계: 누구나 데이터 공급자·소비자 가능<br/>
+                빠른 확장성: 클라우드 기반 대용량 데이터 처리
+              </div>
+              <div className="space-y-2">
+                <strong className="text-blue-700 text-lg md:text-xl">6. 수익 모델</strong><br/>
+                구독형 요금제 (월/연 단위)<br/>
+                건별 데이터 구매<br/>
+                API 호출 과금<br/>
+                전처리·라벨링 맞춤 서비스<br/>
+                판매 수수료 (10~20%)
+              </div>
+              <div className="space-y-2">
+                <strong className="text-blue-700 text-lg md:text-xl">7. 향후 확장 계획</strong><br/>
+                B2G: 공공데이터와 연동해 공공기관 서비스 확장<br/>
+                B2B: 기업 맞춤 데이터셋 제작·제공<br/>
+                Global: 다국어 지원, 해외 결제, 각국 데이터 규제 준수<br/>
+                AI 통합: 자체 모델 학습용 파이프라인 서비스 제공
+              </div>
+              <div className="space-y-2">
+                <strong className="text-blue-700 text-lg md:text-xl">8. 비전</strong><br/>
+                “데이터가 필요한 모든 사람과 데이터를 가진 모든 사람을 연결한다.”<br/>
+                AIDataHub는 AI 혁신의 기초가 되는 데이터를 빠르고, 안전하고, 공정하게 제공합니다.
+              </div>
+            </div>
+            <div className="flex justify-center mt-8">
+              <button
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-full font-bold shadow-lg hover:scale-105 hover:from-blue-700 hover:to-cyan-700 transition-all duration-300 text-lg"
+                onClick={() => setShowAIDetail(false)}
+                aria-label="뒤로가기"
+              >
+                <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                뒤로가기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
         <BusinessSection
           image="/images/sphere-02.jpg"
           title="SI (System Integration)"
           subtitle="시스템 통합 구축"
           description1="정보화 전략수립, 업무분석/설계/구축, 시스템 운영까지 전 과정 통합 서비스. 금융·공공기관 등 다양한 SI사업 수행 경험."
-          description2="정보화 전략, 아키텍처 설계, DB설계, 솔루션 제공, H/W, S/W, 네트워크 등 기반기술 통합 및 통합 유지보수까지 제공합니다."
+          description2={
+            <>
+              정보화 전략, 아키텍처 설계, DB설계, 솔루션 제공, H/W, S/W, 네트워크 등 기반기술 통합 및 통합 유지보수까지 제공합니다.<br/>
+              <button
+                className="mt-4 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full font-bold shadow hover:scale-105 transition"
+                onClick={() => setShowSIDetail(true)}
+              >
+                상세소개 보기
+              </button>
+            </>
+          }
           features={["정보화 전략/아키텍처 설계", "DB설계, 솔루션 제공", "H/W, S/W, 네트워크 통합", "통합 유지보수"]}
         />
-        <BusinessSection
-          image="/images/sphere-03.jpg"
-          title="E-Commerce"
-          subtitle="전자상거래 시스템 구축"
-          description1="클라우드·빅데이터·AI 기반 전자상거래 시스템 구축, 머신러닝 기반 고객 행동 예측, 맞춤형 마케팅 및 데이터 분석."
-          description2="AI 기반 고객 행동 예측, 데이터 분석/마케팅 자동화, 지도/비지도 학습 모델, 스마트 커머스 시스템 등 다양한 서비스를 제공합니다."
-          features={["AI 기반 고객 행동 예측", "데이터 분석/마케팅 자동화", "지도/비지도 학습 모델", "스마트 커머스 시스템"]}
-        />
-        <BusinessSection
-          image="/images/sphere-04.jpg"
-          title="AI ChatBot Service"
-          subtitle="인공지능 챗봇 서비스"
-          description1="금융, 공공, 유통 등 다양한 산업에 적용 가능한 AI 챗봇. 시나리오 기반 대화, 상품 안내/구매/결제 등 시스템 연계."
-          description2="시나리오 기반 챗봇, 다양한 메시지 응답, 기간계 시스템 연계, AI 기반 고객지원 등 다양한 기능을 제공합니다."
-          features={["시나리오 기반 챗봇", "다양한 메시지 응답", "기간계 시스템 연계", "AI 기반 고객지원"]}
-        />
-        <BusinessSection
-          image="/images/sphere-05.jpg"
-          title="AI Demand Prediction"
-          subtitle="인공지능 수요예측"
-          description1="머신러닝 기반 수요예측 솔루션. 이벤트, 계절, 트렌드 등 다양한 변수 반영, 재고/자원 최적화."
-          description2="수요예측 모델 개발, 재고/자원 최적화, 매출 증대 지원, 다양한 변수 반영 등 실질적 비즈니스 효과를 제공합니다."
-          features={["수요예측 모델 개발", "재고/자원 최적화", "매출 증대 지원", "다양한 변수 반영"]}
-        />
-        <BusinessSection
-          image="/images/sphere-06.jpg"
-          title="AI Model 연구개발"
-          subtitle="기술연구소"
-          description1="자율주행, 드론, 로봇 등 미래 AI 기술 연구. 머신러닝/딥러닝 모델 개발 및 적용."
-          description2="미래 AI 기술 연구, 머신러닝/딥러닝 모델, 산업별 AI 적용, 기술 세미나/교육 등 다양한 연구개발을 수행합니다."
-          features={["미래 AI 기술 연구", "머신러닝/딥러닝 모델", "산업별 AI 적용", "기술 세미나/교육"]}
-        />
+          {/* 하위 사업영역 복원 */}
+          <BusinessSection
+            image="/images/sphere-03.jpg"
+            title="E-Commerce Platform"
+            subtitle="전자상거래 플랫폼 구축"
+            description1="온라인 쇼핑몰, 결제 시스템, 상품관리, 주문/배송 등 전자상거래 전 과정 통합 솔루션 제공."
+              description2={
+                <>
+                  맞춤형 쇼핑몰 구축, 결제/배송 연동, 실시간 재고관리, 마케팅 자동화 등 다양한 기능 지원.<br/>
+                  <button
+                    className="mt-4 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-full font-bold shadow hover:scale-105 transition"
+                    onClick={() => setShowECommerceDetail(true)}
+                  >
+                    상세소개 보기
+                  </button>
+                </>
+              }
+            features={["쇼핑몰 구축", "결제/배송 연동", "재고/주문 관리", "마케팅 자동화"]}
+          />
+          <BusinessSection
+            image="/images/sphere-04.jpg"
+            title="AI ChatBot Service"
+            subtitle="챗봇/상담 자동화"
+            description1="AI 기반 챗봇, 고객상담 자동화, FAQ, 실시간 응대, 자연어 처리 기술 적용."
+              description2={
+                <>
+                  다양한 채널(웹/모바일/메신저) 연동, 사용자 맞춤형 답변, 데이터 분석 기반 서비스 개선.<br/>
+                  <button
+                    className="mt-4 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full font-bold shadow hover:scale-105 transition"
+                    onClick={() => setShowChatBotDetail(true)}
+                  >
+                    상세소개 보기
+                  </button>
+                </>
+              }
+            features={["AI 챗봇", "상담 자동화", "다채널 연동", "데이터 분석"]}
+          />
+          <BusinessSection
+            image="/images/pattern-01.jpg"
+            title="Demand Prediction"
+            subtitle="수요예측/AI 분석"
+            description1="AI/머신러닝 기반 수요예측, 판매/재고/트렌드 분석, 비즈니스 의사결정 지원."
+              description2={
+                <>
+                  빅데이터 분석, 예측모델 구축, 실시간 대시보드 제공, 산업별 맞춤형 솔루션.<br/>
+                  <button
+                    className="mt-4 px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-full font-bold shadow hover:scale-105 transition"
+                    onClick={() => setShowDemandDetail(true)}
+                  >
+                    상세소개 보기
+                  </button>
+                </>
+              }
+            features={["수요예측", "빅데이터 분석", "실시간 대시보드", "산업별 맞춤 솔루션"]}
+          />
+          <BusinessSection
+            image="/images/pattern-02.jpg"
+            title="R&D Center"
+            subtitle="기술연구소/신기술 개발"
+            description1="AI, IoT, 빅데이터 등 신기술 연구개발, 특허/논문, 산학협력 프로젝트 수행."
+              description2={
+                <>
+                  미래기술 연구, 산학협력, 기술 특허/논문, 혁신적 IT 서비스 창출.<br/>
+                  <button
+                    className="mt-4 px-4 py-2 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-full font-bold shadow hover:scale-105 transition"
+                    onClick={() => setShowRDDetail(true)}
+                  >
+                    상세소개 보기
+                  </button>
+                </>
+              }
+            features={["신기술 연구", "산학협력", "특허/논문", "혁신 IT 서비스"]}
+          />
+        {/* SI 상세소개 모달 */}
+        {showSIDetail && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-indigo-100 via-purple-100 to-blue-100 bg-opacity-80 animate-fadein">
+            <div className="bg-white max-w-2xl w-full rounded-3xl shadow-2xl p-8 relative overflow-y-auto max-h-[90vh] border-2 border-indigo-100">
+              <h2 className="text-2xl font-extrabold text-indigo-700 mb-4 text-center drop-shadow">SI(System Integration) – 시스템 통합 구축 소개자료</h2>
+              <div className="space-y-5 text-gray-900 text-[16px] leading-normal font-['Inter','Pretendard','Segoe UI',sans-serif]">
+                <div className="space-y-2">
+                  <strong className="text-indigo-700 text-lg md:text-xl">1. 서비스 개요</strong><br/>
+                  SI(System Integration) 서비스는 정보화 전략 수립부터 시스템 운영까지 전 과정을 하나의 흐름으로 연결해 맞춤형 IT 통합 솔루션을 제공합니다.<br/>
+                  금융, 공공기관, 제조, 유통 등 다양한 산업에서 축적된 경험을 바탕으로 안정적이고 확장 가능한 시스템을 구축합니다.
+                </div>
+                <div className="space-y-2">
+                  <strong className="text-indigo-700 text-lg md:text-xl">2. 제공 범위</strong><br/>
+                  <span className="font-semibold">정보화 전략 수립</span><br/>
+                  경영목표·업무환경 분석<br/>
+                  중·장기 IT 로드맵 제안<br/>
+                  디지털 전환(DX) 전략 컨설팅<br/>
+                  <span className="font-semibold">업무 분석 및 설계</span><br/>
+                  현행 시스템 분석(AS-IS)<br/>
+                  개선 목표 및 신규 시스템 요구사항 정의(TO-BE)<br/>
+                  프로세스 최적화 및 표준화 설계<br/>
+                  <span className="font-semibold">시스템 구축</span><br/>
+                  아키텍처 설계 (애플리케이션·데이터·기술 구조)<br/>
+                  DB 설계 (논리/물리 구조, 최적화)<br/>
+                  솔루션 제공 (ERP, MES, CRM, 전자정부 표준프레임워크 등)<br/>
+                  H/W, S/W, 네트워크 등 인프라 통합 구축<br/>
+                  <span className="font-semibold">시스템 운영 및 유지보수</span><br/>
+                  운영 모니터링, 장애 대응, 성능 개선<br/>
+                  버전 업그레이드 및 기능 확장<br/>
+                  SLA 기반 기술지원
+                </div>
+                <div className="space-y-2">
+                  <strong className="text-indigo-700 text-lg md:text-xl">3. 핵심 특징</strong><br/>
+                  <span className="font-semibold">전 과정 통합 서비스</span>: 전략 → 설계 → 구축 → 운영까지 원스톱 제공<br/>
+                  <span className="font-semibold">다양한 산업 경험</span>: 금융, 공공기관, 제조, 유통 등 프로젝트 수행<br/>
+                  <span className="font-semibold">최신 기술 적용</span>: 클라우드, AI, 빅데이터, IoT 등 차세대 IT 기술 반영<br/>
+                  <span className="font-semibold">안정성과 확장성 보장</span>: 대규모 트랜잭션 처리 경험 및 보안/성능 최적화
+                </div>
+                <div className="space-y-2">
+                  <strong className="text-indigo-700 text-lg md:text-xl">4. 주요 기능 & 특징 (Features)</strong><br/>
+                  <span className="font-semibold">정보화 전략 / 아키텍처 설계</span><br/>
+                  → 조직의 비전과 목표에 부합하는 IT 전략과 구조 설계<br/>
+                  <span className="font-semibold">DB 설계, 솔루션 제공</span><br/>
+                  → 데이터 모델링, 최적화 설계, 맞춤형 솔루션 제안<br/>
+                  <span className="font-semibold">H/W, S/W, 네트워크 통합</span><br/>
+                  → 전산 장비, 소프트웨어, 네트워크 인프라 통합 구축<br/>
+                  <span className="font-semibold">통합 유지보수</span><br/>
+                  → 예방 점검, 장애 대응, 성능 모니터링, 지속적 개선
+                </div>
+                <div className="space-y-2">
+                  <strong className="text-indigo-700 text-lg md:text-xl">5. 서비스 적용 사례</strong><br/>
+                  <span className="font-semibold">금융권 차세대 시스템</span><br/>
+                  온라인 거래 처리 속도 40% 개선, 보안 수준 향상<br/>
+                  <span className="font-semibold">공공기관 정보화 사업</span><br/>
+                  전자정부 표준프레임워크 기반 시스템 고도화<br/>
+                  <span className="font-semibold">제조업 MES 구축</span><br/>
+                  생산 효율 20% 향상, 불량률 15% 감소<br/>
+                  <span className="font-semibold">유통 ERP 통합</span><br/>
+                  물류·재고 실시간 관리, 매출 데이터 분석 자동화
+                </div>
+                <div className="space-y-2">
+                  <strong className="text-indigo-700 text-lg md:text-xl">6. 기대 효과</strong><br/>
+                  <span className="font-semibold">운영 효율성 극대화</span>: 업무 프로세스 자동화 및 표준화<br/>
+                  <span className="font-semibold">비용 절감</span>: 유지보수·업그레이드 비용 절감<br/>
+                  <span className="font-semibold">확장성 강화</span>: 향후 신규 서비스 및 기능 추가 용이<br/>
+                  <span className="font-semibold">보안·안정성 확보</span>: 최신 보안 규격 및 인프라 설계
+                </div>
+                <div className="space-y-2">
+                  <strong className="text-indigo-700 text-lg md:text-xl">7. 비전</strong><br/>
+                  “기술과 비즈니스를 연결하는 시스템 통합 파트너”<br/>
+                  고객의 비즈니스 목표를 달성하는 맞춤형 통합 솔루션을 제공합니다.
+                </div>
+                <div className="flex justify-center mt-8">
+                  <button
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full font-bold shadow-lg hover:scale-105 hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 text-lg"
+                    onClick={() => setShowSIDetail(false)}
+                    aria-label="뒤로가기"
+                  >
+                    <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                    뒤로가기
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* E-Commerce 상세소개 모달 */}
+        {showECommerceDetail && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-emerald-100 via-teal-100 to-blue-100 bg-opacity-80 animate-fadein">
+            <div className="bg-white max-w-2xl w-full rounded-3xl shadow-2xl p-8 relative overflow-y-auto max-h-[90vh] border-2 border-emerald-100">
+              <h2 className="text-2xl font-extrabold text-emerald-700 mb-4 text-center drop-shadow">E-Commerce Platform – 전자상거래 플랫폼 구축 소개자료</h2>
+              <div className="space-y-5 text-gray-900 text-[16px] leading-normal font-['Inter','Pretendard','Segoe UI',sans-serif]">
+                <div className="space-y-2">
+                  <strong className="text-emerald-700 text-lg md:text-xl">1. 서비스 개요</strong><br/>
+                  E-Commerce Platform 서비스는<br/>
+                  온라인 쇼핑몰 기획부터 상품 등록·결제·배송·마케팅까지 전자상거래 전 과정을 통합 제공하는 원스톱 솔루션입니다.<br/>
+                  고객의 비즈니스 특성에 맞춘 맞춤형 쇼핑몰 구축과 안정적인 결제/배송 연동, 실시간 재고·주문 관리, 마케팅 자동화 기능을 지원합니다.
+                </div>
+                <div className="space-y-2">
+                  <strong className="text-emerald-700 text-lg md:text-xl">2. 제공 범위</strong><br/>
+                  <span className="font-semibold">맞춤형 쇼핑몰 구축</span><br/>
+                  브랜드 맞춤 UI/UX 디자인<br/>
+                  반응형 웹/모바일 최적화<br/>
+                  멀티 카테고리, 다국어/다통화 지원<br/>
+                  <span className="font-semibold">결제·배송 연동</span><br/>
+                  다양한 결제수단 지원(신용카드, 간편결제, 해외결제)<br/>
+                  국내외 배송사 API 연동(실시간 배송 추적)<br/>
+                  주문·배송 상태 자동 업데이트<br/>
+                  <span className="font-semibold">재고·주문 관리</span><br/>
+                  실시간 재고 동기화<br/>
+                  주문 처리 자동화<br/>
+                  반품·교환 프로세스 관리<br/>
+                  <span className="font-semibold">마케팅 자동화</span><br/>
+                  쿠폰·할인·적립금 시스템<br/>
+                  이메일/SMS/푸시 마케팅<br/>
+                  광고 성과 분석 대시보드
+                </div>
+                <div className="space-y-2">
+                  <strong className="text-emerald-700 text-lg md:text-xl">3. 핵심 특징</strong><br/>
+                  <span className="font-semibold">통합 전자상거래 솔루션</span><br/>
+                  기획 → 구축 → 운영 → 마케팅까지 원스톱 제공<br/>
+                  <span className="font-semibold">확장성 높은 구조</span><br/>
+                  소규모 쇼핑몰부터 대규모 마켓플레이스까지 대응<br/>
+                  <span className="font-semibold">사용자 친화적 UI</span><br/>
+                  쉽고 직관적인 관리자 페이지 제공<br/>
+                  <span className="font-semibold">글로벌 지원</span><br/>
+                  다국어, 다통화, 해외 결제·배송 연동 가능
+                </div>
+                <div className="space-y-2">
+                  <strong className="text-emerald-700 text-lg md:text-xl">4. 주요 기능 (Features)</strong><br/>
+                  <span className="font-semibold">쇼핑몰 구축</span><br/>
+                  → 디자인, 기능, 사용자 경험까지 브랜드 맞춤형 구현<br/>
+                  <span className="font-semibold">결제/배송 연동</span><br/>
+                  → 안정적이고 다양한 결제수단, 배송사 연동<br/>
+                  <span className="font-semibold">재고/주문 관리</span><br/>
+                  → 실시간 재고, 주문, 반품·교환 관리<br/>
+                  <span className="font-semibold">마케팅 자동화</span><br/>
+                  → 프로모션, CRM, 성과 분석, 리타겟팅 지원
+                </div>
+                <div className="space-y-2">
+                  <strong className="text-emerald-700 text-lg md:text-xl">5. 서비스 적용 사례</strong><br/>
+                  <span className="font-semibold">패션 쇼핑몰 구축</span><br/>
+                  시즌별 컬렉션 자동 업데이트, 인플루언서 마케팅 연동<br/>
+                  <span className="font-semibold">전자제품 전문몰</span><br/>
+                  실시간 재고·배송 상태 추적, 보증기간 알림<br/>
+                  <span className="font-semibold">해외 직구몰</span><br/>
+                  다국어·다통화·국제배송 API 완비<br/>
+                  <span className="font-semibold">지역 특산품 마켓</span><br/>
+                  로컬 판매자 입점형 마켓플레이스 구현
+                </div>
+                <div className="space-y-2">
+                  <strong className="text-emerald-700 text-lg md:text-xl">6. 기대 효과</strong><br/>
+                  <span className="font-semibold">매출 증대</span>: 효율적인 주문·재고 관리와 마케팅 자동화로 판매 극대화<br/>
+                  <span className="font-semibold">운영 효율화</span>: 결제·배송·CS까지 통합 관리로 업무 시간 단축<br/>
+                  <span className="font-semibold">고객 경험 향상</span>: 빠른 결제, 정확한 배송, 개인화 추천 제공<br/>
+                  <span className="font-semibold">글로벌 확장 용이</span>: 해외 결제·배송·언어 지원으로 시장 확대
+                </div>
+                <div className="space-y-2">
+                  <strong className="text-emerald-700 text-lg md:text-xl">7. 비전</strong><br/>
+                  “판매와 고객을 잇는 최적의 전자상거래 인프라”<br/>
+                  기술과 디자인, 마케팅이 결합된 통합형 이커머스 플랫폼을 제공합니다.
+                </div>
+                <div className="flex justify-center mt-8">
+                  <button
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-full font-bold shadow-lg hover:scale-105 hover:from-emerald-700 hover:to-teal-700 transition-all duration-300 text-lg"
+                    onClick={() => setShowECommerceDetail(false)}
+                    aria-label="뒤로가기"
+                  >
+                    <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                    뒤로가기
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* ChatBot 상세소개 모달 */}
+        {showChatBotDetail && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-indigo-100 via-blue-100 to-cyan-100 bg-opacity-80 animate-fadein">
+            <div className="bg-white max-w-2xl w-full rounded-3xl shadow-2xl p-8 relative overflow-y-auto max-h-[90vh] border-2 border-indigo-100">
+              <h2 className="text-2xl font-extrabold text-indigo-700 mb-4 text-center drop-shadow">AI ChatBot Service – 챗봇/상담 자동화 상세소개</h2>
+              <div className="space-y-5 text-gray-900 text-[16px] leading-normal font-['Inter','Pretendard','Segoe UI',sans-serif]">
+                <div>
+                  <strong className="text-indigo-700 text-lg md:text-xl">1. 서비스 개요</strong><br />
+                  AI ChatBot Service는<br />
+                  AI 기반 자연어 처리(NLP) 기술을 활용하여 고객 상담을 자동화하고, 실시간 응대와 맞춤형 답변을 제공하는 지능형 상담 솔루션입니다.<br />
+                  웹·모바일·메신저 등 다양한 채널과 연동되며, 데이터 분석을 통해 지속적으로 응답 품질과 서비스 효율을 개선합니다.
+                </div>
+                <div>
+                  <strong className="text-indigo-700 text-lg md:text-xl">2. 제공 범위</strong><br />
+                  <ul className="list-disc ml-5">
+                    <li>AI 챗봇 구축</li>
+                    <li>자연어 처리(NLP) 기반 대화 엔진</li>
+                    <li>고객 맞춤형 답변 시나리오 설계</li>
+                    <li>다국어 지원 가능(한국어·영어·일본어 등)</li>
+                    <li>상담 자동화</li>
+                    <li>FAQ 자동응답</li>
+                    <li>예약·주문·결제 등 프로세스 자동화</li>
+                    <li>24/7 무중단 상담 서비스</li>
+                    <li>다채널 연동</li>
+                    <li>웹사이트, 모바일 앱, 카카오톡·네이버톡·WhatsApp·Slack 등 메신저 연동</li>
+                    <li>API 기반 외부 시스템 연계(CRM, ERP, 결제, 배송 등)</li>
+                    <li>데이터 분석</li>
+                    <li>대화 로그 분석으로 고객 니즈 파악</li>
+                    <li>응답 정확도·만족도 분석</li>
+                    <li>개선 포인트 자동 추천</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong className="text-indigo-700 text-lg md:text-xl">3. 핵심 특징</strong><br />
+                  <ul className="list-disc ml-5">
+                    <li>지능형 자연어 처리: 대화 맥락 이해 및 의도 분석, 오타/방언 인식 가능</li>
+                    <li>24시간 무중단 서비스: 언제든 고객 문의에 즉시 대응</li>
+                    <li>다양한 채널·시스템 연계: 기존 업무 시스템과 매끄럽게 통합</li>
+                    <li>데이터 기반 서비스 개선: 대화 데이터 분석으로 지속적인 품질 향상</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong className="text-indigo-700 text-lg md:text-xl">4. 주요 기능 (Features)</strong><br />
+                  <ul className="list-disc ml-5">
+                    <li>AI 챗봇<br />→ NLP 기반 대화 모델, 맞춤형 답변 시나리오</li>
+                    <li>상담 자동화<br />→ 주문·예약·CS처리 자동화</li>
+                    <li>다채널 연동<br />→ 웹·모바일·메신저 API 연동</li>
+                    <li>데이터 분석<br />→ 대화 로그 분석, 고객 니즈 반영</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong className="text-indigo-700 text-lg md:text-xl">5. 서비스 적용 사례</strong><br />
+                  <ul className="list-disc ml-5">
+                    <li>전자상거래 고객센터<br />상품 문의·배송 조회·반품 요청 자동 처리</li>
+                    <li>금융기관 챗봇<br />계좌 조회·상품 안내·대출 상담 자동화</li>
+                    <li>공공기관 민원 상담<br />민원 안내·서류 제출 방법 안내·예약 접수</li>
+                    <li>교육 플랫폼<br />강좌 안내·수강 신청·학습 피드백 자동화</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong className="text-indigo-700 text-lg md:text-xl">6. 기대 효과</strong><br />
+                  <ul className="list-disc ml-5">
+                    <li>운영 효율 향상: 상담 인력 부담 경감, 응대 속도 향상</li>
+                    <li>고객 만족도 상승: 신속·정확한 맞춤형 응대 제공</li>
+                    <li>비용 절감: 반복 업무 자동화로 운영 비용 절감</li>
+                    <li>서비스 개선 가속화: 데이터 분석 기반 지속적 고도화</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong className="text-indigo-700 text-lg md:text-xl">7. 비전</strong><br />
+                  “대화 그 이상의 가치를 제공하는 AI 상담 파트너”<br />
+                  고객 경험 혁신과 기업 운영 효율화를 동시에 실현합니다.
+                </div>
+                <div className="flex justify-center mt-8">
+                  <button
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-full font-bold shadow-lg hover:scale-105 hover:from-indigo-700 hover:to-blue-700 transition-all duration-300 text-lg"
+                    onClick={() => setShowChatBotDetail(false)}
+                    aria-label="뒤로가기"
+                  >
+                    <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                    뒤로가기
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Demand Prediction 상세소개 모달 */}
+        {showDemandDetail && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-blue-100 via-cyan-100 to-indigo-100 bg-opacity-80 animate-fadein">
+            <div className="bg-white max-w-2xl w-full rounded-3xl shadow-2xl p-8 relative overflow-y-auto max-h-[90vh] border-2 border-blue-100">
+              <h2 className="text-2xl font-extrabold text-blue-700 mb-4 text-center drop-shadow">Demand Prediction – 수요예측/AI 분석 상세소개</h2>
+              <div className="space-y-5 text-gray-900 text-[16px] leading-normal font-['Inter','Pretendard','Segoe UI',sans-serif]">
+                <div>
+                  <strong className="text-blue-700 text-lg md:text-xl">1. 서비스 개요</strong><br />
+                  Demand Prediction 서비스는<br />
+                  AI/머신러닝 기반 예측 모델과 빅데이터 분석 기술을 활용하여 판매·재고·트렌드 변화를 사전에 파악하고,<br />
+                  비즈니스 의사결정을 지원하는 산업 맞춤형 예측 솔루션입니다.<br />
+                  실시간 대시보드와 시뮬레이션 기능으로 빠르고 정확한 경영 판단이 가능합니다.
+                </div>
+                <div>
+                  <strong className="text-blue-700 text-lg md:text-xl">2. 제공 범위</strong><br />
+                  <ul className="list-disc ml-5">
+                    <li>수요예측<br />AI·머신러닝 기반 시계열 예측<br />계절성·이벤트·트렌드 반영<br />예측 정확도 지속 개선</li>
+                    <li>빅데이터 분석<br />판매·재고·마케팅 데이터 통합 분석<br />외부 요인(날씨·경제지표·SNS 트렌드) 반영<br />데이터 전처리·클렌징 자동화</li>
+                    <li>실시간 대시보드<br />예측 결과 시각화<br />KPI 모니터링 및 알림<br />사용자별 맞춤형 데이터 뷰</li>
+                    <li>산업별 맞춤 솔루션<br />제조·유통·패션·식품·에너지·교통 등 산업별 모델 최적화<br />비즈니스 특성에 따른 커스터마이징</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong className="text-blue-700 text-lg md:text-xl">3. 핵심 특징</strong><br />
+                  <ul className="list-disc ml-5">
+                    <li>AI/ML 고도화 모델: 다양한 알고리즘(XGBoost, Prophet, LSTM 등) 적용</li>
+                    <li>데이터 통합 분석: 내부·외부 데이터 동시 반영</li>
+                    <li>실시간 대응: 수요 변화에 즉각적인 경영 전략 수립 가능</li>
+                    <li>산업 맞춤형 최적화: 업종별 특성에 따른 전용 모델 개발</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong className="text-blue-700 text-lg md:text-xl">4. 주요 기능 (Features)</strong><br />
+                  <ul className="list-disc ml-5">
+                    <li>수요예측<br />→ 판매·재고·이벤트 기반 AI 예측 모델</li>
+                    <li>빅데이터 분석<br />→ 다원적 데이터 통합·패턴 분석</li>
+                    <li>실시간 대시보드<br />→ 시각화, KPI 알림, 실시간 모니터링</li>
+                    <li>산업별 맞춤 솔루션<br />→ 업종별 전용 알고리즘 설계</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong className="text-blue-700 text-lg md:text-xl">5. 서비스 적용 사례</strong><br />
+                  <ul className="list-disc ml-5">
+                    <li>유통업: 재고 부족·과잉 방지, 신상품 출시 타이밍 예측</li>
+                    <li>제조업: 원자재 발주 최적화, 생산 스케줄 자동화</li>
+                    <li>패션·리테일: 시즌별 수요 예측, 세일 전략 수립</li>
+                    <li>에너지 산업: 전력 수요 예측, 공급 계획 최적화</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong className="text-blue-700 text-lg md:text-xl">6. 기대 효과</strong><br />
+                  <ul className="list-disc ml-5">
+                    <li>재고·운영 비용 절감: 불필요한 재고 감소</li>
+                    <li>매출 증대: 판매 타이밍 최적화로 매출 극대화</li>
+                    <li>위험 최소화: 수요 변동에 대한 사전 대응</li>
+                    <li>데이터 기반 경영: 직관이 아닌 데이터 중심 의사결정</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong className="text-blue-700 text-lg md:text-xl">7. 비전</strong><br />
+                  “미래를 예측하고 기회를 창출하는 AI 분석 파트너”<br />
+                  데이터와 AI로 비즈니스 경쟁력을 강화합니다.
+                </div>
+                <div className="flex justify-center mt-8">
+                  <button
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-full font-bold shadow-lg hover:scale-105 hover:from-blue-700 hover:to-cyan-700 transition-all duration-300 text-lg"
+                    onClick={() => setShowDemandDetail(false)}
+                    aria-label="뒤로가기"
+                  >
+                    <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                    뒤로가기
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* R&D 상세소개 모달 */}
+        {showRDDetail && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-orange-100 via-red-100 to-yellow-100 bg-opacity-80 animate-fadein">
+            <div className="bg-white max-w-2xl w-full rounded-3xl shadow-2xl p-8 relative overflow-y-auto max-h-[90vh] border-2 border-orange-100">
+              <h2 className="text-2xl font-extrabold text-orange-700 mb-4 text-center drop-shadow">연구개발 센터 – 기술연구소/신기술 개발 상세소개</h2>
+              <div className="space-y-5 text-gray-900 text-[16px] leading-normal font-['Inter','Pretendard','Segoe UI',sans-serif]">
+                <div>
+                  <strong className="text-orange-700 text-lg md:text-xl">1. 센터 개요</strong><br />
+                  연구개발 센터는<br />
+                  AI, IoT, 빅데이터 등 첨단 기술 분야에서 신기술 연구개발, 특허·논문 창출, 산학협력 프로젝트를 수행하며,<br />
+                  미래지향적인 혁신 IT 서비스를 창출하는 기술혁신 거점입니다.
+                </div>
+                <div>
+                  <strong className="text-orange-700 text-lg md:text-xl">2. 주요 연구 분야</strong><br />
+                  <ul className="list-disc ml-5">
+                    <li>신기술 연구<br />인공지능(AI) 알고리즘 개발<br />사물인터넷(IoT) 융합 솔루션<br />빅데이터 분석 및 예측 모델<br />클라우드·엣지 컴퓨팅 기술</li>
+                    <li>산학협력<br />국내외 대학·연구기관 공동 연구<br />기업 맞춤형 기술 이전<br />정부·지자체 R&D 과제 수행</li>
+                    <li>특허/논문<br />핵심 기술 특허 출원 및 등록<br />국제 학술지 논문 발표<br />기술 표준화 및 인증 취득</li>
+                    <li>혁신적 IT 서비스 창출<br />AI·IoT 기반 신사업 모델 발굴<br />스마트 제조·헬스케어·에너지 분야 솔루션<br />디지털 전환(DX) 플랫폼 개발</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong className="text-orange-700 text-lg md:text-xl">3. 핵심 특징</strong><br />
+                  <ul className="list-disc ml-5">
+                    <li>미래지향 기술개발: 산업 트렌드를 선도하는 차세대 기술 연구</li>
+                    <li>산학연 네트워크: 대학·연구기관·기업과의 협력 생태계 구축</li>
+                    <li>지식재산 창출: 특허·논문·기술 인증을 통한 기술 자산 확보</li>
+                    <li>사업화 연계: 연구성과를 실제 서비스·제품으로 상용화</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong className="text-orange-700 text-lg md:text-xl">4. 주요 활동 (Features)</strong><br />
+                  <ul className="list-disc ml-5">
+                    <li>신기술 연구<br />→ AI, IoT, 빅데이터, 클라우드, 로보틱스</li>
+                    <li>산학협력<br />→ 공동연구, 기술 이전, 인재 양성</li>
+                    <li>특허/논문<br />→ 지식재산권 창출, 국제 학술 발표</li>
+                    <li>혁신적인 IT 서비스<br />→ 연구성과의 산업화 및 신사업 발굴</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong className="text-orange-700 text-lg md:text-xl">5. 연구성과 사례</strong><br />
+                  <ul className="list-disc ml-5">
+                    <li>AI 영상분석 기술 특허 등록<br />스마트 시티 교통 모니터링에 적용</li>
+                    <li>IoT 기반 스마트 팜 솔루션 개발<br />작물 생산량 30% 향상</li>
+                    <li>빅데이터 기반 예측 분석 플랫폼<br />제조 불량률 15% 감소</li>
+                    <li>산학협력 과제<br />○○대학교와 공동 개발한 의료 영상 분석 AI</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong className="text-orange-700 text-lg md:text-xl">6. 기대 효과</strong><br />
+                  <ul className="list-disc ml-5">
+                    <li>기술 경쟁력 강화: 차별화된 기술 확보</li>
+                    <li>지속가능한 혁신: 신기술 기반 신사업 창출</li>
+                    <li>산업 발전 기여: 다양한 산업에 기술 확산</li>
+                    <li>글로벌 진출 가능성 확대: 해외 인증·표준화 기반 진출</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong className="text-orange-700 text-lg md:text-xl">7. 비전</strong><br />
+                  “연구와 혁신으로 미래를 설계하는 기술의 중심”<br />
+                  새로운 가치를 창출하는 차세대 IT 연구개발 허브가 됩니다.
+                </div>
+                <div className="flex justify-center mt-8">
+                  <button
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-full font-bold shadow-lg hover:scale-105 hover:from-orange-700 hover:to-red-700 transition-all duration-300 text-lg"
+                    onClick={() => setShowRDDetail(false)}
+                    aria-label="뒤로가기"
+                  >
+                    <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                    뒤로가기
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* 구성원 */}
@@ -510,28 +1086,28 @@ export default function Home() {
           {/* 대표이사 카드 */}
           <div className="bg-gradient-to-br from-blue-100 to-cyan-100 rounded-2xl shadow-xl p-6 flex flex-col items-center hover:scale-105 transition">
             <div className="w-20 h-20 mb-3 rounded-full bg-white shadow flex items-center justify-center overflow-hidden">
-              <img src="/images/president.jpg" alt="홍길동" className="w-full h-full object-cover rounded-full" onError={e => {e.currentTarget.src = 'https://em-content.zobj.net/thumbs/240/apple/354/man-office-worker_1f468-200d-1f4bc.png'}} />
+              <img src="/images/president.jpg" alt="한규재" className="w-full h-full object-cover rounded-full" onError={e => {e.currentTarget.src = 'https://em-content.zobj.net/thumbs/240/apple/354/man-office-worker_1f468-200d-1f4bc.png'}} />
             </div>
-            <span className="text-2xl font-bold text-blue-800 mb-1">홍길동</span>
+            <span className="text-2xl font-bold text-blue-800 mb-1">한규재</span>
             <span className="text-sm font-semibold text-cyan-700 mb-2">대표이사</span>
             <span className="text-4xl">👨‍💼</span>
           </div>
           {/* 기술이사 카드 */}
           <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl shadow-xl p-6 flex flex-col items-center hover:scale-105 transition">
             <div className="w-20 h-20 mb-3 rounded-full bg-white shadow flex items-center justify-center overflow-hidden">
-              <img src="/images/tech-director.jpg" alt="김철수" className="w-full h-full object-cover rounded-full" onError={e => {e.currentTarget.src = 'https://em-content.zobj.net/thumbs/240/apple/354/man-technologist_1f468-200d-1f4bb.png'}} />
+              <img src="/images/tech-director.jpg" alt="김종악" className="w-full h-full object-cover rounded-full" onError={e => {e.currentTarget.src = 'https://em-content.zobj.net/thumbs/240/apple/354/man-technologist_1f468-200d-1f4bb.png'}} />
             </div>
-            <span className="text-2xl font-bold text-blue-800 mb-1">김철수</span>
+            <span className="text-2xl font-bold text-blue-800 mb-1">김종악</span>
             <span className="text-sm font-semibold text-cyan-700 mb-2">기술이사</span>
             <span className="text-4xl">🧑‍💻</span>
           </div>
-          {/* DB컨설턴트 카드 */}
+          {/* 관리이사 카드 */}
           <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl shadow-xl p-6 flex flex-col items-center hover:scale-105 transition">
             <div className="w-20 h-20 mb-3 rounded-full bg-white shadow flex items-center justify-center overflow-hidden">
-              <img src="/images/db-consultant.jpg" alt="이영희" className="w-full h-full object-cover rounded-full" onError={e => {e.currentTarget.src = 'https://em-content.zobj.net/thumbs/240/apple/354/woman-office-worker_1f469-200d-1f4bc.png'}} />
+              <img src="/images/db-consultant.jpg" alt="김애숙" className="w-full h-full object-cover rounded-full" onError={e => {e.currentTarget.src = 'https://em-content.zobj.net/thumbs/240/apple/354/woman-office-worker_1f469-200d-1f4bc.png'}} />
             </div>
-            <span className="text-2xl font-bold text-blue-800 mb-1">이영희</span>
-            <span className="text-sm font-semibold text-cyan-700 mb-2">DB컨설턴트</span>
+            <span className="text-2xl font-bold text-blue-800 mb-1">김애숙</span>
+            <span className="text-sm font-semibold text-cyan-700 mb-2">관리이사</span>
             <span className="text-4xl">👩‍💼</span>
           </div>
         </div>
