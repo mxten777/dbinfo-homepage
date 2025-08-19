@@ -43,7 +43,6 @@ export default function Header() {
         <span className="px-3 py-1 rounded bg-gray-300 text-gray-400 cursor-not-allowed block sm:inline-block" aria-disabled>사업영역</span>
         <span className="px-3 py-1 rounded bg-gray-300 text-gray-400 cursor-not-allowed block sm:inline-block" aria-disabled>채용</span>
         <span className="px-3 py-1 rounded bg-gray-300 text-gray-400 cursor-not-allowed block sm:inline-block" aria-disabled>프로젝트 현황</span>
-        {/* <span className="px-3 py-1 rounded bg-gray-300 text-gray-400 cursor-not-allowed block sm:inline-block" aria-disabled>프로젝트</span> */}
         <span className="px-3 py-1 rounded bg-gray-300 text-gray-400 cursor-not-allowed block sm:inline-block" aria-disabled>직원로그인</span>
       </>
     );
@@ -54,29 +53,27 @@ export default function Header() {
         <a href="#business" className={`px-3 py-1 rounded ${isAdminScreen ? 'bg-gray-300 text-gray-400 cursor-not-allowed' : 'hover:bg-white/20 hover:text-yellow-200 text-white transition'} block sm:inline-block`} onClick={e => { if(isAdminScreen){e.preventDefault();return;} e.preventDefault(); const target = document.getElementById('business'); if (target) { const header = document.querySelector('header'); const headerHeight = header ? header.offsetHeight : 64; const y = target.getBoundingClientRect().top + window.scrollY - headerHeight; window.scrollTo({ top: y, behavior: 'smooth' }); setMenuOpen(false); } }} aria-disabled={isAdminScreen}>사업영역</a>
         <a href="#recruit" className={`px-3 py-1 rounded ${isAdminScreen ? 'bg-gray-300 text-gray-400 cursor-not-allowed' : 'hover:bg-white/20 hover:text-yellow-200 text-white transition'} block sm:inline-block`} onClick={e => { if(isAdminScreen){e.preventDefault();return;} e.preventDefault(); const target = document.getElementById('recruit'); if (target) { const header = document.querySelector('header'); const headerHeight = header ? header.offsetHeight : 64; const y = target.getBoundingClientRect().top + window.scrollY - headerHeight; window.scrollTo({ top: y, behavior: 'smooth' }); setMenuOpen(false); } }} aria-disabled={isAdminScreen}>채용</a>
         <Link to="/project-list" className={`px-3 py-1 rounded ${(isAdminScreen || isLoginScreen) ? 'bg-gray-300 text-gray-400 cursor-not-allowed' : 'hover:bg-white/20 hover:text-yellow-200 text-white transition'} block sm:inline-block`} onClick={e => { if(isAdminScreen || isLoginScreen){e.preventDefault();return;} setMenuOpen(false); }} aria-disabled={isAdminScreen || isLoginScreen}>프로젝트 현황</Link>
-        {/* <Link to="/projects" className={`px-3 py-1 rounded ${(isAdminScreen || isLoginScreen) ? 'bg-gray-300 text-gray-400 cursor-not-allowed' : 'hover:bg-white/20 hover:text-yellow-200 text-white transition'} block sm:inline-block`} onClick={e => { if(isAdminScreen || isLoginScreen){e.preventDefault();return;} setMenuOpen(false); }} aria-disabled={isAdminScreen || isLoginScreen}>프로젝트</Link> */}
         <Link to="/employee-login" className={`px-3 py-1 rounded ${(isAdminScreen || isLoginScreen) ? 'bg-gray-300 text-gray-400 cursor-not-allowed' : 'hover:bg-white/20 hover:text-yellow-200 text-white transition'} block sm:inline-block`} onClick={e => { if(isAdminScreen || isLoginScreen){e.preventDefault();return;} setMenuOpen(false); }} aria-disabled={isAdminScreen || isLoginScreen}>직원로그인</Link>
+        <Link to="/login" className="px-3 py-1 rounded bg-white/20 text-white hover:bg-yellow-200 hover:text-blue-700 transition block sm:inline-block">로그인</Link>
       </>
     );
-  } else if (isEmployeeMode || (user && isAdmin && window.location.pathname.startsWith('/employee'))) {
-    // 직원 로그인/직원 홈 경로에서는 네비게이션에 아무 메뉴도 노출하지 않음
-    navLinks = null;
+  } else if (isEmployeeMode || (user && !isAdmin)) {
+    // 직원 로그인(관리자 아님): 연차신청, 내정보, 로그아웃만 노출
+    navLinks = (
+      <>
+        <Link to="/employee-home" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">직원홈</Link>
+        <Link to="/leaves" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">연차신청</Link>
+        <Link to="/employee-home#myinfo" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">내정보</Link>
+        <button onClick={()=>{import('../firebaseConfig').then(mod=>{mod.auth.signOut();window.location.href='/';});}} className="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600 transition block sm:inline-block">로그아웃</button>
+      </>
+    );
   } else if (isAdmin) {
-    // 관리자 로그인: 회사소개/사업영역/채용/프로젝트/연차관리/프로젝트관리 등(기존대로)
+    // 관리자 로그인: 관리자 홈, 직원관리, 로그아웃만 노출
     navLinks = (
       <>
-        <Link to="/admin/register" className="px-3 py-1 rounded text-white block sm:inline-block line-through">직원등록</Link>
-        <Link to="/admin/employee-leave-edit" className="px-3 py-1 rounded text-white block sm:inline-block line-through">연차정보 초기화</Link>
-        <Link to="/leaves" className={`px-3 py-1 rounded ${isAdminScreen ? 'bg-gray-300 text-gray-400 cursor-not-allowed' : 'hover:bg-white/20 hover:text-yellow-200 text-white transition'} block sm:inline-block`} onClick={e => { if(isAdminScreen){e.preventDefault();return;} setMenuOpen(false); }} aria-disabled={isAdminScreen}>연차관리</Link>
-        <Link to="/projects" className={`px-3 py-1 rounded ${isAdminScreen ? 'bg-gray-300 text-gray-400 cursor-not-allowed' : 'hover:bg-white/20 hover:text-yellow-200 text-white transition'} block sm:inline-block`} onClick={e => { if(isAdminScreen){e.preventDefault();return;} setMenuOpen(false); }} aria-disabled={isAdminScreen}>프로젝트관리</Link>
-      </>
-    );
-  } else {
-    // 직원 로그인(관리자 아님): 연차신청(직원용)과 로그아웃만 노출
-    navLinks = (
-      <>
-        <Link to="/leaves" className={`px-3 py-1 rounded ${isAdminScreen ? 'bg-gray-300 text-gray-400 cursor-not-allowed' : 'hover:bg-white/20 hover:text-yellow-200 text-white transition'} block sm:inline-block`} onClick={e => { if(isAdminScreen){e.preventDefault();return;} setMenuOpen(false); }} aria-disabled={isAdminScreen}>연차신청</Link>
-        {/* 로그아웃 버튼은 기존 위치에 있으면 됨 (예: 우측 상단 등) */}
+        <Link to="/admin/home" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">관리자홈</Link>
+        <Link to="/admin/employee-manage" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">직원관리</Link>
+        <button onClick={()=>{import('../firebaseConfig').then(mod=>{mod.auth.signOut();window.location.href='/';});}} className="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600 transition block sm:inline-block">로그아웃</button>
       </>
     );
   }

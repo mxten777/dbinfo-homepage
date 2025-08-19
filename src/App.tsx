@@ -25,6 +25,8 @@ import AdminEmployeeLeaveEdit from './pages/admin/AdminEmployeeLeaveEdit';
 import EmployeeLogin from './pages/EmployeeLogin';
 import EmployeeHome from './pages/EmployeeHome';
 import AdminEmployeeEdit from './pages/AdminEmployeeEdit';
+import SignUp from './pages/SignUp';
+import Login from './pages/Login';
 
 // 관리자 인증 필요 페이지 보호용 컴포넌트
 function ProtectedRoute({ children }: { children: JSX.Element }) {
@@ -55,6 +57,8 @@ function AppRoutesWithHeader() {
       <main className="min-h-[60vh]">
         <ErrorBoundary>
           <Routes>
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/" element={<Home />} />
             <Route path="/projects" element={
               <ProtectedRoute>

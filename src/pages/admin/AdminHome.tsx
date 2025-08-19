@@ -11,49 +11,8 @@ import { collection, getDocs, deleteDoc, updateDoc } from 'firebase/firestore';
 const AdminHome: React.FC = () => {
   const navigate = useNavigate();
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isFixing, setIsFixing] = useState(false);
 
-  // 연차 employeeId를 직원 uid로 일괄 정리하는 함수
-  const handleFixLeaveEmployeeIds = async () => {
-    if (!window.confirm('모든 연차 데이터의 employeeId를 직원 uid로 일괄 정리하시겠습니까?')) return;
-    setIsFixing(true);
-    try {
-      // 직원 데이터 가져오기
-      const employeesSnapshot = await getDocs(collection(db, 'employees'));
-      const employeesData = employeesSnapshot.docs.map(doc => ({
-        id: doc.id,
-        uid: doc.data().uid,
-        name: doc.data().name,
-        email: doc.data().email,
-      }));
 
-      // leaves 데이터 가져오기
-      const leavesSnapshot = await getDocs(collection(db, 'leaves'));
-      let updateCount = 0;
-
-      for (const leaveDoc of leavesSnapshot.docs) {
-        const leave = leaveDoc.data();
-        // employeeId가 직원 uid가 아닌 경우만 처리
-        const emp = employeesData.find(e =>
-          e.id === leave.employeeId ||
-          e.email === leave.employeeId ||
-          e.name === leave.employeeName ||
-          e.name === leave.name
-        );
-        if (emp && leave.employeeId !== emp.uid && emp.uid) {
-          await updateDoc(leaveDoc.ref, { employeeId: emp.uid });
-          updateCount++;
-        }
-      }
-
-      alert(`총 ${updateCount}건의 연차 데이터 employeeId가 직원 uid로 정리되었습니다.`);
-    } catch (error) {
-      console.error('일괄 정리 실패:', error);
-      alert('일괄 정리에 실패했습니다.');
-    } finally {
-      setIsFixing(false);
-    }
-  };
   const handleClearDeputyRequestData = async () => {
     if (!window.confirm('모든 대리신청 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
       return;
@@ -92,7 +51,6 @@ const AdminHome: React.FC = () => {
   // 직원 연차정보 초기화 함수
   const handleResetEmployeeLeaveInfo = async () => {
     if (!window.confirm('모든 직원의 연차 사용일수와 잔여연차를 초기화하시겠습니까?')) return;
-    setIsFixing(true);
     try {
       const employeesSnapshot = await getDocs(collection(db, 'employees'));
       let updateCount = 0;
@@ -109,8 +67,6 @@ const AdminHome: React.FC = () => {
     } catch (error) {
       console.error('직원 연차정보 초기화 실패:', error);
       alert('직원 연차정보 초기화에 실패했습니다.');
-    } finally {
-      setIsFixing(false);
     }
   };
 
@@ -151,22 +107,13 @@ const AdminHome: React.FC = () => {
           {/* 직원 연차정보 초기화 버튼 */}
           <button
             onClick={handleResetEmployeeLeaveInfo}
-            disabled={isFixing}
-            className="bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white px-4 py-2 rounded flex items-center gap-2 mt-4 transition-colors"
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2 mt-4 transition-colors"
           >
-            {isFixing ? '초기화 중...' : '모든 직원 연차정보 초기화'}
+            모든 직원 연차정보 초기화
           </button>
           <p className="text-sm text-blue-600 mt-1">⚠️ 모든 직원의 연차 사용일수와 잔여연차가 0, 총연차로 초기화됩니다</p>
 
-           {/* employeeId 일괄 uid 정리 버튼 */}
-           <button
-             onClick={handleFixLeaveEmployeeIds}
-             disabled={isFixing}
-             className="bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white px-4 py-2 rounded flex items-center gap-2 mt-4 transition-colors"
-           >
-             {isFixing ? '정리 중...' : '연차 employeeId 일괄 uid 정리'}
-           </button>
-           <p className="text-sm text-orange-600 mt-1">⚠️ 모든 연차 데이터의 employeeId를 직원 uid로 자동 정리합니다</p>
+
         </div>
         <button className="bg-gray-200 px-6 py-2 rounded-full shadow text-lg font-semibold hover:bg-gray-300" onClick={() => navigate('/')}>홈으로</button>
       </div>

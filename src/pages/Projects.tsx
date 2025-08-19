@@ -32,10 +32,16 @@ const Projects: React.FC = () => {
         return;
       }
       try {
-        const adminDoc = await import('firebase/firestore').then(firestore =>
-          firestore.getDoc(firestore.doc(db, 'admins', user.uid))
-        );
-        setIsAdmin(!!(adminDoc.exists && adminDoc.exists() && adminDoc.data()?.isAdmin === true));
+        const firestore = await import('firebase/firestore');
+        const adminRef = firestore.doc(db, 'admins', user.uid);
+        const adminDoc = await firestore.getDoc(adminRef);
+        if (!adminDoc.exists()) {
+          // 문서가 없으면 자동으로 isAdmin: false로 생성
+          await firestore.setDoc(adminRef, { isAdmin: false });
+          setIsAdmin(false);
+        } else {
+          setIsAdmin(!!(adminDoc.data()?.isAdmin === true));
+        }
       } catch {
         setIsAdmin(false);
       }

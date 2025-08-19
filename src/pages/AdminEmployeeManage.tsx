@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { setDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import type { Employee, Leave } from '../types/employee';
 
 const AdminEmployeeManage: React.FC = () => {
+  // 관리자 권한 상태 저장
+  const [adminMap, setAdminMap] = useState<{ [uid: string]: boolean }>({});
   // 진입 확인용 테스트
   console.log('AdminEmployeeManage 컴포넌트 진입!');
   // 화면 최상단에 테스트용 텍스트와 버튼 추가
@@ -34,6 +37,10 @@ const AdminEmployeeManage: React.FC = () => {
     setEditLoading(true);
     try {
       await updateDoc(doc(db, 'employees', String(editEmp.id)), {
+        empNo: editEmp.empNo,
+        regNo: editEmp.regNo,
+        gender: editEmp.gender,
+        joinDate: editEmp.joinDate,
         name: editEmp.name,
         department: editEmp.department,
         position: editEmp.position,
@@ -108,17 +115,60 @@ const AdminEmployeeManage: React.FC = () => {
       const leavesData = leaveSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Leave));
       const deputyData = deputySnap.docs.map(doc => ({ id: doc.id, ...doc.data(), isAdminRequest: true } as Leave));
       setLeaves([...leavesData, ...deputyData]);
+
+      // 관리자 권한 정보 불러오기
+      const adminsSnap = await getDocs(collection(db, 'admins'));
+      const adminMapObj: { [uid: string]: boolean } = {};
+      adminsSnap.docs.forEach(doc => {
+        const data = doc.data();
+        if (data.isAdmin) adminMapObj[doc.id] = true;
+      });
+      setAdminMap(adminMapObj);
     };
     fetchData();
   }, []);
+
+  // 관리자 권한 부여/해제 핸들러 (useEffect 바깥으로 이동)
+  const handleAdminToggle = async (emp: Employee) => {
+    if (!emp.uid) {
+      setMessage('UID가 없는 직원입니다.');
+      return;
+    }
+    const adminDocRef = doc(db, 'admins', emp.uid);
+    const isAdmin = !!adminMap[emp.uid];
+    try {
+      if (isAdmin) {
+        // 권한 해제
+        await setDoc(adminDocRef, { isAdmin: false });
+        setAdminMap(prev => ({ ...prev, [emp.uid!]: false }));
+        setMessage(`${emp.name}님 관리자 권한 해제됨`);
+      } else {
+        // 권한 부여
+        await setDoc(adminDocRef, { isAdmin: true });
+        setAdminMap(prev => ({ ...prev, [emp.uid!]: true }));
+        setMessage(`${emp.name}님 관리자 권한 부여됨`);
+      }
+    } catch (e) {
+      setMessage('권한 변경 실패: 다시 시도해 주세요.');
+    }
+    setTimeout(() => setMessage(''), 2000);
+  };
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto flex flex-col gap-8">
       {/* 직원 정보 수정 모달 */}
       {editEmp && (
         <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-2xl p-8 border-2 border-blue-300 flex flex-col gap-4 min-w-[320px] max-w-[90vw]">
+          <div className="bg-white rounded-xl shadow-2xl p-8 border-2 border-blue-300 flex flex-col gap-4 min-w-[320px] max-w-[95vw] max-h-[90vh] overflow-y-auto">
             <div className="text-xl font-bold text-blue-700 mb-2">직원 정보 수정</div>
+            <label className="font-semibold">사번</label>
+            <input className="border rounded px-3 py-2 mb-2" value={editEmp.empNo ?? ''} onChange={e => setEditEmp({ ...editEmp, empNo: e.target.value })} />
+            <label className="font-semibold">주민번호</label>
+            <input className="border rounded px-3 py-2 mb-2" value={editEmp.regNo ?? ''} onChange={e => setEditEmp({ ...editEmp, regNo: e.target.value })} />
+            <label className="font-semibold">성별</label>
+            <input className="border rounded px-3 py-2 mb-2" value={editEmp.gender ?? ''} onChange={e => setEditEmp({ ...editEmp, gender: e.target.value })} />
+            <label className="font-semibold">입사일</label>
+            <input className="border rounded px-3 py-2 mb-2" value={editEmp.joinDate ?? ''} onChange={e => setEditEmp({ ...editEmp, joinDate: e.target.value })} />
             <label className="font-semibold">이름</label>
             <input className="border rounded px-3 py-2 mb-2" value={editEmp.name ?? ''} onChange={e => setEditEmp({ ...editEmp, name: e.target.value })} />
             <label className="font-semibold">부서</label>
@@ -210,7 +260,18 @@ const AdminEmployeeManage: React.FC = () => {
                 <td className="border px-2 py-2 whitespace-nowrap">{emp.remainingLeaves ?? '-'}</td>
                 <td className="border px-2 py-2 whitespace-nowrap">{emp.email || '-'}</td>
                 <td className="border px-2 py-2 whitespace-nowrap">{emp.phone || '-'}</td>
-                <td className="border px-2 py-2 whitespace-nowrap">{emp.role === 'admin' ? '관리자' : '일반직원'}</td>
+                <td className="border px-2 py-2 whitespace-nowrap">
+                  <div className="flex items-center justify-center gap-2">
+                    <span className={`px-2 py-1 rounded text-xs font-bold ${adminMap[emp.uid!] ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}`}>{adminMap[emp.uid!] ? '관리자' : '일반직원'}</span>
+                    <button
+                      className={`px-3 py-1 rounded text-xs font-bold shadow-sm border ${adminMap[emp.uid!] ? 'bg-red-100 text-red-700 border-red-200 hover:bg-red-200' : 'bg-green-100 text-green-700 border-green-200 hover:bg-green-200'} transition`}
+                      style={{ minWidth: '72px' }}
+                      onClick={() => handleAdminToggle(emp)}
+                    >
+                      {adminMap[emp.uid!] ? '권한 해제' : '권한 부여'}
+                    </button>
+                  </div>
+                </td>
                 <td className="border px-2 py-2 whitespace-nowrap">{emp.uid || '-'}</td>
                 <td className="border px-2 py-2 whitespace-nowrap text-center flex gap-1">
                   <button onClick={() => handleDelete(emp.id!)} className="px-2 py-1 md:px-3 md:py-1 bg-red-500 text-white rounded-lg font-bold shadow hover:bg-red-600 transition text-xs md:text-sm flex items-center gap-1">
