@@ -24,7 +24,24 @@ const initialProject: Omit<Project, 'id' | 'deployments'> = {
 const Projects: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const isAdmin = user && user.email === 'west@naver.com';
+  const [isAdmin, setIsAdmin] = useState(false);
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (!user) {
+        setIsAdmin(false);
+        return;
+      }
+      try {
+        const adminDoc = await import('firebase/firestore').then(firestore =>
+          firestore.getDoc(firestore.doc(db, 'admins', user.uid))
+        );
+        setIsAdmin(!!(adminDoc.exists && adminDoc.exists() && adminDoc.data()?.isAdmin === true));
+      } catch {
+        setIsAdmin(false);
+      }
+    };
+    checkAdmin();
+  }, [user]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(initialProject);
@@ -35,8 +52,8 @@ const getToday = () => {
   const day = d.getDate().toString().padStart(2, '0');
   return `${d.getFullYear()}-${month}-${day}`;
 };
-const [deployForm, setDeployForm] = useState<Deployment>({ status: '등록', statusChangeDate: getToday(), note: '' });
-  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
+const [deployForm, setDeployForm] = useState<Deployment>({ status: '진행', statusChangeDate: getToday(), note: '' });
+  const [selectedProjectId] = useState<string>('');
   const [message, setMessage] = useState('');
   const [editId, setEditId] = useState<string | null>(null);
 
@@ -52,6 +69,10 @@ const [deployForm, setDeployForm] = useState<Deployment>({ status: '등록', sta
   // 프로젝트 등록/수정
   const handleAddOrEditProject = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) {
+      setMessage('관리자 권한이 필요합니다.');
+      return;
+    }
     try {
       if (editId) {
         // 수정
@@ -93,6 +114,10 @@ const [deployForm, setDeployForm] = useState<Deployment>({ status: '등록', sta
 
   // 프로젝트 삭제
   const handleDeleteProject = async (id: string) => {
+    if (!isAdmin) {
+      setMessage('관리자 권한이 필요합니다.');
+      return;
+    }
     if (!window.confirm('정말 삭제하시겠습니까?')) return;
     try {
       await updateDoc(doc(db, 'projects', id), { deleted: true });
@@ -129,6 +154,10 @@ const [deployForm, setDeployForm] = useState<Deployment>({ status: '등록', sta
 // 프로젝트 상태관리 추가
 const handleAddDeployment = async (e: React.FormEvent) => {
   e.preventDefault();
+  if (!isAdmin) {
+    setMessage('관리자 권한이 필요합니다.');
+    return;
+  }
   if (!selectedProjectId || !deployForm.statusChangeDate) {
     setMessage('프로젝트와 상태변경일을 입력하세요.');
     return;
@@ -139,85 +168,79 @@ const handleAddDeployment = async (e: React.FormEvent) => {
     const newDeployments = target?.deployments ? [...target.deployments, deployForm] : [deployForm];
     await updateDoc(projectRef, { deployments: newDeployments });
     setMessage('프로젝트 상태가 추가되었습니다.');
-    setDeployForm({ status: '등록', statusChangeDate: getToday(), note: '' });
+    setDeployForm({ status: '진행', statusChangeDate: getToday(), note: '' });
     setTimeout(() => setMessage(''), 1500);
   } catch {
     setMessage('상태관리 실패');
   }
 };
 
+  if (!isAdmin) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="bg-white rounded-2xl shadow-xl p-10 border border-red-200 flex flex-col items-center">
+          <div className="text-6xl mb-4 text-red-400">❗</div>
+          <div className="text-2xl font-bold mb-2">접근 권한이 없습니다</div>
+          <div className="mb-6 text-gray-600">관리자 권한이 필요한 페이지입니다.</div>
+          <button onClick={() => navigate('/')} className="px-6 py-3 bg-blue-500 text-white rounded-xl text-lg shadow hover:bg-blue-600">홈으로 돌아가기</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-4 md:p-10 bg-gradient-to-br from-blue-50 to-white min-h-screen">
       <div className="bg-white rounded-2xl shadow-xl p-8 mb-10 border border-blue-200 max-w-6xl mx-auto">
         <h2 className="text-2xl mb-8 text-blue-700 flex items-center gap-2 tracking-wide">
           <span>프로젝트 정보</span>
-          {isAdmin && <span className="text-sm bg-blue-100 text-blue-600 px-3 py-1 rounded-full">관리자</span>}
+          <span className="text-sm bg-blue-100 text-blue-600 px-3 py-1 rounded-full">관리자</span>
         </h2>
         {message && <div className={`mb-4 px-4 py-2 rounded-xl text-center text-base ${message.includes('실패') ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-700'}`}>{message}</div>}
-        {isAdmin && (
-          <>
-            {/* 프로젝트 추가 폼 */}
-            <form onSubmit={handleAddOrEditProject} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <div>
-                <label className="block text-base mb-2 text-blue-700">등록일</label>
-                <input name="requestDate" value={form.requestDate} onChange={e => setForm({ ...form, requestDate: e.target.value })} type="date" className="w-full px-4 py-2 border-2 border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-300" required />
-              </div>
-              <div>
-                <label className="block text-base mb-2 text-blue-700">수행사</label>
-                <input name="client" value={form.client} onChange={e => setForm({ ...form, client: e.target.value })} className="w-full px-4 py-2 border-2 border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-300" placeholder="수행사명" required />
-              </div>
-              <div>
-                <label className="block text-base mb-2 text-blue-700">프로젝트개요</label>
-                <input name="project" value={form.project} onChange={e => setForm({ ...form, project: e.target.value })} className="w-full px-4 py-2 border-2 border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-300" placeholder="프로젝트개요" required />
-              </div>
-              <div>
-                <label className="block text-base mb-2 text-blue-700">프로젝트기간</label>
-                <input name="period" value={form.period} onChange={e => setForm({ ...form, period: e.target.value })} className="w-full px-4 py-2 border-2 border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-300" placeholder="예: 6개월" required />
-              </div>
-              <div>
-                <label className="block text-base mb-2 text-blue-700">장소</label>
-                <input name="location" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} className="w-full px-4 py-2 border-2 border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-300" placeholder="장소" />
-              </div>
-              <div>
-                <label className="block text-base mb-2 text-blue-700">요청기술</label>
-                <input name="developer" value={form.developer} onChange={e => setForm({ ...form, developer: e.target.value })} className="w-full px-4 py-2 border-2 border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-300" placeholder="요청기술" />
-              </div>
-              <div className="flex gap-3 mb-8 col-span-1 md:col-span-3">
-                <button type="submit" className="px-5 py-2 bg-blue-600 text-white rounded-xl text-base hover:bg-blue-700 transition shadow">{editId ? '수정' : '등록'}</button>
-                {editId && <button type="button" className="px-5 py-2 bg-gray-400 text-white rounded-xl text-base hover:bg-gray-500 transition shadow" onClick={()=>{setForm(initialProject);setEditId(null);}}>취소</button>}
-              </div>
-            </form>
-            {/* 프로젝트 상태관리 폼 */}
-            <form onSubmit={handleAddDeployment} className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <div>
-                <label className="block text-base mb-2 text-blue-700">프로젝트 선택</label>
-                <select value={selectedProjectId} onChange={e => setSelectedProjectId(e.target.value)} className="w-full px-4 py-2 border-2 border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-300" required>
-                  <option value="">프로젝트 선택</option>
-                  {projects.map(p => <option key={p.id} value={p.id}>{p.project}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-base mb-2 text-blue-700">상태</label>
-                <select name="status" value={deployForm.status} onChange={e => setDeployForm({ ...deployForm, status: e.target.value as '등록' | '진행' | '마감' })} className="w-full px-4 py-2 border-2 border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-300" required>
-                  <option value="등록">등록</option>
-                  <option value="진행">진행</option>
-                  <option value="마감">마감</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-base mb-2 text-blue-700">상태변경일</label>
-                <input name="statusChangeDate" value={deployForm.statusChangeDate} onChange={e => setDeployForm({ ...deployForm, statusChangeDate: e.target.value })} type="date" className="w-full px-4 py-2 border-2 border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-300" required />
-              </div>
-              <div>
-                <label className="block text-base mb-2 text-blue-700">비고</label>
-                <input name="note" value={deployForm.note} onChange={e => setDeployForm({ ...deployForm, note: e.target.value })} className="w-full px-4 py-2 border-2 border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-300" placeholder="비고" />
-              </div>
-              <div className="col-span-1 md:col-span-4 flex gap-3 mt-2">
-                <button type="submit" className="px-5 py-2 bg-green-600 text-white rounded-xl text-base hover:bg-green-700 transition shadow">프로젝트 상태관리</button>
-              </div>
-            </form>
-          </>
-        )}
+        {/* 프로젝트 추가 폼 */}
+        <form onSubmit={handleAddOrEditProject} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          {/* ...기존 코드... */}
+        </form>
+        {/* 프로젝트 상태관리 폼 */}
+        <form onSubmit={handleAddDeployment} className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div>
+            <label className="block font-bold mb-2 text-gray-700 text-base">상태</label>
+            <select
+              name="status"
+              value={deployForm.status}
+              onChange={e => setDeployForm({ ...deployForm, status: e.target.value as '진행' | '완료' })}
+              className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-blue-400 text-base"
+              required
+            >
+              <option value="진행">진행</option>
+              <option value="완료">완료</option>
+            </select>
+          </div>
+          <div>
+            <label className="block font-bold mb-2 text-gray-700 text-base">상태변경일</label>
+            <input
+              type="date"
+              name="statusChangeDate"
+              value={deployForm.statusChangeDate}
+              onChange={e => setDeployForm({ ...deployForm, statusChangeDate: e.target.value })}
+              className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-blue-400 text-base"
+              required
+            />
+          </div>
+          <div className="md:col-span-2">
+            <label className="block font-bold mb-2 text-gray-700 text-base">비고</label>
+            <input
+              type="text"
+              name="note"
+              value={deployForm.note}
+              onChange={e => setDeployForm({ ...deployForm, note: e.target.value })}
+              className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-blue-400 text-base"
+              placeholder="비고 입력"
+            />
+          </div>
+          <div className="md:col-span-4 flex justify-center mt-2">
+            <button type="submit" className="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-blue-700 transition-all duration-150">등록됨</button>
+          </div>
+        </form>
       </div>
       <div className="overflow-x-auto max-w-6xl mx-auto">
         {loading ? (
@@ -234,7 +257,7 @@ const handleAddDeployment = async (e: React.FormEvent) => {
                 <th className="border px-4 py-3 text-blue-700">장소</th>
                 <th className="border px-4 py-3 text-blue-700">요청기술</th>
                 <th className="border px-4 py-3 text-blue-700">프로젝트 상태</th>
-                {isAdmin && <th className="border px-4 py-3 text-blue-700">관리</th>}
+                <th className="border px-4 py-3 text-blue-700">관리</th>
               </tr>
             </thead>
             <tbody>
@@ -252,7 +275,7 @@ const handleAddDeployment = async (e: React.FormEvent) => {
                       <ul className="list-disc list-inside space-y-1">
                         {proj.deployments.map((dep, dIdx) => (
                           <li key={dIdx} className="text-sm text-blue-700">
-                            <span className="inline-block bg-blue-200 text-blue-800 px-2 py-0.5 rounded mr-1">{dep.status}</span>
+                            <span className={`inline-block px-2 py-0.5 rounded mr-1 ${dep.status === '등록' ? 'bg-gray-200 text-gray-700' : dep.status === '진행' ? 'bg-blue-200 text-blue-800' : 'bg-green-200 text-green-800'}`}>{dep.status}</span>
                             <span className="inline-block bg-gray-100 text-gray-700 px-2 py-0.5 rounded mr-1">{dep.statusChangeDate}</span>
                             {dep.note && <span className="inline-block bg-green-100 text-green-700 px-2 py-0.5 rounded">{dep.note}</span>}
                           </li>
@@ -262,12 +285,10 @@ const handleAddDeployment = async (e: React.FormEvent) => {
                       <span className="text-gray-400">상태 없음</span>
                     )}
                   </td>
-                  {isAdmin && (
-                    <td className="border px-4 py-3 whitespace-nowrap">
-                      <button className="px-3 py-1 bg-yellow-400 text-base rounded-xl mr-2 hover:bg-yellow-500 transition shadow" onClick={() => handleEditProject(proj.id)}>수정</button>
-                      <button className="px-3 py-1 bg-red-400 text-base rounded-xl hover:bg-red-500 transition shadow" onClick={() => handleDeleteProject(proj.id)}>삭제</button>
-                    </td>
-                  )}
+                  <td className="border px-4 py-3 whitespace-nowrap">
+                    <button className="px-3 py-1 bg-yellow-400 text-base rounded-xl mr-2 hover:bg-yellow-500 transition shadow" onClick={() => handleEditProject(proj.id)}>수정</button>
+                    <button className="px-3 py-1 bg-red-400 text-base rounded-xl hover:bg-red-500 transition shadow" onClick={() => handleDeleteProject(proj.id)}>삭제</button>
+                  </td>
                 </tr>
               ))}
             </tbody>

@@ -9,7 +9,7 @@ const initialForm = {
   period: '',
   location: '',
   developer: '',
-  deployments: [{ status: '등록', statusChangeDate: '' }],
+  deployments: [{ status: '진행', statusChangeDate: '' }],
 };
 
 const AdminProjectStatus: React.FC = () => {
@@ -35,12 +35,17 @@ const AdminProjectStatus: React.FC = () => {
       period: project.period || '',
       location: project.location || '',
       developer: project.developer || '',
-      deployments: project.deployments || [{ status: '등록', statusChangeDate: '' }],
+      deployments: project.deployments && project.deployments.length > 0
+        ? project.deployments.map((d: any) => ({
+            ...d,
+            status: d.status === '진행중' ? '진행' : d.status // 기존 데이터 호환
+          }))
+        : [{ status: '진행', statusChangeDate: '' }],
     });
     setEditId(project.id);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     if (name === 'status' || name === 'statusChangeDate') {
       setForm({
@@ -59,11 +64,20 @@ const AdminProjectStatus: React.FC = () => {
     e.preventDefault();
     try {
       if (editId) {
+        // 수정 시: 폼에서 선택한 상태 그대로 반영
         await updateDoc(doc(db, 'projects', editId), form);
         setMessage('수정되었습니다.');
         setEditId(null);
       } else {
-        await addDoc(collection(db, 'projects'), form);
+        // 등록 시: 상태를 무조건 '진행'으로 저장
+        const newForm = {
+          ...form,
+          deployments: [{
+            ...form.deployments[0],
+            status: '진행',
+          }],
+        };
+        await addDoc(collection(db, 'projects'), newForm);
         setMessage('등록되었습니다.');
       }
       setForm(initialForm);
@@ -112,7 +126,16 @@ const AdminProjectStatus: React.FC = () => {
             </div>
             <div>
               <label className="block font-bold mb-2 text-gray-700 text-base">상태</label>
-              <input name="status" value={form.deployments[0].status} onChange={handleChange} className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-blue-400 text-base" />
+              <select
+                name="status"
+                value={form.deployments[0].status}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-blue-400 text-base"
+                disabled={!editId} // 등록 시에는 상태 선택 불가
+              >
+                <option value="진행">진행</option>
+                <option value="완료">완료</option>
+              </select>
             </div>
             <div>
               <label className="block font-bold mb-2 text-gray-700 text-base">상태변경일</label>

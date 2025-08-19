@@ -1,6 +1,6 @@
 // 프로젝트 실적 타입
 export interface Deployment {
-  status: '등록' | '진행' | '마감';
+  status: '등록' | '진행' | '완료';
   statusChangeDate: string;
   note?: string;
 }

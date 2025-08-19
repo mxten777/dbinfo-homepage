@@ -64,7 +64,10 @@ const ProjectList: React.FC = () => {
                 <tbody>
                   {sorted.map((proj, idx) => {
                     const filteredDeployments = (proj.deployments || []).filter(
-                      d => d.status === '진행' || d.status === '마감'
+                      d =>
+                        d.status === '등록' ||
+                        d.status === '진행' ||
+                        d.status === '완료'
                     );
                     if (filteredDeployments.length === 0) return null;
                     return (
@@ -88,7 +91,7 @@ const ProjectList: React.FC = () => {
                                 ) : (
                                   <span className="inline-flex items-center px-2 py-0.5 bg-gray-200 text-gray-700 rounded-full font-bold">
                                     <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                                    마감
+                                    완료
                                   </span>
                                 )}
                                 <span className="inline-block bg-gray-100 text-gray-700 px-2 py-0.5 rounded">{dep.statusChangeDate}</span>
