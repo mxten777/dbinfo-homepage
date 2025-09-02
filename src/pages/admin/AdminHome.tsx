@@ -76,8 +76,7 @@ const AdminHome: React.FC = () => {
           <h1 className="text-3xl font-extrabold text-center text-blue-700 mb-8 tracking-wide drop-shadow">관리자 메뉴</h1>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-8">
             {adminMenus.map(menu => {
-              // 직원등록, 직원관리 메뉴만 텍스트 색상 변경
-              const isEmployeeMenu = menu.label === '직원등록' || menu.label === '직원관리';
+              // 모든 메뉴 텍스트 색상 은은하게 변경
               return (
                 <button
                   key={menu.label}
@@ -85,7 +84,7 @@ const AdminHome: React.FC = () => {
                   onClick={() => navigate(menu.to)}
                 >
                   <menu.icon size={36} className="mb-2 opacity-90" />
-                  <div className={`mb-1 text-lg md:text-xl font-bold tracking-tight ${isEmployeeMenu ? 'text-blue-50 drop-shadow-sm' : ''}`}>{menu.label}</div>
+                  <div className="mb-1 text-lg md:text-xl font-bold tracking-tight text-blue-50 drop-shadow-sm">{menu.label}</div>
                   <div className="text-xs md:text-sm font-normal text-white/80 mt-1">{menu.desc}</div>
                 </button>
               );
