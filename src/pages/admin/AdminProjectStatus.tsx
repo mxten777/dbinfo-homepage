@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
 
@@ -96,6 +97,10 @@ const AdminProjectStatus: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-10 px-2 flex flex-col items-center">
       <div className="w-full max-w-4xl mx-auto flex flex-col gap-10">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-3xl font-extrabold text-blue-700 tracking-tight drop-shadow">프로젝트 관리</h2>
+          <Link to="/admin/home" className="bg-gradient-to-r from-blue-100 to-cyan-200 hover:from-blue-200 hover:to-cyan-100 text-blue-700 px-5 py-2 rounded-full font-semibold shadow transition-all">관리자 홈</Link>
+        </div>
         <div className="bg-white rounded-2xl shadow-xl border border-blue-100 p-8">
           <h2 className="text-2xl font-extrabold mb-6 text-blue-700 tracking-tight">프로젝트 등록/수정/삭제</h2>
           {message && <div className="mb-4 text-green-600 font-semibold text-lg text-center">{message}</div>}

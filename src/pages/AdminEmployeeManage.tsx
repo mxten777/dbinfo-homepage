@@ -8,10 +8,7 @@ import type { Employee, Leave } from '../types/employee';
 const AdminEmployeeManage: React.FC = () => {
   // 관리자 권한 상태 저장
   const [adminMap, setAdminMap] = useState<{ [uid: string]: boolean }>({});
-  // 진입 확인용 테스트
-  console.log('AdminEmployeeManage 컴포넌트 진입!');
-  // 화면 최상단에 테스트용 텍스트와 버튼 추가
-  const testAlert = () => alert('직원관리 화면입니다! (경로 진입 확인)');
+  // ...existing code...
   const [message, setMessage] = useState('');
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [leaves, setLeaves] = useState<Leave[]>([]);
@@ -188,13 +185,7 @@ const AdminEmployeeManage: React.FC = () => {
           </div>
         </div>
       )}
-      {/* 진입 확인용 테스트 영역 */}
-      <div className="mb-4 p-4 bg-yellow-100 border-2 border-yellow-400 rounded-xl flex flex-col items-center">
-        <h2 className="text-xl font-bold text-yellow-700 mb-2">직원관리 화면 진입 확인용</h2>
-        <button className="px-4 py-2 bg-yellow-400 text-white rounded-full font-bold shadow hover:bg-yellow-500 transition" onClick={testAlert}>
-          테스트 버튼 (클릭 시 alert)
-        </button>
-      </div>
+  {/* ...existing code... */}
       {/* 메시지 출력 */}
       {message && (
         <div className="mb-4 text-center text-lg font-bold text-blue-700 bg-blue-100 rounded-xl py-2 shadow">{message}</div>
@@ -218,7 +209,8 @@ const AdminEmployeeManage: React.FC = () => {
         </div>
       )}
       {/* 직원 테이블 */}
-      <div className="overflow-x-auto bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+  <div className="mb-4 text-2xl font-extrabold text-blue-700 text-center drop-shadow">직원정보 상세현황</div>
+  <div className="overflow-x-auto bg-white rounded-xl shadow-lg p-6 border border-gray-200">
         <table className="min-w-full text-sm text-left">
           <thead>
             <tr>
