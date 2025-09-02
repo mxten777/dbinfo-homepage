@@ -53,6 +53,7 @@ export default function Header() {
     navLinks = (
       <>
         <Link to="/admin/home" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">관리자홈</Link>
+        <Link to="/admin/register" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">직원등록</Link>
         <Link to="/admin/employee-manage" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">직원관리</Link>
         <Link to="/admin/project-status" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">프로젝트관리</Link>
         <Link to="/admin/deputy-approval" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">직원연차 관리</Link>
