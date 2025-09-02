@@ -49,28 +49,10 @@ export default function Header() {
       </>
     );
   } else if (isAdminPage) {
-    // 모든 /admin/ 경로에서 관리자 메뉴만 노출
+    // 모든 /admin/ 경로에서 관리자 메뉴는 '관리자홈'과 '로그아웃'만 노출
     navLinks = (
       <>
         <Link to="/admin/home" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">관리자홈</Link>
-        <Link to="/admin/register" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">직원등록</Link>
-        <Link to="/admin/employee-manage" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">직원관리</Link>
-        <Link to="/admin/project-status" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">프로젝트관리</Link>
-        <Link to="/admin/deputy-approval" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">직원연차 관리</Link>
-        <Link to="/admin/company-news-manage" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">사내소식관리</Link>
-        <Link to="/admin/deputy-request" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">관리자대리 신청</Link>
-        <button onClick={()=>{import('../firebaseConfig').then(mod=>{mod.auth.signOut();window.location.href='/';});}} className="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600 transition block sm:inline-block">로그아웃</button>
-      </>
-    );
-    navLinks = (
-      <>
-        <Link to="/admin/home" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">관리자홈</Link>
-        <Link to="/admin/register" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">직원등록</Link>
-        <Link to="/admin/employee-manage" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">직원관리</Link>
-        <Link to="/admin/project-status" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">프로젝트관리</Link>
-        <Link to="/admin/deputy-approval" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">직원연차 관리</Link>
-        <Link to="/admin/company-news-manage" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">사내소식관리</Link>
-        <Link to="/admin/deputy-request" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">관리자대리 신청</Link>
         <button onClick={()=>{import('../firebaseConfig').then(mod=>{mod.auth.signOut();window.location.href='/';});}} className="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600 transition block sm:inline-block">로그아웃</button>
       </>
     );
