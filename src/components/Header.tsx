@@ -33,17 +33,8 @@ export default function Header() {
 
   // 직원 로그인 경로(직원 로그인/직원 홈) 또는 user가 있고 관리자 이메일이지만 직원 로그인 경로로 진입한 경우에도 직원 메뉴만 노출
   const isEmployeeMode = ['/employee-login', '/employee-home'].includes(location.pathname);
-  // 관리자 페이지 전체에서 관리자 메뉴 노출 (관리자 홈, 직원관리, 프로젝트관리, 연차관리, 사내소식관리, 관리자대리신청)
-  const adminPages = [
-    '/admin/home',
-    '/admin/employee-manage',
-    '/admin/project-status',
-    '/admin/deputy-approval',
-    '/admin/company-news-manage',
-    '/admin/deputy-request',
-    '/admin/register'
-  ];
-  const isAdminPage = adminPages.includes(location.pathname);
+  // /admin/로 시작하는 모든 경로에서 관리자 메뉴 강제 노출
+  const isAdminPage = location.pathname.startsWith('/admin/');
   let navLinks = null;
   if (loading) {
     navLinks = null;
@@ -57,8 +48,8 @@ export default function Header() {
         <span className="px-3 py-1 rounded bg-gray-300 text-gray-400 cursor-not-allowed block sm:inline-block" aria-disabled>직원로그인</span>
       </>
     );
-  } else if (isAdminPage && isAdmin) {
-    // 모든 관리자 페이지에서 관리자 메뉴만 노출
+  } else if (isAdminPage) {
+    // 모든 /admin/ 경로에서 관리자 메뉴만 노출
     navLinks = (
       <>
         <Link to="/admin/home" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">관리자홈</Link>
