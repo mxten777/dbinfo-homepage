@@ -75,8 +75,10 @@ const AdminHome: React.FC = () => {
       <Header />
       <div className="min-h-screen bg-gray-50 py-10 px-2 flex flex-col items-center">
         <div className="w-full max-w-4xl mx-auto">
-          <div className="bg-white/80 border border-blue-100 rounded-3xl shadow-xl p-6 md:p-10 mb-10">
-            <h1 className="text-3xl font-extrabold text-center text-blue-700 mb-8 tracking-wide drop-shadow">관리자 메뉴</h1>
+          <div className="bg-blue-700 rounded-t-3xl shadow-xl p-6 md:p-10 mb-0 flex flex-col items-center">
+            <h1 className="text-4xl font-extrabold text-white text-center mb-4 tracking-wide drop-shadow">DB.INFO 관리자</h1>
+          </div>
+          <div className="bg-white/80 border border-blue-100 rounded-b-3xl shadow-xl p-6 md:p-10 mb-10">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-8">
               {adminMenus.map(menu => {
                 // 모든 메뉴 텍스트 색상 은은하게 변경
