@@ -75,17 +75,21 @@ const AdminHome: React.FC = () => {
         <div className="bg-white/80 border border-blue-100 rounded-3xl shadow-xl p-6 md:p-10 mb-10">
           <h1 className="text-3xl font-extrabold text-center text-blue-700 mb-8 tracking-wide drop-shadow">관리자 메뉴</h1>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-8">
-            {adminMenus.map(menu => (
-              <button
-                key={menu.label}
-                className={`flex flex-col items-center justify-center rounded-2xl shadow-md p-6 md:p-7 min-h-[140px] transition-all duration-150 ${menu.color} hover:scale-[1.04] hover:shadow-xl active:scale-100`}
-                onClick={() => navigate(menu.to)}
-              >
-                <menu.icon size={36} className="mb-2 opacity-90" />
-                <div className="mb-1 text-lg md:text-xl font-bold tracking-tight">{menu.label}</div>
-                <div className="text-xs md:text-sm font-normal text-white/80 mt-1">{menu.desc}</div>
-              </button>
-            ))}
+            {adminMenus.map(menu => {
+              // 직원등록, 직원관리 메뉴만 텍스트 색상 변경
+              const isEmployeeMenu = menu.label === '직원등록' || menu.label === '직원관리';
+              return (
+                <button
+                  key={menu.label}
+                  className={`flex flex-col items-center justify-center rounded-2xl shadow-md p-6 md:p-7 min-h-[140px] transition-all duration-150 ${menu.color} hover:scale-[1.04] hover:shadow-xl active:scale-100`}
+                  onClick={() => navigate(menu.to)}
+                >
+                  <menu.icon size={36} className="mb-2 opacity-90" />
+                  <div className={`mb-1 text-lg md:text-xl font-bold tracking-tight ${isEmployeeMenu ? 'text-blue-50 drop-shadow-sm' : ''}`}>{menu.label}</div>
+                  <div className="text-xs md:text-sm font-normal text-white/80 mt-1">{menu.desc}</div>
+                </button>
+              );
+            })}
           </div>
         </div>
         {/* 개발자 도구 */}
