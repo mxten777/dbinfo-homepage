@@ -8,6 +8,16 @@ export default function Home() {
   const [showChatBotDetail, setShowChatBotDetail] = useState(false);
   const [showDemandDetail, setShowDemandDetail] = useState(false);
   const [showRDDetail, setShowRDDetail] = useState(false);
+  // 스크롤 이동 함수
+  const scrollToSection = (id: string) => {
+    const target = document.getElementById(id);
+    if (target) {
+      const header = document.querySelector('header');
+      const headerHeight = header ? header.offsetHeight : 0;
+      const y = target.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  };
   return (
     <main className="min-h-[80vh] bg-gradient-to-br from-blue-50 to-cyan-50 p-0 md:p-8">
       {/* Hero Section */}
@@ -51,7 +61,10 @@ export default function Home() {
           
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-            <button className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-2xl font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+            <button
+              className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-2xl font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
+              onClick={() => scrollToSection('business')}
+            >
               <span className="flex items-center gap-3">
                 사업영역 보기
                 <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -59,7 +72,10 @@ export default function Home() {
                 </svg>
               </span>
             </button>
-            <button className="px-8 py-4 bg-white/70 backdrop-blur-sm border border-gray-200 text-gray-700 rounded-2xl font-bold hover:bg-white/90 transition-all duration-300">
+            <button
+              className="px-8 py-4 bg-white/70 backdrop-blur-sm border border-gray-200 text-gray-700 rounded-2xl font-bold hover:bg-white/90 transition-all duration-300"
+              onClick={() => scrollToSection('about')}
+            >
               회사소개 자세히
             </button>
           </div>
