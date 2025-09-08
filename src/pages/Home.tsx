@@ -179,8 +179,8 @@ export default function Home() {
                 </div>
               </div>
               
-              <div className="mt-6 flex items-center justify-between">
-                <div className="text-right">
+              <div className="mt-6 flex items-center">
+                <div className="text-left">
                   <div className="text-gray-400 text-sm">CEO</div>
                   <div className="text-white font-semibold">한규재</div>
                 </div>
@@ -642,25 +642,25 @@ export default function Home() {
             features={["AI 챗봇", "상담 자동화", "다채널 연동", "데이터 분석"]}
           />
           <BusinessSection
-            image="/images/pattern-01.jpg"
-            title="Demand Prediction"
-            subtitle="수요예측/AI 분석"
-            description1="AI/머신러닝 기반 수요예측, 판매/재고/트렌드 분석, 비즈니스 의사결정 지원."
+            image="/images/watch-03.jpg"
+            title="AI ChatBot Service"
+            subtitle="챗봇/상담 자동화"
+            description1="AI 기반 챗봇, 고객상담 자동화, FAQ, 실시간 응대, 자연어 처리 기술 적용."
               description2={
                 <>
-                  빅데이터 분석, 예측모델 구축, 실시간 대시보드 제공, 산업별 맞춤형 솔루션.<br/>
+                  다양한 채널(웹/모바일/메신저) 연동, 사용자 맞춤형 답변, 데이터 분석 기반 서비스 개선.<br/>
                   <button
-                    className="mt-4 px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-full font-bold shadow hover:scale-105 transition"
-                    onClick={() => setShowDemandDetail(true)}
+                    className="mt-4 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full font-bold shadow hover:scale-105 transition"
+                    onClick={() => setShowChatBotDetail(true)}
                   >
                     상세소개 보기
                   </button>
                 </>
               }
-            features={["수요예측", "빅데이터 분석", "실시간 대시보드", "산업별 맞춤 솔루션"]}
+            features={["AI 챗봇", "상담 자동화", "FAQ/실시간 응대", "자연어 처리"]}
           />
           <BusinessSection
-            image="/images/pattern-02.jpg"
+            image="/images/whatsapp-04.jpg"
             title="R&D Center"
             subtitle="기술연구소/신기술 개발"
             description1="AI, IoT, 빅데이터 등 신기술 연구개발, 특허/논문, 산학협력 프로젝트 수행."
