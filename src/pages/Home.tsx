@@ -41,20 +41,20 @@ export default function Home() {
               </div>
             </FadeSlideIn>
             <FadeSlideIn direction="up" delay={300}>
-              <h1 className="text-5xl md:text-7xl font-black text-transparent bg-gradient-to-r from-blue-800 via-cyan-600 to-indigo-800 bg-clip-text mb-6 tracking-tight leading-tight">
+              <h1 className="font-display text-hero md:text-[5rem] font-black text-transparent bg-gradient-to-r from-primary-dark via-accent to-indigo-800 bg-clip-text mb-6 tracking-tight leading-tight drop-shadow-lg">
                 DB.INFO
               </h1>
             </FadeSlideIn>
             <FadeSlideIn direction="up" delay={500}>
               <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-8">
                 <div className="flex items-center gap-3">
-                  <div className="w-1 h-8 bg-gradient-to-b from-cyan-400 to-blue-600 rounded-full"></div>
-                  <span className="text-xl md:text-2xl font-bold text-gray-700">Digital Transformation</span>
+                  <div className="w-1 h-8 bg-gradient-to-b from-accent to-primary rounded-full"></div>
+                  <span className="font-display text-subtitle md:text-2xl font-extrabold text-headline">Digital Transformation</span>
                 </div>
-                <div className="hidden md:block w-2 h-2 bg-gray-400 rounded-full"></div>
+                <div className="hidden md:block w-2 h-2 bg-accent rounded-full"></div>
                 <div className="flex items-center gap-3">
-                  <span className="text-xl md:text-2xl font-bold text-gray-700">AI Innovation</span>
-                  <div className="w-1 h-8 bg-gradient-to-b from-indigo-400 to-cyan-600 rounded-full"></div>
+                  <span className="font-display text-subtitle md:text-2xl font-extrabold text-headline">AI Innovation</span>
+                  <div className="w-1 h-8 bg-gradient-to-b from-indigo-400 to-accent rounded-full"></div>
                 </div>
               </div>
             </FadeSlideIn>
@@ -62,10 +62,10 @@ export default function Home() {
           
           {/* Subtitle */}
           <FadeSlideIn direction="up" delay={700}>
-            <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-              <span className="font-semibold text-blue-800">13년간의 전문성</span>과 
-              <span className="font-semibold text-cyan-600"> 혁신적 기술력</span>으로<br className="hidden md:inline"/>
-              디지털 미래를 선도하는 <span className="font-semibold text-indigo-800">IT 솔루션 파트너</span>
+            <p className="font-sans text-base md:text-xl text-sub mb-8 max-w-3xl mx-auto leading-relaxed font-semibold">
+              <span className="text-primary-dark">13년간의 전문성</span>과
+              <span className="text-accent font-bold"> 혁신적 기술력</span>으로<br className="hidden md:inline"/>
+              디지털 미래를 선도하는 <span className="text-indigo-800 font-bold">IT 솔루션 파트너</span>
             </p>
           </FadeSlideIn>
           

@@ -1,6 +1,6 @@
 // ...existing code...
 import { collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore';
-import { FaGithub, FaLinkedin, FaMapMarkerAlt, FaPhoneAlt, FaEnvelope } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaPhoneAlt, FaEnvelope } from 'react-icons/fa';
 // ...existing code...
 // 연차기록 전체 삭제 함수
 export async function clearLeaves(setUploadMessage: (msg: string) => void) {
