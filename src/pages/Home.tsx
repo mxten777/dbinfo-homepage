@@ -1,5 +1,7 @@
+
 import BusinessSection from '../components/BusinessSection';
 import { useState } from 'react';
+import FadeSlideIn from '../components/FadeSlideIn';
 
 export default function Home() {
   const [showAIDetail, setShowAIDetail] = useState(false);
@@ -19,45 +21,53 @@ export default function Home() {
     }
   };
   return (
-    <main className="min-h-[80vh] bg-gradient-to-br from-blue-50 to-cyan-50 p-0 md:p-8">
+    <main className="min-h-[80vh] bg-gradient-to-br from-blue-100 via-cyan-50 to-indigo-100 p-0 md:p-8">
       {/* Hero Section */}
       <section className="max-w-6xl mx-auto py-16 px-4 md:px-8 text-center relative overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-cyan-50/30 to-indigo-50/50"></div>
-        <div className="absolute top-10 right-10 w-64 h-64 bg-gradient-to-br from-blue-400/10 to-cyan-400/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-10 left-10 w-48 h-48 bg-gradient-to-tr from-indigo-400/10 to-blue-400/10 rounded-full blur-3xl"></div>
-        
+        {/* Enhanced Background Elements */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-100/80 via-cyan-100/60 to-indigo-100/80 animate-gradient-move"></div>
+        <div className="absolute top-[-80px] left-1/2 -translate-x-1/2 w-[900px] h-[900px] bg-gradient-radial from-cyan-200/40 via-blue-100/10 to-transparent rounded-full blur-3xl opacity-80 animate-pulse-slow"></div>
+        <div className="absolute top-10 right-10 w-64 h-64 bg-gradient-to-br from-blue-400/20 to-cyan-400/10 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-10 left-10 w-48 h-48 bg-gradient-to-tr from-indigo-400/20 to-blue-400/10 rounded-full blur-3xl animate-float2"></div>
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-32 bg-gradient-to-t from-white/80 to-transparent"></div>
+
         <div className="relative z-10">
           {/* Main Title */}
           <div className="mb-8">
-            <div className="inline-flex items-center gap-3 bg-white/70 backdrop-blur-sm border border-blue-200/50 rounded-full px-6 py-3 mb-6 shadow-lg">
-              <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
-              <span className="text-sm font-semibold text-blue-700 tracking-wide">IT INNOVATION LEADER</span>
-            </div>
-            
-            <h1 className="text-5xl md:text-7xl font-black text-transparent bg-gradient-to-r from-blue-800 via-cyan-600 to-indigo-800 bg-clip-text mb-6 tracking-tight leading-tight">
-              DB.INFO
-            </h1>
-            
-            <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-8">
-              <div className="flex items-center gap-3">
-                <div className="w-1 h-8 bg-gradient-to-b from-cyan-400 to-blue-600 rounded-full"></div>
-                <span className="text-xl md:text-2xl font-bold text-gray-700">Digital Transformation</span>
+            <FadeSlideIn direction="up" delay={100}>
+              <div className="inline-flex items-center gap-3 bg-white/70 backdrop-blur-sm border border-blue-200/50 rounded-full px-6 py-3 mb-6 shadow-lg">
+                <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+                <span className="text-sm font-semibold text-blue-700 tracking-wide">IT INNOVATION LEADER</span>
               </div>
-              <div className="hidden md:block w-2 h-2 bg-gray-400 rounded-full"></div>
-              <div className="flex items-center gap-3">
-                <span className="text-xl md:text-2xl font-bold text-gray-700">AI Innovation</span>
-                <div className="w-1 h-8 bg-gradient-to-b from-indigo-400 to-cyan-600 rounded-full"></div>
+            </FadeSlideIn>
+            <FadeSlideIn direction="up" delay={300}>
+              <h1 className="text-5xl md:text-7xl font-black text-transparent bg-gradient-to-r from-blue-800 via-cyan-600 to-indigo-800 bg-clip-text mb-6 tracking-tight leading-tight">
+                DB.INFO
+              </h1>
+            </FadeSlideIn>
+            <FadeSlideIn direction="up" delay={500}>
+              <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="w-1 h-8 bg-gradient-to-b from-cyan-400 to-blue-600 rounded-full"></div>
+                  <span className="text-xl md:text-2xl font-bold text-gray-700">Digital Transformation</span>
+                </div>
+                <div className="hidden md:block w-2 h-2 bg-gray-400 rounded-full"></div>
+                <div className="flex items-center gap-3">
+                  <span className="text-xl md:text-2xl font-bold text-gray-700">AI Innovation</span>
+                  <div className="w-1 h-8 bg-gradient-to-b from-indigo-400 to-cyan-600 rounded-full"></div>
+                </div>
               </div>
-            </div>
+            </FadeSlideIn>
           </div>
           
           {/* Subtitle */}
-          <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-            <span className="font-semibold text-blue-800">13년간의 전문성</span>과 
-            <span className="font-semibold text-cyan-600"> 혁신적 기술력</span>으로<br className="hidden md:inline"/>
-            디지털 미래를 선도하는 <span className="font-semibold text-indigo-800">IT 솔루션 파트너</span>
-          </p>
+          <FadeSlideIn direction="up" delay={700}>
+            <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+              <span className="font-semibold text-blue-800">13년간의 전문성</span>과 
+              <span className="font-semibold text-cyan-600"> 혁신적 기술력</span>으로<br className="hidden md:inline"/>
+              디지털 미래를 선도하는 <span className="font-semibold text-indigo-800">IT 솔루션 파트너</span>
+            </p>
+          </FadeSlideIn>
           
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
@@ -623,24 +633,7 @@ export default function Home() {
               }
             features={["쇼핑몰 구축", "결제/배송 연동", "재고/주문 관리", "마케팅 자동화"]}
           />
-          <BusinessSection
-            image="/images/sphere-04.jpg"
-            title="AI ChatBot Service"
-            subtitle="챗봇/상담 자동화"
-            description1="AI 기반 챗봇, 고객상담 자동화, FAQ, 실시간 응대, 자연어 처리 기술 적용."
-              description2={
-                <>
-                  다양한 채널(웹/모바일/메신저) 연동, 사용자 맞춤형 답변, 데이터 분석 기반 서비스 개선.<br/>
-                  <button
-                    className="mt-4 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full font-bold shadow hover:scale-105 transition"
-                    onClick={() => setShowChatBotDetail(true)}
-                  >
-                    상세소개 보기
-                  </button>
-                </>
-              }
-            features={["AI 챗봇", "상담 자동화", "다채널 연동", "데이터 분석"]}
-          />
+          {/* 중복된 AI ChatBot Service 카드 제거됨 */}
           <BusinessSection
             image="/images/watch-03.jpg"
             title="AI ChatBot Service"
@@ -1148,16 +1141,6 @@ export default function Home() {
         <div className="text-xs text-gray-500">* 자세한 내용은 공식 홈페이지 채용정보 참고</div>
       </section>
 
-      {/* 연락처 */}
-      <section className="max-w-5xl mx-auto py-8 px-4">
-        <h2 className="text-lg font-bold text-blue-700 mb-2">연락처 및 위치</h2>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="mb-1">주소: 서울특별시 금천구 서부샛길 606, 대성디플리스 지식산업센터 B동 1410호</p>
-          <p className="mb-1">대표전화: 02-1234-5678</p>
-          <p className="mb-1">이메일: info@dbinfo.co.kr</p>
-          <p className="mb-1">대중교통: 1호선, 7호선 8번 출구 500미터</p>
-        </div>
-      </section>
 
     </main>
   );
