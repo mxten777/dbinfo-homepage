@@ -633,7 +633,7 @@ export default function Home() {
             features={["쇼핑몰 구축", "결제/배송 연동", "재고/주문 관리", "마케팅 자동화"]}
           />
           <BusinessSection
-            image="/images/sphere-04.jpg"
+            image="/images/sphere-05.jpg"
             title="AI ChatBot Service"
             subtitle="챗봇/상담 자동화"
             description1="AI 기반 챗봇, 고객상담 자동화, FAQ, 실시간 응대, 자연어 처리 기술 적용."
@@ -651,7 +651,7 @@ export default function Home() {
             features={["AI 챗봇", "상담 자동화", "다채널 연동", "데이터 분석"]}
           />
           <BusinessSection
-            image="/images/pattern-01.jpg"
+            image="/images/watch-03.jpg"
             title="Demand Prediction"
             subtitle="수요예측/AI 분석"
             description1="AI/머신러닝 기반 수요예측, 판매/재고/트렌드 분석, 비즈니스 의사결정 지원."
@@ -669,7 +669,7 @@ export default function Home() {
             features={["수요예측", "빅데이터 분석", "실시간 대시보드", "산업별 맞춤 솔루션"]}
           />
           <BusinessSection
-            image="/images/pattern-02.jpg"
+            image="/images/whatsapp-05.jpg"
             title="R&D Center"
             subtitle="기술연구소/신기술 개발"
             description1="AI, IoT, 빅데이터 등 신기술 연구개발, 특허/논문, 산학협력 프로젝트 수행."
