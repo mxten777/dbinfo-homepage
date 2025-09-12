@@ -1,4 +1,3 @@
-// src/components/FadeSlideIn.tsx
 import { useRef, useEffect } from 'react';
 
 interface FadeSlideInProps {

@@ -1,6 +1,5 @@
 // ...existing code...
 import { collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore';
-import { FaMapMarkerAlt, FaPhoneAlt, FaEnvelope } from 'react-icons/fa';
 // ...existing code...
 // 연차기록 전체 삭제 함수
 export async function clearLeaves(setUploadMessage: (msg: string) => void) {
@@ -66,32 +65,22 @@ export async function uploadUniqueEmployees(setUploadMessage: (msg: string) => v
 
 function Footer() {
   return (
-    <footer className="bg-gradient-to-r from-blue-700 to-cyan-600 text-white py-10 px-4 mt-12">
-      <div className="max-w-5xl mx-auto flex flex-col md:flex-row md:justify-between md:items-center gap-6">
-        {/* 회사 정보 */}
-        <div className="text-sm md:text-left text-center space-y-1">
-          <div className="text-lg font-bold tracking-wide mb-1">DB.INFO Co.,Ltd.</div>
-          <div><span className="font-semibold">대표</span>: 한규재 &nbsp; <span className="font-semibold">사업자등록번호</span>: 119-86-12345</div>
-          <div className="flex items-center justify-center md:justify-start gap-2"><FaMapMarkerAlt className="inline-block mr-1"/>서울특별시 금천구 서부샛길 606, 대성디폴리스 B동 1410호</div>
-          <div className="flex items-center justify-center md:justify-start gap-2"><FaPhoneAlt className="inline-block mr-1"/>대표전화: <a href="tel:02-780-0386" className="underline">02-780-0386</a></div>
-          <div className="flex items-center justify-center md:justify-start gap-2"><FaEnvelope className="inline-block mr-1"/>이메일: <a href="mailto:hankjae@db-info.co.kr" className="underline">hankjae@db-info.co.kr</a></div>
-          <div>대중교통: 1호선, 7호선 8번 출구 500미터</div>
-        </div>
-        {/* 소셜 링크 */}
-        <div className="flex flex-col items-center md:items-end gap-2">
-          <div className="mb-1">
-            <a
-              href="https://map.naver.com/p/search/%EC%84%9C%EC%9A%B8%ED%8A%B9%EB%B3%84%EC%8B%9C%20%EA%B8%88%EC%B2%9C%EA%B5%AC%20%EC%84%9C%EB%B6%80%EC%83%9B%EA%B8%B8%20606,%20%EB%8C%80%EC%84%B1%EB%94%94%ED%8F%B4%EB%A6%AC%EC%8A%A4%20%EC%A7%80%EC%8B%9D%EC%82%B0%EC%97%85%EC%84%BC%ED%84%B0%20B%EB%8F%99%201410%ED%98%B8"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline text-xs text-white/80 hover:text-green-400 transition"
-            >
-              찾아오는 길
-            </a>
-          </div>
-          <div className="text-xs text-white/80 mt-2">© 2025 DB.INFO Co.,Ltd. All rights reserved.</div>
-        </div>
+    <footer className="bg-contrast border-t border-gray-200 mt-12 py-8 px-4 text-center text-xs text-muted font-sans">
+      <div className="mb-2 text-base md:text-lg font-semibold text-headline">
+        주소: <span className="font-bold">서울특별시 금천구 서부샛길 606, 대성디폴리스 지식산업센터 B동 1410호</span><br />
+        <span className="text-sm md:text-base font-normal text-muted">대중교통: 1호선, 7호선 8번 출구 500미터</span>
       </div>
+      <div className="mb-2">
+        <a
+          href="https://map.naver.com/p/search/%EC%84%9C%EC%9A%B8%ED%8A%B9%EB%B3%84%EC%8B%9C%20%EA%B8%88%EC%B2%9C%EA%B5%AC%20%EC%84%9C%EB%B6%80%EC%83%9B%EA%B8%B8%20606,%20%EB%8C%80%EC%84%B1%EB%94%94%ED%8F%B4%EB%A6%AC%EC%8A%A4%20%EC%A7%80%EC%8B%9D%EC%82%B0%EC%97%85%EC%84%BC%ED%84%B0%20B%EB%8F%99%201410%ED%98%B8"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline text-accent font-extrabold text-base md:text-lg hover:text-accent-dark transition"
+        >
+          오시는 길
+        </a>
+      </div>
+      <div className="mt-2 text-xs text-muted">DB.INFO Co.,Ltd. All rights reserved.</div>
     </footer>
   );
 }

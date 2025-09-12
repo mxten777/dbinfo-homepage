@@ -4,34 +4,36 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 
 export default function Header() {
+
   const location = useLocation();
+  // 관리자/프로젝트 현황 화면에서 네비게이션 비활성화
   const isAdminScreen = ['/admin', '/admin-home', '/leaves', '/projects', '/project-list'].includes(location.pathname);
+  // 프로젝트 현황 화면에서 모든 메뉴 비활성화 (홈만 예외)
   const isProjectListScreen = location.pathname === '/project-list';
+  // 관리자 로그인 화면에서 프로젝트, 관리자로그인, 직원로그인 메뉴도 비활성화
   const isLoginScreen = location.pathname === '/admin';
   const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  // ...existing code...
   const { user, loading } = useAuth();
+  // 관리자 이메일 예시
   const isAdmin = user && (user.email === 'west@naver.com' || user.email === 'hankjae@naver.com');
 
-  // 헤더 스크롤 효과
-  useEffect(() => {
-    const onScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
+  // [자동 로그아웃] 관리자가 홈(/) 경로에 접근하면 자동 로그아웃
   useEffect(() => {
     if (user && isAdmin && window.location.pathname === '/') {
+      // 로그아웃 후 새로고침 (firebaseConfig에서 auth 사용)
       import('../firebaseConfig').then(mod => {
         mod.auth.signOut();
         window.location.reload();
       });
     }
   }, [user, isAdmin]);
+  // 직원 로그인 예시(관리자 외)
+  // ...existing code...
 
+  // 직원 로그인 경로(직원 로그인/직원 홈) 또는 user가 있고 관리자 이메일이지만 직원 로그인 경로로 진입한 경우에도 직원 메뉴만 노출
   const isEmployeeMode = ['/employee-login', '/employee-home'].includes(location.pathname);
+  // /admin/로 시작하는 모든 경로에서 관리자 메뉴 강제 노출
   const isAdminPage = location.pathname.startsWith('/admin/');
   let navLinks = null;
   if (loading) {
@@ -47,6 +49,7 @@ export default function Header() {
       </>
     );
   } else if (isAdminPage) {
+    // 모든 /admin/ 경로에서 관리자 메뉴는 '관리자홈'과 '로그아웃'만 노출
     navLinks = (
       <>
         <Link to="/admin/home" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">관리자홈</Link>
@@ -65,6 +68,7 @@ export default function Header() {
       </>
     );
   } else if (isEmployeeMode || (user && !isAdmin)) {
+    // 직원 로그인(관리자 아님): 연차신청, 내정보, 로그아웃만 노출
     navLinks = (
       <>
         <Link to="/employee-home" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">직원홈</Link>
@@ -74,6 +78,7 @@ export default function Header() {
       </>
     );
   } else if (isAdmin) {
+    // 관리자 로그인: 관리자 홈, 직원관리, 로그아웃만 노출
     navLinks = (
       <>
         <Link to="/admin/home" className="px-3 py-1 rounded hover:bg-white/20 hover:text-yellow-200 text-white transition block sm:inline-block">관리자홈</Link>
@@ -83,37 +88,34 @@ export default function Header() {
     );
   }
 
-  // 헤더 스타일 동적 적용
-  const headerClass = `backdrop-blur-md sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-blue-800/80 shadow-lg' : 'bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-400/90'}`;
+  // 관리자 메뉴 버튼 완전 제거 (AdminHome에서만 노출)
+  // ...existing code...
 
   return (
-    <header className={headerClass}>
-      <div className="max-w-6xl mx-auto flex items-center justify-end px-6 py-3">
-        <div className="flex items-center gap-4">
+    <header className="bg-gradient-to-r from-primary-dark via-primary to-accent shadow-lg sticky top-0 z-50">
+      <div className="max-w-6xl mx-auto flex items-center justify-end px-4 md:px-6 py-2 md:py-3">
+        {/* 데스크탑 네비게이션: 관리자 화면에서는 숨김 */}
+        <div className="flex items-center gap-2 md:gap-4">
+          {/* 프로젝트 현황(/project-list)에서는 네비게이션 숨김, 홈(/) 또는 그 외에서만 보이기 */}
           {(location.pathname === '/' || (!isAdminScreen && !isProjectListScreen)) && (
-            <nav className="hidden sm:flex gap-2 sm:gap-6 text-base font-semibold">
+            <nav className="hidden sm:flex gap-1 md:gap-4 text-base font-display font-extrabold tracking-tight text-contrast drop-shadow">
               {navLinks}
             </nav>
           )}
         </div>
         {/* 모바일 햄버거 버튼 */}
-        <button
-          className="sm:hidden flex flex-col justify-center items-center w-10 h-10 rounded hover:bg-white/10 focus:outline-none transition-all duration-300"
-          onClick={()=>setMenuOpen(v=>!v)}
-          aria-label="메뉴 열기"
-        >
-          <span className={`block w-6 h-0.5 bg-white mb-1 rounded transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
-          <span className={`block w-6 h-0.5 bg-white mb-1 rounded transition-all duration-300 ${menuOpen ? 'opacity-0' : ''}`}></span>
-          <span className={`block w-6 h-0.5 bg-white rounded transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
+        <button className="sm:hidden flex flex-col justify-center items-center w-10 h-10 rounded hover:bg-white/10 focus:outline-none" onClick={()=>setMenuOpen(v=>!v)} aria-label="메뉴 열기">
+          <span className="block w-6 h-0.5 bg-contrast mb-1 rounded transition-all" style={{transform: menuOpen ? 'rotate(45deg) translateY(7px)' : 'none'}}></span>
+          <span className={`block w-6 h-0.5 bg-contrast mb-1 rounded transition-all ${menuOpen ? 'opacity-0' : ''}`}></span>
+          <span className="block w-6 h-0.5 bg-contrast rounded transition-all" style={{transform: menuOpen ? 'rotate(-45deg) translateY(-7px)' : 'none'}}></span>
         </button>
       </div>
       {/* 모바일 메뉴 드롭다운 */}
-      <nav
-        className={`sm:hidden flex flex-col gap-2 px-6 pb-4 text-base font-semibold z-50 transition-all duration-500 ${menuOpen ? 'max-h-96 opacity-100 translate-y-0' : 'max-h-0 opacity-0 -translate-y-4 pointer-events-none'} bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-400/90 backdrop-blur-md`}
-        style={{overflow: 'hidden'}}
-      >
-        {navLinks}
-      </nav>
+      {menuOpen && (
+        <nav className="sm:hidden flex flex-col gap-2 px-6 pb-4 bg-gradient-to-r from-primary-dark via-primary to-accent text-base font-display font-extrabold tracking-tight text-contrast animate-fade-in-down z-50">
+          {navLinks}
+        </nav>
+      )}
     </header>
   );
 }

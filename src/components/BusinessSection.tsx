@@ -21,27 +21,39 @@ const BusinessSection: React.FC<BusinessSectionProps> = ({
   const [showModal, setShowModal] = useState(false);
   return (
     <>
-      <section className="bg-white rounded-3xl shadow-2xl flex flex-col gap-8 p-10 mb-16">
+      <section className="bg-white rounded-3xl shadow-2xl flex flex-col gap-8 p-6 md:p-10 mb-16">
         <div className="text-left">
           <img
             src={image}
             alt={title + " 대표 이미지"}
-            className="w-full h-48 md:h-56 object-cover rounded-xl shadow-lg border border-gray-100 mb-4"
+            className="w-full h-44 md:h-56 object-cover rounded-xl shadow-lg border border-gray-100 mb-4"
             style={{ boxSizing: 'border-box' }}
           />
-          <h3 className="text-3xl font-extrabold text-blue-800 mb-3">{title}</h3>
-          {subtitle && <p className="text-blue-600 mb-4 font-semibold text-lg">{subtitle}</p>}
-          <p className="text-gray-700 mb-3 text-base md:text-lg font-medium">{description1}</p>
-          {description2 && <p className="text-gray-600 mb-3 text-base">{description2}</p>}
+          <h3 className="font-display text-2xl md:text-3xl font-black text-primary-dark mb-2 md:mb-3 tracking-tight drop-shadow-sm">
+            {title}
+          </h3>
+          {subtitle && (
+            <p className="text-accent font-semibold text-base md:text-lg mb-3 md:mb-4">
+              {subtitle}
+            </p>
+          )}
+          <p className="font-sans text-base md:text-lg text-sub mb-2 md:mb-3 font-medium leading-relaxed">
+            {description1}
+          </p>
+          {description2 && (
+            <p className="font-sans text-base text-muted mb-2 md:mb-3">
+              {description2}
+            </p>
+          )}
           {features.length > 0 && (
-            <ul className="text-base text-gray-700 list-disc list-inside mb-2 space-y-1">
+            <ul className="text-base text-muted list-disc list-inside mb-2 space-y-1">
               {features.map((f, i) => (
                 <li key={i}>{f}</li>
               ))}
             </ul>
           )}
           <button
-            className="mt-4 px-6 py-2 bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-bold rounded-lg shadow hover:scale-105 transition"
+            className="mt-4 px-6 py-2 bg-gradient-to-r from-primary to-accent text-contrast font-extrabold rounded-lg shadow-lg hover:scale-105 hover:from-primary-dark hover:to-accent-dark transition-all duration-200 text-base md:text-lg"
             onClick={() => setShowModal(true)}
           >
             대표 이미지 크게 보기

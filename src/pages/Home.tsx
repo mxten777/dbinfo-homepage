@@ -1,4 +1,3 @@
-
 import BusinessSection from '../components/BusinessSection';
 import { useState } from 'react';
 import FadeSlideIn from '../components/FadeSlideIn';
@@ -21,7 +20,7 @@ export default function Home() {
     }
   };
   return (
-    <main className="min-h-[80vh] bg-gradient-to-br from-blue-100 via-cyan-50 to-indigo-100 p-0 md:p-8">
+    <main className="min-h-[80vh] bg-gradient-to-br from-blue-50 to-cyan-50 p-0 md:p-8">
       {/* Hero Section */}
       <section className="max-w-6xl mx-auto py-16 px-4 md:px-8 text-center relative overflow-hidden">
         {/* Enhanced Background Elements */}
@@ -36,8 +35,8 @@ export default function Home() {
           <div className="mb-8">
             <FadeSlideIn direction="up" delay={100}>
               <div className="inline-flex items-center gap-3 bg-white/70 backdrop-blur-sm border border-blue-200/50 rounded-full px-6 py-3 mb-6 shadow-lg">
-                <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
-                <span className="text-sm font-semibold text-blue-700 tracking-wide">IT INNOVATION LEADER</span>
+                <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
+                <span className="text-xs md:text-sm font-extrabold text-primary tracking-widest font-display uppercase">IT INNOVATION LEADER</span>
               </div>
             </FadeSlideIn>
             <FadeSlideIn direction="up" delay={300}>
@@ -633,9 +632,8 @@ export default function Home() {
               }
             features={["쇼핑몰 구축", "결제/배송 연동", "재고/주문 관리", "마케팅 자동화"]}
           />
-          {/* 중복된 AI ChatBot Service 카드 제거됨 */}
           <BusinessSection
-            image="/images/watch-03.jpg"
+            image="/images/sphere-04.jpg"
             title="AI ChatBot Service"
             subtitle="챗봇/상담 자동화"
             description1="AI 기반 챗봇, 고객상담 자동화, FAQ, 실시간 응대, 자연어 처리 기술 적용."
@@ -650,10 +648,28 @@ export default function Home() {
                   </button>
                 </>
               }
-            features={["AI 챗봇", "상담 자동화", "FAQ/실시간 응대", "자연어 처리"]}
+            features={["AI 챗봇", "상담 자동화", "다채널 연동", "데이터 분석"]}
           />
           <BusinessSection
-            image="/images/whatsapp-04.jpg"
+            image="/images/pattern-01.jpg"
+            title="Demand Prediction"
+            subtitle="수요예측/AI 분석"
+            description1="AI/머신러닝 기반 수요예측, 판매/재고/트렌드 분석, 비즈니스 의사결정 지원."
+              description2={
+                <>
+                  빅데이터 분석, 예측모델 구축, 실시간 대시보드 제공, 산업별 맞춤형 솔루션.<br/>
+                  <button
+                    className="mt-4 px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-full font-bold shadow hover:scale-105 transition"
+                    onClick={() => setShowDemandDetail(true)}
+                  >
+                    상세소개 보기
+                  </button>
+                </>
+              }
+            features={["수요예측", "빅데이터 분석", "실시간 대시보드", "산업별 맞춤 솔루션"]}
+          />
+          <BusinessSection
+            image="/images/pattern-02.jpg"
             title="R&D Center"
             subtitle="기술연구소/신기술 개발"
             description1="AI, IoT, 빅데이터 등 신기술 연구개발, 특허/논문, 산학협력 프로젝트 수행."
@@ -1141,6 +1157,16 @@ export default function Home() {
         <div className="text-xs text-gray-500">* 자세한 내용은 공식 홈페이지 채용정보 참고</div>
       </section>
 
+      {/* 연락처 */}
+      <section className="max-w-5xl mx-auto py-8 px-4">
+        <h2 className="text-lg font-bold text-blue-700 mb-2">연락처 및 위치</h2>
+        <div className="bg-white rounded-lg shadow p-4">
+          <p className="mb-1">주소: 서울특별시 금천구 서부샛길 606, 대성디플리스 지식산업센터 B동 1410호</p>
+          <p className="mb-1">대표전화: 02-1234-5678</p>
+          <p className="mb-1">이메일: info@dbinfo.co.kr</p>
+          <p className="mb-1">대중교통: 1호선, 7호선 8번 출구 500미터</p>
+        </div>
+      </section>
 
     </main>
   );
