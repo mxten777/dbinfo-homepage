@@ -13,8 +13,8 @@ export interface AdminMenu {
 
 export const adminMenus: AdminMenu[] = [
   {
-    label: '직원등록',
-    desc: '직원 신규 등록',
+    label: '직원정보 보완',
+    desc: '직원정보 추가/수정',
     color: 'bg-blue-600',
     icon: FaUserPlus,
     to: '/admin/register',
