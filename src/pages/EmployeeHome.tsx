@@ -171,10 +171,10 @@ const EmployeeHome: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-10 px-2 flex flex-col items-center">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-10 px-2 flex flex-col items-center" role="main" aria-label="직원 홈 페이지">
       <div className="w-full max-w-4xl mx-auto flex flex-col gap-10">
         {/* 직원정보 카드 */}
-        <div className="bg-white rounded-2xl shadow-xl border border-blue-100 p-8 flex flex-col md:flex-row items-center gap-8">
+        <div className="bg-white rounded-2xl shadow-xl border border-blue-100 p-8 flex flex-col md:flex-row items-center gap-8" role="region" aria-label="직원정보 카드">
           <div className="flex flex-col gap-3 flex-1">
             <div className="flex items-center gap-3 mb-3">
               <svg className="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
@@ -196,20 +196,20 @@ const EmployeeHome: React.FC = () => {
               </div>
             )}
           </div>
-          <button onClick={handleLogout} className="px-6 py-3 bg-blue-100 text-blue-700 rounded-xl text-base font-bold hover:bg-blue-200 shadow">로그아웃</button>
+          <button onClick={handleLogout} className="px-6 py-3 bg-blue-100 text-blue-700 rounded-xl text-base font-bold hover:bg-blue-200 shadow focus:outline-none focus:ring-2 focus:ring-accent" aria-label="로그아웃">로그아웃</button>
         </div>
         {/* 비밀번호 변경 모달 */}
         {showPasswordChange && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-label="비밀번호 변경 모달">
             <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-bold text-blue-700">비밀번호 변경</h3>
-                <button onClick={() => setShowPasswordChange(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+                <button onClick={() => setShowPasswordChange(false)} className="text-gray-400 hover:text-gray-600" aria-label="비밀번호 변경 취소">✕</button>
               </div>
               {passwordMessage && (
                 <div className={`p-3 mb-4 rounded ${passwordMessage.includes('성공') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{passwordMessage}</div>
               )}
-              <form onSubmit={handlePasswordChange} className="space-y-4">
+              <form onSubmit={handlePasswordChange} className="space-y-4" aria-label="비밀번호 변경하기">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">현재 비밀번호</label>
                   <input type="password" value={passwordForm.currentPassword} onChange={(e) => setPasswordForm({...passwordForm, currentPassword: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required />
@@ -223,15 +223,15 @@ const EmployeeHome: React.FC = () => {
                   <input type="password" value={passwordForm.confirmPassword} onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" minLength={6} required />
                 </div>
                 <div className="flex gap-3">
-                  <button type="submit" className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">변경하기</button>
-                  <button type="button" onClick={() => setShowPasswordChange(false)} className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition">취소</button>
+                  <button type="submit" className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition" aria-label="비밀번호 변경하기">변경하기</button>
+                  <button type="button" onClick={() => setShowPasswordChange(false)} className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition" aria-label="비밀번호 변경 취소">취소</button>
                 </div>
               </form>
             </div>
           </div>
         )}
-        {/* 사내소식 카드 */}
-        <div className="bg-white rounded-2xl shadow-xl border border-indigo-100 p-8">
+    {/* 사내소식 카드 */}
+    <div className="bg-white rounded-2xl shadow-xl border border-indigo-100 p-8" role="region" aria-label="사내소식 카드">
           <div className="flex items-center gap-3 mb-4">
             <svg className="w-7 h-7 text-indigo-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 21H5a2 2 0 01-2-2V7a2 2 0 012-2h4l2-2h6a2 2 0 012 2v12a2 2 0 01-2 2z" /></svg>
             <h2 className="text-2xl font-extrabold text-indigo-700 tracking-tight">사내소식</h2>
@@ -240,7 +240,7 @@ const EmployeeHome: React.FC = () => {
         </div>
         {/* 연차신청 카드 */}
         <div className="bg-white rounded-2xl shadow-xl p-10 border border-blue-100">
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} aria-label="연차신청 폼">
             <div className="flex items-center gap-2 mb-6">
               <svg className="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2 2H5a2 2 0 00-2 2v12a2 2 0 012 2z" /></svg>
               <h2 className="text-2xl font-extrabold text-blue-700 tracking-tight">연차신청</h2>
@@ -275,33 +275,32 @@ const EmployeeHome: React.FC = () => {
               <input type="text" name="reason" value={form.reason} onChange={handleFormChange} className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-blue-400 text-base" placeholder="사유 입력" required />
             </div>
             <div className="flex justify-end">
-              <button type="submit" className="px-10 py-3 bg-blue-500 text-white rounded-xl font-extrabold text-lg hover:bg-blue-600 transition">연차 신청</button>
+              <button type="submit" className="px-10 py-3 bg-blue-500 text-white rounded-xl font-extrabold text-lg hover:bg-blue-600 transition focus:outline-none focus:ring-2 focus:ring-accent" aria-label="연차 신청">연차 신청</button>
             </div>
-            {message && <div className="text-green-600 mt-4 text-center font-semibold">{message}</div>}
             {message && <div className="text-green-600 mt-4 text-center font-bold text-lg">{message}</div>}
           </form>
         </div>
         {/* 내 연차 신청 내역 카드 */}
         <div className="bg-white rounded-2xl shadow-xl border border-blue-100 p-8">
-          <h2 className="text-2xl font-extrabold mb-6 text-blue-700 tracking-tight">내 연차 신청 내역</h2>
+          <h2 className="text-2xl font-extrabold mb-6 text-blue-700 tracking-tight" id="leave-history-title">내 연차 신청 내역</h2>
           <div className="overflow-x-auto">
             {leaves.length === 0 ? (
               <div className="text-center py-8 text-gray-400">신청 내역 없음</div>
             ) : (
-              <table className="min-w-[700px] w-full border-separate border-spacing-y-2">
+              <table className="min-w-[700px] w-full border-separate border-spacing-y-2" role="table" aria-labelledby="leave-history-title">
                 <thead>
-                  <tr className="bg-blue-50 text-blue-900 text-lg">
-                    <th className="border px-5 py-3 rounded-tl-xl font-extrabold">유형</th>
-                    <th className="border px-5 py-3 font-extrabold">기간</th>
-                    <th className="border px-5 py-3 font-extrabold">신청 일수</th>
-                    <th className="border px-5 py-3 font-extrabold">사유</th>
-                    <th className="border px-5 py-3 font-extrabold">신청일자</th>
-                    <th className="border px-5 py-3 font-extrabold">상태</th>
+                  <tr className="bg-blue-50 text-blue-900 text-lg" role="row">
+                    <th className="border px-5 py-3 rounded-tl-xl font-extrabold" scope="col">유형</th>
+                    <th className="border px-5 py-3 font-extrabold" scope="col">기간</th>
+                    <th className="border px-5 py-3 font-extrabold" scope="col">신청 일수</th>
+                    <th className="border px-5 py-3 font-extrabold" scope="col">사유</th>
+                    <th className="border px-5 py-3 font-extrabold" scope="col">신청일자</th>
+                    <th className="border px-5 py-3 font-extrabold" scope="col">상태</th>
                   </tr>
                 </thead>
                 <tbody>
                   {leaves.map(l => (
-                    <tr key={l.id} className="bg-gray-50 hover:bg-blue-50 shadow rounded-xl">
+                    <tr key={l.id} className="bg-gray-50 hover:bg-blue-50 shadow rounded-xl focus-within:bg-blue-100 transition" tabIndex={0} role="row" aria-label={`연차신청: ${l.type}, ${l.startDate}~${l.endDate}, 상태: ${l.status}`}> 
                       <td className="border px-5 py-3 font-extrabold text-center text-base">
                         <span className={`px-3 py-2 rounded-xl text-base font-extrabold ${
                           l.type === '연차' ? 'bg-blue-100 text-blue-700' :

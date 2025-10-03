@@ -24,16 +24,17 @@ const ProjectList: React.FC = () => {
     .sort((a, b) => (b.requestDate || '').localeCompare(a.requestDate || ''));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 py-10 px-2 flex flex-col items-center">
+  <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 py-10 px-2 flex flex-col items-center" role="main" aria-label="프로젝트 현황 페이지">
       <div className="w-full max-w-5xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-center text-blue-700 flex items-center gap-2">
+          <h1 className="text-3xl font-bold text-center text-blue-700 flex items-center gap-2" id="project-list-title">
             <svg className="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2a4 4 0 018 0v2M9 21h6a2 2 0 002-2v-2a2 2 0 00-2-2H9a2 2 0 00-2 2v2a2 2 0 002 2z" /></svg>
             프로젝트 현황
           </h1>
           <button
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg font-bold hover:bg-blue-600 transition"
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-bold shadow hover:scale-105 hover:from-blue-700 hover:to-cyan-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent"
             onClick={() => navigate('/')}
+            aria-label="홈으로"
           >
             홈으로
           </button>
@@ -48,17 +49,17 @@ const ProjectList: React.FC = () => {
             <div className="text-center py-8 text-gray-400">등록된 프로젝트가 없습니다.</div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-[900px] w-full border-separate border-spacing-y-2">
+              <table className="min-w-[900px] w-full border-separate border-spacing-y-2" role="table" aria-labelledby="project-list-title">
                 <thead>
-                  <tr className="bg-blue-100 text-blue-900">
-                    <th className="border px-4 py-2 rounded-tl-lg">번호</th>
-                    <th className="border px-4 py-2">등록일</th>
-                    <th className="border px-4 py-2">수행사</th>
-                    <th className="border px-4 py-2">프로젝트개요</th>
-                    <th className="border px-4 py-2">프로젝트기간</th>
-                    <th className="border px-4 py-2">장소</th>
-                    <th className="border px-4 py-2">요청기술</th>
-                    <th className="border px-4 py-2 rounded-tr-lg">프로젝트 상태</th>
+                  <tr className="bg-blue-100 text-blue-900" role="row">
+                    <th className="border px-4 py-2 rounded-tl-lg" scope="col">번호</th>
+                    <th className="border px-4 py-2" scope="col">등록일</th>
+                    <th className="border px-4 py-2" scope="col">수행사</th>
+                    <th className="border px-4 py-2" scope="col">프로젝트개요</th>
+                    <th className="border px-4 py-2" scope="col">프로젝트기간</th>
+                    <th className="border px-4 py-2" scope="col">장소</th>
+                    <th className="border px-4 py-2" scope="col">요청기술</th>
+                    <th className="border px-4 py-2 rounded-tr-lg" scope="col">프로젝트 상태</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -70,8 +71,10 @@ const ProjectList: React.FC = () => {
                         d.status === '완료'
                     );
                     if (filteredDeployments.length === 0) return null;
+                    // 프로젝트 상태는 deployments 중 가장 최근 status를 사용
+                    const lastStatus = filteredDeployments[filteredDeployments.length - 1]?.status || '';
                     return (
-                      <tr key={proj.id} className="bg-gray-50 hover:bg-blue-50 shadow rounded-lg">
+                      <tr key={proj.id} className="bg-gray-50 hover:bg-blue-50 shadow rounded-lg focus-within:bg-blue-100 transition" tabIndex={0} role="row" aria-label={`프로젝트: ${proj.project}, 상태: ${lastStatus}`}> 
                         <td className="border px-4 py-2 text-center font-semibold">{idx + 1}</td>
                         <td className="border px-4 py-2 text-center">{proj.requestDate}</td>
                         <td className="border px-4 py-2">{proj.client}</td>

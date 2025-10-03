@@ -92,19 +92,19 @@ export default function Header() {
   // ...existing code...
 
   return (
-    <header className="bg-gradient-to-r from-primary-dark via-primary to-accent shadow-lg sticky top-0 z-50">
+    <header className="bg-gradient-to-r from-primary-dark via-primary to-accent shadow-lg sticky top-0 z-50" role="banner" aria-label="사이트 헤더 및 네비게이션">
       <div className="max-w-6xl mx-auto flex items-center justify-end px-4 md:px-6 py-2 md:py-3">
         {/* 데스크탑 네비게이션: 관리자 화면에서는 숨김 */}
         <div className="flex items-center gap-2 md:gap-4">
           {/* 프로젝트 현황(/project-list)에서는 네비게이션 숨김, 홈(/) 또는 그 외에서만 보이기 */}
           {(location.pathname === '/' || (!isAdminScreen && !isProjectListScreen)) && (
-            <nav className="hidden sm:flex gap-1 md:gap-4 text-base font-display font-extrabold tracking-tight text-contrast drop-shadow">
+            <nav className="hidden sm:flex gap-1 md:gap-4 text-base font-display font-extrabold tracking-tight text-contrast drop-shadow" role="navigation" aria-label="주요 메뉴">
               {navLinks}
             </nav>
           )}
         </div>
         {/* 모바일 햄버거 버튼 */}
-        <button className="sm:hidden flex flex-col justify-center items-center w-10 h-10 rounded hover:bg-white/10 focus:outline-none" onClick={()=>setMenuOpen(v=>!v)} aria-label="메뉴 열기">
+        <button className="sm:hidden flex flex-col justify-center items-center w-10 h-10 rounded hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-accent" onClick={()=>setMenuOpen(v=>!v)} aria-label="모바일 메뉴 열기" aria-expanded={menuOpen} aria-controls="mobile-nav">
           <span className="block w-6 h-0.5 bg-contrast mb-1 rounded transition-all" style={{transform: menuOpen ? 'rotate(45deg) translateY(7px)' : 'none'}}></span>
           <span className={`block w-6 h-0.5 bg-contrast mb-1 rounded transition-all ${menuOpen ? 'opacity-0' : ''}`}></span>
           <span className="block w-6 h-0.5 bg-contrast rounded transition-all" style={{transform: menuOpen ? 'rotate(-45deg) translateY(-7px)' : 'none'}}></span>
@@ -112,7 +112,7 @@ export default function Header() {
       </div>
       {/* 모바일 메뉴 드롭다운 */}
       {menuOpen && (
-        <nav className="sm:hidden flex flex-col gap-2 px-6 pb-4 bg-gradient-to-r from-primary-dark via-primary to-accent text-base font-display font-extrabold tracking-tight text-contrast animate-fade-in-down z-50">
+        <nav id="mobile-nav" className="sm:hidden flex flex-col gap-2 px-6 pb-4 bg-gradient-to-r from-primary-dark via-primary to-accent text-base font-display font-extrabold tracking-tight text-contrast animate-fade-in-down z-50" role="navigation" aria-label="모바일 메뉴">
           {navLinks}
         </nav>
       )}

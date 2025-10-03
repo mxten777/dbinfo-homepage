@@ -43,7 +43,13 @@ export default function FadeSlideIn({
   }, [direction, delay, duration]);
 
   return (
-    <div ref={ref} style={{ willChange: 'opacity, transform' }}>
+    <div
+      ref={ref}
+      style={{ willChange: 'opacity, transform' }}
+      role="presentation"
+      aria-live="polite"
+      className="motion-reduce:transition-none motion-reduce:transform-none"
+    >
       {children}
     </div>
   );

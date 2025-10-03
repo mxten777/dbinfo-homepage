@@ -152,11 +152,11 @@ const AdminEmployeeManage: React.FC = () => {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto flex flex-col gap-8">
+  <div className="p-4 md:p-8 max-w-7xl mx-auto flex flex-col gap-8" role="main" aria-label="관리자 직원관리 페이지">
       {/* 직원 정보 수정 모달 */}
       {editEmp && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-2xl p-8 border-2 border-blue-300 flex flex-col gap-4 min-w-[320px] max-w-[95vw] max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-label="직원 정보 수정 모달">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 border-2 border-blue-300 flex flex-col gap-4 min-w-[320px] max-w-[95vw] max-h-[90vh] overflow-y-auto">
             <div className="text-xl font-bold text-blue-700 mb-2">직원 정보 수정</div>
             <label className="font-semibold">사번</label>
             <input className="border rounded px-3 py-2 mb-2" value={editEmp.empNo ?? ''} onChange={e => setEditEmp({ ...editEmp, empNo: e.target.value })} />
@@ -180,7 +180,9 @@ const AdminEmployeeManage: React.FC = () => {
             <input className="border rounded px-3 py-2 mb-2" value={editEmp.jobType ?? ''} onChange={e => setEditEmp({ ...editEmp, jobType: e.target.value })} />
             <div className="flex gap-4 mt-4">
               <button className="px-6 py-2 bg-blue-600 text-white rounded-full font-bold shadow hover:bg-blue-700 transition" onClick={handleEditSave} disabled={editLoading}>{editLoading ? '저장 중...' : '저장'}</button>
+              aria-label="직원 정보 저장"
               <button className="px-6 py-2 bg-gray-300 text-gray-700 rounded-full font-bold shadow hover:bg-gray-400 transition" onClick={() => setEditEmp(null)}>취소</button>
+              aria-label="수정 취소"
             </div>
           </div>
         </div>
@@ -192,18 +194,20 @@ const AdminEmployeeManage: React.FC = () => {
       )}
       {/* 연차 기록 초기화 버튼 및 결과 */}
       <div className="flex gap-4 items-center mb-4">
-        <button className="px-6 py-2 bg-green-600 text-white rounded-full font-bold shadow hover:bg-green-700 transition" onClick={()=>setShowResetModal(true)}>연차 기록 전체 초기화</button>
+  <button className="px-8 py-3 bg-gradient-to-r from-green-600 to-cyan-600 text-white rounded-xl font-bold shadow hover:scale-105 hover:from-green-700 hover:to-cyan-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent" onClick={()=>setShowResetModal(true)} aria-label="연차 기록 전체 초기화">연차 기록 전체 초기화</button>
         {resetLoading && <span className="text-green-700 font-bold">초기화 중...</span>}
         {resetResult && <span className="text-green-700 font-bold">{resetResult}</span>}
       </div>
       {/* 초기화 모달 */}
       {showResetModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-2xl p-8 border-2 border-green-300 flex flex-col gap-4">
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-label="연차 기록 초기화 모달">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 border-2 border-green-300 flex flex-col gap-4">
             <div className="text-xl font-bold text-green-700">모든 직원의 연차 기록을 초기화하시겠습니까?</div>
             <div className="flex gap-4 mt-4">
               <button className="px-6 py-2 bg-green-600 text-white rounded-full font-bold shadow hover:bg-green-700 transition" onClick={handleResetLeaves}>확인</button>
+              aria-label="연차 기록 초기화 확인"
               <button className="px-6 py-2 bg-gray-300 text-gray-700 rounded-full font-bold shadow hover:bg-gray-400 transition" onClick={()=>setShowResetModal(false)}>취소</button>
+              aria-label="초기화 취소"
             </div>
           </div>
         </div>
@@ -211,9 +215,9 @@ const AdminEmployeeManage: React.FC = () => {
       {/* 직원 테이블 */}
   <div className="mb-4 text-2xl font-extrabold text-blue-700 text-center drop-shadow">직원정보 상세현황</div>
   <div className="overflow-x-auto bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-        <table className="min-w-full text-sm text-left">
+  <table className="min-w-full text-sm text-left" role="table" aria-label="직원정보 상세현황 테이블">
           <thead>
-            <tr>
+            <tr role="row">
               <th className="border px-2 py-2 whitespace-nowrap">사번</th>
               <th className="border px-2 py-2 whitespace-nowrap">이름</th>
               <th className="border px-2 py-2 whitespace-nowrap">주민번호</th>
@@ -236,7 +240,7 @@ const AdminEmployeeManage: React.FC = () => {
           </thead>
           <tbody>
             {employees.map((emp, idx) => (
-              <tr key={emp.id} className={idx % 2 === 0 ? 'bg-gray-50 hover:bg-blue-50 transition' : 'bg-white hover:bg-blue-50 transition'}>
+              <tr key={emp.id} className={idx % 2 === 0 ? 'bg-gray-50 hover:bg-blue-50 focus-within:bg-blue-100 transition' : 'bg-white hover:bg-blue-50 focus-within:bg-blue-100 transition'} tabIndex={0} role="row" aria-label={`직원정보: ${emp.name}`}> 
                 <td className="border px-2 py-2 whitespace-nowrap">{emp.empNo}</td>
                 <td className="border px-2 py-2 whitespace-nowrap">{emp.name}</td>
                 <td className="border px-2 py-2 whitespace-nowrap">{emp.regNo || '-'}</td>

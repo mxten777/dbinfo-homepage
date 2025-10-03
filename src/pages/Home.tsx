@@ -22,7 +22,7 @@ export default function Home() {
   return (
     <main className="min-h-[80vh] bg-gradient-to-br from-blue-50 to-cyan-50 p-0 md:p-8">
       {/* Hero Section */}
-      <section className="max-w-6xl mx-auto py-16 px-4 md:px-8 text-center relative overflow-hidden">
+      <section className="max-w-6xl mx-auto py-20 px-4 md:px-12 text-center relative overflow-hidden rounded-3xl shadow-2xl border border-primary/10">
         {/* Enhanced Background Elements */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-100/80 via-cyan-100/60 to-indigo-100/80 animate-gradient-move"></div>
         <div className="absolute top-[-80px] left-1/2 -translate-x-1/2 w-[900px] h-[900px] bg-gradient-radial from-cyan-200/40 via-blue-100/10 to-transparent rounded-full blur-3xl opacity-80 animate-pulse-slow"></div>
@@ -34,13 +34,13 @@ export default function Home() {
           {/* Main Title */}
           <div className="mb-8">
             <FadeSlideIn direction="up" delay={100}>
-              <div className="inline-flex items-center gap-3 bg-white/70 backdrop-blur-sm border border-blue-200/50 rounded-full px-6 py-3 mb-6 shadow-lg">
+              <div className="inline-flex items-center gap-3 bg-white/80 backdrop-blur-md border border-accent/30 rounded-full px-8 py-4 mb-8 shadow-2xl">
                 <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
                 <span className="text-xs md:text-sm font-extrabold text-primary tracking-widest font-display uppercase">IT INNOVATION LEADER</span>
               </div>
             </FadeSlideIn>
             <FadeSlideIn direction="up" delay={300}>
-              <h1 className="font-display text-hero md:text-[5rem] font-black text-transparent bg-gradient-to-r from-primary-dark via-accent to-indigo-800 bg-clip-text mb-6 tracking-tight leading-tight drop-shadow-lg">
+              <h1 className="font-display text-hero md:text-[5rem] font-black text-transparent bg-gradient-to-r from-primary-dark via-accent to-indigo-800 bg-clip-text mb-8 tracking-tight leading-tight drop-shadow-2xl">
                 DB.INFO
               </h1>
             </FadeSlideIn>
@@ -48,30 +48,28 @@ export default function Home() {
               <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-8">
                 <div className="flex items-center gap-3">
                   <div className="w-1 h-8 bg-gradient-to-b from-accent to-primary rounded-full"></div>
-                  <span className="font-display text-subtitle md:text-2xl font-extrabold text-headline">Digital Transformation</span>
+                  <span className="font-display text-subtitle md:text-2xl font-extrabold text-headline drop-shadow">Digital Transformation</span>
                 </div>
                 <div className="hidden md:block w-2 h-2 bg-accent rounded-full"></div>
                 <div className="flex items-center gap-3">
-                  <span className="font-display text-subtitle md:text-2xl font-extrabold text-headline">AI Innovation</span>
+                  <span className="font-display text-subtitle md:text-2xl font-extrabold text-headline drop-shadow">AI Innovation</span>
                   <div className="w-1 h-8 bg-gradient-to-b from-indigo-400 to-accent rounded-full"></div>
                 </div>
               </div>
             </FadeSlideIn>
           </div>
-          
           {/* Subtitle */}
           <FadeSlideIn direction="up" delay={700}>
-            <p className="font-sans text-base md:text-xl text-sub mb-8 max-w-3xl mx-auto leading-relaxed font-semibold">
+            <p className="font-sans text-base md:text-xl text-sub mb-10 max-w-3xl mx-auto leading-relaxed font-semibold">
               <span className="text-primary-dark">13년간의 전문성</span>과
               <span className="text-accent font-bold"> 혁신적 기술력</span>으로<br className="hidden md:inline"/>
               디지털 미래를 선도하는 <span className="text-indigo-800 font-bold">IT 솔루션 파트너</span>
             </p>
           </FadeSlideIn>
-          
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-10">
             <button
-              className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-2xl font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
+              className="group px-10 py-5 bg-gradient-to-r from-primary-dark via-primary to-accent text-white rounded-2xl font-bold shadow-2xl hover:shadow-accent/40 hover:-translate-y-1 scale-105 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent"
               onClick={() => scrollToSection('business')}
             >
               <span className="flex items-center gap-3">
@@ -82,30 +80,29 @@ export default function Home() {
               </span>
             </button>
             <button
-              className="px-8 py-4 bg-white/70 backdrop-blur-sm border border-gray-200 text-gray-700 rounded-2xl font-bold hover:bg-white/90 transition-all duration-300"
+              className="px-10 py-5 bg-white/80 backdrop-blur-md border border-accent/30 text-primary-dark rounded-2xl font-bold hover:bg-white/90 shadow focus:outline-none focus:ring-2 focus:ring-accent transition-all duration-300"
               onClick={() => scrollToSection('about')}
             >
               회사소개 자세히
             </button>
           </div>
-          
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-2xl mx-auto mt-8">
             <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-blue-700 mb-1">13+</div>
-              <div className="text-sm text-gray-600">Years</div>
+              <div className="text-3xl md:text-4xl font-extrabold text-primary-dark mb-2 drop-shadow">13+</div>
+              <div className="text-sm text-accent/80">Years</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-cyan-600 mb-1">100+</div>
-              <div className="text-sm text-gray-600">Projects</div>
+              <div className="text-3xl md:text-4xl font-extrabold text-accent mb-2 drop-shadow">100+</div>
+              <div className="text-sm text-accent/80">Projects</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-indigo-600 mb-1">50+</div>
-              <div className="text-sm text-gray-600">Clients</div>
+              <div className="text-3xl md:text-4xl font-extrabold text-indigo-600 mb-2 drop-shadow">50+</div>
+              <div className="text-sm text-accent/80">Clients</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-blue-700 mb-1">24/7</div>
-              <div className="text-sm text-gray-600">Support</div>
+              <div className="text-3xl md:text-4xl font-extrabold text-primary-dark mb-2 drop-shadow">24/7</div>
+              <div className="text-sm text-accent/80">Support</div>
             </div>
           </div>
         </div>

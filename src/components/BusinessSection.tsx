@@ -21,14 +21,19 @@ const BusinessSection: React.FC<BusinessSectionProps> = ({
   const [showModal, setShowModal] = useState(false);
   return (
     <>
-      <section className="bg-white rounded-3xl shadow-2xl flex flex-col gap-8 p-6 md:p-10 mb-16">
-        <div className="text-left">
-          <img
-            src={image}
-            alt={title + " 대표 이미지"}
-            className="w-full h-44 md:h-56 object-cover rounded-xl shadow-lg border border-gray-100 mb-4"
-            style={{ boxSizing: 'border-box' }}
-          />
+  <section className="bg-gradient-to-br from-gradientFrom via-gradientVia to-gradientTo rounded-3xl shadow-3xl flex flex-col gap-8 p-6 md:p-10 mb-16 border border-navy/20">
+  <div className="text-left">
+          <div className="relative mb-4">
+            <img
+              src={image}
+              alt={title + " 대표 이미지"}
+              className="w-full h-44 md:h-56 object-cover rounded-2xl shadow-xl border-2 border-gradientVia/40"
+              style={{ boxSizing: 'border-box' }}
+            />
+            <div className="absolute top-2 right-2 bg-gradient-to-r from-point to-accent rounded-full p-2 shadow-lg">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            </div>
+          </div>
           <h3 className="font-display text-2xl md:text-3xl font-black text-primary-dark mb-2 md:mb-3 tracking-tight drop-shadow-sm">
             {title}
           </h3>
@@ -53,9 +58,10 @@ const BusinessSection: React.FC<BusinessSectionProps> = ({
             </ul>
           )}
           <button
-            className="mt-4 px-6 py-2 bg-gradient-to-r from-primary to-accent text-contrast font-extrabold rounded-lg shadow-lg hover:scale-105 hover:from-primary-dark hover:to-accent-dark transition-all duration-200 text-base md:text-lg"
+            className="mt-4 px-6 py-2 bg-gradient-to-r from-point via-accent to-primary text-contrast font-extrabold rounded-xl shadow-xl hover:scale-105 hover:from-primary-dark hover:to-accent-dark transition-all duration-200 text-base md:text-lg flex items-center gap-2"
             onClick={() => setShowModal(true)}
           >
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
             대표 이미지 크게 보기
           </button>
         </div>

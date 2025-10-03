@@ -65,22 +65,26 @@ export async function uploadUniqueEmployees(setUploadMessage: (msg: string) => v
 
 function Footer() {
   return (
-    <footer className="bg-contrast border-t border-gray-200 mt-12 py-8 px-4 text-center text-xs text-muted font-sans">
-      <div className="mb-2 text-base md:text-lg font-semibold text-headline">
-        주소: <span className="font-bold">서울특별시 금천구 서부샛길 606, 대성디폴리스 지식산업센터 B동 1410호</span><br />
-        <span className="text-sm md:text-base font-normal text-muted">대중교통: 1호선, 7호선 8번 출구 500미터</span>
+    <footer className="bg-gradient-to-r from-primary-dark via-primary to-accent shadow-inner border-t border-accent/30 mt-16 py-8 px-4 text-center text-xs font-display text-contrast" role="contentinfo" aria-label="사이트 정보 및 오시는 길">
+      <div className="mb-3 text-base md:text-lg font-extrabold tracking-tight text-white flex flex-col items-center gap-1">
+        <span className="inline-flex items-center gap-2" role="region" aria-label="회사 주소">
+          <svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" className="text-accent"><circle cx="10" cy="10" r="10" fill="currentColor"/></svg>
+          <span>서울특별시 금천구 서부샛길 606, 대성디폴리스 지식산업센터 B동 1410호</span>
+        </span>
+        <span className="text-sm md:text-base font-normal text-accent/80" role="region" aria-label="대중교통 안내">대중교통: 1호선, 7호선 8번 출구 500미터</span>
       </div>
       <div className="mb-2">
         <a
           href="https://map.naver.com/p/search/%EC%84%9C%EC%9A%B8%ED%8A%B9%EB%B3%84%EC%8B%9C%20%EA%B8%88%EC%B2%9C%EA%B5%AC%20%EC%84%9C%EB%B6%80%EC%83%9B%EA%B8%B8%20606,%20%EB%8C%80%EC%84%B1%EB%94%94%ED%8F%B4%EB%A6%AC%EC%8A%A4%20%EC%A7%80%EC%8B%9D%EC%82%B0%EC%97%85%EC%84%BC%ED%84%B0%20B%EB%8F%99%201410%ED%98%B8"
           target="_blank"
           rel="noopener noreferrer"
-          className="underline text-accent font-extrabold text-base md:text-lg hover:text-accent-dark transition"
+          className="inline-flex items-center gap-2 underline text-yellow-200 font-extrabold text-base md:text-lg hover:text-white transition focus:outline-none focus:ring-2 focus:ring-accent" role="link" aria-label="오시는 길 네이버 지도 링크"
         >
+          <svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 20 20" fill="none" className="text-yellow-200"><path d="M10 2v16M2 10h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
           오시는 길
         </a>
       </div>
-      <div className="mt-2 text-xs text-muted">DB.INFO Co.,Ltd. All rights reserved.</div>
+      <div className="mt-4 text-xs text-white/70" aria-label="저작권 안내">DB.INFO Co.,Ltd. All rights reserved.</div>
     </footer>
   );
 }

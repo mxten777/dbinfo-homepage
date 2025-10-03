@@ -5,6 +5,23 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: [
+          'Inter',
+          'Pretendard',
+          'Segoe UI',
+          'Arial',
+          'sans-serif',
+        ],
+        display: [
+          'Montserrat',
+          'Inter',
+          'Pretendard',
+          'Segoe UI',
+          'Arial',
+          'sans-serif',
+        ],
+      },
       colors: {
         primary: {
           DEFAULT: '#2563eb', // blue-600
@@ -23,6 +40,11 @@ module.exports = {
         warning: '#f59e42',
         error: '#ef4444',
         success: '#22c55e',
+        navy: '#1a237e', // 네이비
+        gradientFrom: '#2563eb', // 그라데이션 시작
+        gradientVia: '#06b6d4', // 그라데이션 중간
+        gradientTo: '#1e3a8a', // 그라데이션 끝
+        point: '#ff6f61', // 포인트 컬러(레드/오렌지)
       },
       fontFamily: {
         sans: ['Pretendard', 'Inter', 'ui-sans-serif', 'system-ui'],
