@@ -345,7 +345,7 @@ const AdminEmployeeManage: React.FC = () => {
   // 통계 계산
   const totalEmployees = employees.length;
   const activeEmployees = employees.filter(emp => emp.uid).length;
-  const pendingLeaves = leaves.filter(leave => leave.status === '신청').length;
+  const pendingLeaves = leaves.filter(leave => leave.status === '대기중').length;
   const adminCount = Object.values(adminMap).filter(Boolean).length;
 
   return (
@@ -555,7 +555,7 @@ const AdminEmployeeManage: React.FC = () => {
                           {leave.createdAt ? new Date(leave.createdAt).toLocaleDateString() : '-'}
                         </td>
                         <td className="px-4 py-3 border-b border-white/5">
-                          {leave.status === '신청' && (
+                          {leave.status === '대기중' && (
                             <div className="flex gap-2">
                               <button
                                 className="px-3 py-1 bg-green-600 text-white rounded-lg text-xs hover:bg-green-700 transition-all duration-300"

@@ -18,10 +18,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
+      console.log('Auth state changed:', u?.email || 'No user');
       setUser(u);
       setLoading(false);
     });
-    return () => unsubscribe();
+
+    // 타임아웃 설정 (10초 후 강제 로딩 해제)
+    const timeout = setTimeout(() => {
+      console.log('Auth timeout - forcing loading to false');
+      setLoading(false);
+    }, 10000);
+
+    return () => {
+      unsubscribe();
+      clearTimeout(timeout);
+    };
   }, []);
 
   const logout = async () => {

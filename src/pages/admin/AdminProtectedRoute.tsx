@@ -10,23 +10,43 @@ const AdminProtectedRoute: React.FC = () => {
   const [checkingAdmin, setCheckingAdmin] = useState(true);
 
   useEffect(() => {
-    // 상태 초기화: user가 바뀔 때마다 명확히 초기화
-    setIsAdmin(null);
-    setCheckingAdmin(true);
+    // 사용자 로딩 중이면 대기
+    if (loading) return;
+    
+    // 사용자가 없으면 즉시 체크 종료
     if (!user) {
+      console.log('User not logged in');
+      setIsAdmin(false);
       setCheckingAdmin(false);
       return;
     }
+    
+    // 관리자 권한 체크 시작
+    setCheckingAdmin(true);
+    setIsAdmin(null);
+    
     const checkAdminRole = async () => {
       try {
+        console.log('Checking admin role for user:', user.email, 'UID:', user.uid);
+        
+        // 3초 타임아웃으로 단축
+        const timeoutId = setTimeout(() => {
+          console.log('Admin check timeout - assuming not admin');
+          setIsAdmin(false);
+          setCheckingAdmin(false);
+        }, 3000);
+        
         const adminDoc = await getDoc(doc(db, 'admins', user.uid));
-        console.log('현재 로그인 uid:', user.uid);
-        console.log('admins 컬렉션 문서:', adminDoc.data());
+        clearTimeout(timeoutId);
+        
+        console.log('Admin document exists:', adminDoc.exists());
+        
         if (adminDoc.exists() && adminDoc.data()?.isAdmin === true) {
+          console.log('User is admin');
           setIsAdmin(true);
         } else {
+          console.log('User is not admin:', user.email);
           setIsAdmin(false);
-          console.log('관리자 권한이 없습니다:', user.email);
         }
       } catch (error) {
         console.error('관리자 권한 확인 실패:', error);
@@ -35,8 +55,9 @@ const AdminProtectedRoute: React.FC = () => {
         setCheckingAdmin(false);
       }
     };
+    
     checkAdminRole();
-  }, [user]);
+  }, [user, loading]);
 
 
   useEffect(() => {
@@ -45,23 +66,31 @@ const AdminProtectedRoute: React.FC = () => {
     console.log('렌더링 직전 checkingAdmin:', checkingAdmin);
   }, [isAdmin, user, checkingAdmin]);
 
-  // 상태 안전 분기: 로딩/체크 중이거나 isAdmin이 null이면 반드시 로딩 화면
-  if (loading || checkingAdmin || isAdmin === null) {
+  // Auth 로딩 중이거나 관리자 권한 체크 중일 때만 로딩 화면 표시
+  if (loading || (user && checkingAdmin)) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">권한 확인 중...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-50 to-brand-50/30">
+        <div className="glass-strong rounded-3xl p-8 text-center shadow-glow">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-brand-500 mx-auto mb-6"></div>
+          <h2 className="text-2xl font-bold gradient-text mb-2">권한 확인 중</h2>
+          <p className="text-neutral-600 mb-4">
+            {loading ? '사용자 인증 확인 중...' : checkingAdmin ? '관리자 권한 확인 중...' : '처리 중...'}
+          </p>
+          <div className="text-xs text-neutral-500">
+            User: {user ? user.email : 'None'} | Loading: {loading.toString()} | Checking: {checkingAdmin.toString()} | IsAdmin: {isAdmin?.toString() || 'null'}
+          </div>
         </div>
       </div>
     );
   }
 
-  if (!user) {
+  // 사용자가 없으면 로그인 페이지로 리다이렉트
+  if (!loading && !user) {
     return <Navigate to="/admin/login" replace />;
   }
 
-  if (isAdmin === false) {
+  // 관리자가 아닌 경우 접근 거부
+  if (!loading && user && isAdmin === false) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-md">

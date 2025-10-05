@@ -1,6 +1,5 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import './index.css';
 import App from './App';
 // 사용자 현황 확인 도구 로드
 import './checkUsers';
@@ -11,7 +10,10 @@ import './resetAdminSystem';
 // 관리자 권한 부여 도구 로드
 import './grantAdminPermissions';
 
-const container = document.getElementById('app');
+// CSS 파일 임포트 (side-effect import)
+import './index.css';
+
+const container = document.getElementById('root');
 if (container) {
   const root = createRoot(container);
   root.render(<App />);

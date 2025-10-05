@@ -1,11 +1,16 @@
 /// <reference types="vite/client" />
 
-declare global {
-  namespace NodeJS {
-    interface ProcessEnv {
-      NODE_ENV: 'development' | 'production' | 'test';
-    }
-  }
+// CSS 파일을 side-effect import로 허용
+declare module '*.css';
+
+declare module '*.module.css' {
+  const classes: { [key: string]: string };
+  export default classes;
 }
 
-export {};
+declare module '*.scss';
+
+declare module '*.module.scss' {
+  const classes: { [key: string]: string };
+  export default classes;
+}

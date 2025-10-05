@@ -15,11 +15,10 @@ import AdminDeputyRequest from './pages/admin/AdminDeputyRequest';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminHome from './pages/admin/AdminHome';
 import AdminLeaves from './pages/admin/AdminLeaves';
-import AdminLeaveRequest from './pages/admin/AdminLeaveRequest';
-import AdminLeaveApproval from './pages/admin/AdminLeaveApproval';
 import AdminProjectStatus from './pages/admin/AdminProjectStatus';
 import AdminEmployeeManage from './pages/AdminEmployeeManage'; // export default로 오류 해결
 import AdminEmployeeRegister from './pages/admin/AdminEmployeeRegister';
+import AdminEmployeeStatus from './pages/admin/AdminEmployeeStatus';
 import AdminCompanyNewsManage from './pages/admin/AdminCompanyNewsManage';
 import AdminEmployeeLeaveEdit from './pages/admin/AdminEmployeeLeaveEdit';
 import EmployeeLogin from './pages/EmployeeLogin';
@@ -29,7 +28,7 @@ import SignUp from './pages/SignUp';
 import Login from './pages/Login';
 
 // 관리자 인증 필요 페이지 보호용 컴포넌트
-function ProtectedRoute({ children }: { children: JSX.Element }) {
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) return <div className="p-8">로딩 중...</div>;
   return user ? children : <Navigate to="/admin" replace />;
@@ -71,13 +70,14 @@ function AppRoutesWithHeader() {
                 <Leaves />
               </ProtectedRoute>
             } />
+            {/* /admin 루트 경로 - 로그인 페이지로 리다이렉트 */}
+            <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/*" element={<AdminProtectedRoute />}>
               <Route element={<AdminLayout />}>
+                <Route index element={<Navigate to="/admin/login" replace />} />
                 <Route path="home" element={<AdminHome />} />
                 <Route path="leaves" element={<AdminLeaves />} />
-                <Route path="leave-request" element={<AdminLeaveRequest />} />
-                <Route path="leave-approval" element={<AdminLeaveApproval />} />
                 <Route path="project-status" element={<AdminProjectStatus />} />
                 <Route path="employee-manage" element={<AdminEmployeeManage />} />
                 <Route path="register" element={<AdminEmployeeRegister />} />
@@ -87,6 +87,7 @@ function AppRoutesWithHeader() {
                 <Route path="employee-leave-edit" element={<AdminEmployeeLeaveEdit />} />
                 <Route path="deputy-request" element={<AdminDeputyRequest />} />
                 <Route path="deputy-approval" element={<AdminDeputyApproval />} />
+                <Route path="employee-status" element={<AdminEmployeeStatus />} />
               </Route>
             </Route>
             <Route path="/employee-login" element={<EmployeeLogin />} />

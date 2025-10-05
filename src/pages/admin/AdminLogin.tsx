@@ -12,6 +12,7 @@ const AdminLogin: React.FC = () => {
   const [success, setSuccess] = useState('');
   const [resetMsg, setResetMsg] = useState('');
   const [isCreatingAccounts, setIsCreatingAccounts] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -58,74 +59,182 @@ const AdminLogin: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-white">
-      <div className="w-full">
-        <div className="w-full bg-gradient-to-r from-blue-600 to-cyan-400 h-12 flex items-center px-6 shadow mb-8">
-          <span className="text-white font-extrabold text-xl tracking-wide">DB.INFO</span>
-          <span className="ml-2 px-2 py-1 bg-white/30 text-xs text-white rounded-full font-semibold">IT INNOVATION</span>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-0 left-0 w-full h-full opacity-30" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='7' cy='7' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+        }}></div>
+        <div className="absolute top-20 right-20 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 left-20 w-80 h-80 bg-indigo-400/20 rounded-full blur-3xl"></div>
+      </div>
+
+      {/* Brand Bar */}
+      <div className="relative z-10 w-full bg-gradient-to-r from-blue-600 to-indigo-600 h-16 flex items-center px-6 shadow-lg">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+            </svg>
+          </div>
+          <div>
+            <span className="text-white font-bold text-xl tracking-wide font-space">DB.INFO</span>
+            <span className="ml-3 px-3 py-1 bg-white/20 text-xs text-white rounded-full font-semibold backdrop-blur-md">
+              ADMIN PORTAL
+            </span>
+          </div>
         </div>
       </div>
-      
-      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-blue-700 text-center">관리자 로그인</h2>
-        
-        {error && <div className="mb-4 text-red-500 text-center">{error}</div>}
-        {success && <div className="text-green-600 text-center font-bold mb-4">{success}</div>}
-        
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <input
-            type="email"
-            placeholder="이메일"
-            value={id}
-            onChange={e => setId(e.target.value)}
-            className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-blue-400"
-            required
-          />
-          <input
-            type="password"
-            placeholder="비밀번호"
-            value={pw}
-            onChange={e => setPw(e.target.value)}
-            className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-blue-400"
-            required
-          />
-          <button
-            type="submit"
-            className="px-8 py-2 bg-blue-500 text-white rounded-lg font-bold hover:bg-blue-600 transition"
-          >
-            로그인
-          </button>
-          <button
-            type="button"
-            className="mt-2 text-blue-600 underline text-sm hover:text-blue-800"
-            onClick={handleResetPassword}
-          >
-            비밀번호 재설정
-          </button>
-        </form>
-        
-        {resetMsg && <div className="text-center text-sm mt-2 text-green-600">{resetMsg}</div>}
-        
-        {/* 개발환경에서만 보이는 관리자 계정 생성 버튼 */}
-        {import.meta.env.DEV && (
-          <div className="mt-6 pt-4 border-t border-gray-200">
-            <button
-              onClick={handleCreateAdminAccounts}
-              disabled={isCreatingAccounts}
-              className="w-full px-4 py-2 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 transition disabled:bg-gray-400"
-            >
-              {isCreatingAccounts ? '계정 생성 중...' : '관리자 계정 생성'}
-            </button>
-            <p className="text-xs text-gray-500 mt-2 text-center">
-              개발환경에서만 표시됩니다
-            </p>
+
+      {/* Main Content */}
+      <div className="relative z-10 flex items-center justify-center min-h-[calc(100vh-64px)] p-6">
+        <div className="w-full max-w-md">
+          {/* Login Card */}
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 shadow-2xl">
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-2 font-space">관리자 로그인</h2>
+              <p className="text-blue-200 text-sm">DB.INFO 관리 시스템에 접속하세요</p>
+            </div>
+
+            {/* Alerts */}
+            {error && (
+              <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-xl text-red-200 text-sm backdrop-blur-md">
+                <div className="flex items-center gap-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {error}
+                </div>
+              </div>
+            )}
+
+            {success && (
+              <div className="mb-6 p-4 bg-emerald-500/20 border border-emerald-500/30 rounded-xl text-emerald-200 text-sm backdrop-blur-md">
+                <div className="flex items-center gap-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  {success}
+                </div>
+              </div>
+            )}
+
+            {/* Login Form */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-blue-200 mb-2">이메일</label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    placeholder="hankjae@db-info.co.kr"
+                    value={id}
+                    onChange={e => setId(e.target.value)}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-md"
+                    required
+                  />
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <svg className="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-blue-200 mb-2">비밀번호</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={pw}
+                    onChange={e => setPw(e.target.value)}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-md"
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <svg className="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 hover:scale-105 hover:shadow-xl"
+              >
+                로그인
+              </button>
+
+              <button
+                type="button"
+                className="w-full text-blue-200 hover:text-white transition-colors duration-200 text-sm underline"
+                onClick={handleResetPassword}
+              >
+                비밀번호를 잊으셨나요?
+              </button>
+            </form>
+
+            {resetMsg && (
+              <div className="mt-4 p-3 bg-blue-500/20 border border-blue-500/30 rounded-xl text-blue-200 text-sm backdrop-blur-md text-center">
+                {resetMsg}
+              </div>
+            )}
+
+            {/* Developer Tools */}
+            {import.meta.env.DEV && (
+              <div className="mt-8 pt-6 border-t border-white/20">
+                <button
+                  onClick={handleCreateAdminAccounts}
+                  disabled={isCreatingAccounts}
+                  className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-teal-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isCreatingAccounts ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <svg className="animate-spin w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      계정 생성 중...
+                    </div>
+                  ) : '관리자 계정 생성'}
+                </button>
+                <p className="text-xs text-blue-300 mt-2 text-center">
+                  개발환경에서만 표시됩니다
+                </p>
+              </div>
+            )}
+
+            {/* Admin Info */}
+            <div className="mt-8 pt-6 border-t border-white/20">
+              <h3 className="text-sm font-semibold text-blue-200 mb-3 text-center">등록된 관리자</h3>
+              <div className="space-y-2 text-xs text-blue-300 text-center">
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                  hankjae@db-info.co.kr
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                  6511kesuk@db-info.co.kr
+                </div>
+              </div>
+            </div>
           </div>
-        )}
-        
-        <div className="mt-6 text-center text-sm text-gray-600">
-          <p className="font-semibold">등록된 관리자:</p>
-          <p className="text-xs mt-1">hankjae@db-info.co.kr</p>
-          <p className="text-xs">6511kesuk@db-info.co.kr</p>
         </div>
       </div>
     </div>

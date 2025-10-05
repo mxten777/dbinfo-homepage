@@ -48,7 +48,7 @@ const HEADER_STYLES = {
 } as const;
 
 // 🌟 로고 애니메이션 컴포넌트
-const PremiumLogo: React.FC = () => (
+const PremiumLogo: React.FC<{ isScrolled: boolean }> = ({ isScrolled }) => (
   <Link to="/" className={HEADER_STYLES.logo.container}>
     <div className="relative">
       <div className={HEADER_STYLES.logo.glow}></div>
@@ -118,7 +118,7 @@ const MobileMenuButton: React.FC<{
 );
 
 // 📋 네비게이션 메뉴 생성 함수
-const createNavLinks = (isLoginScreen: boolean) => {
+const createNavLinks = (location: any, isLoginScreen: boolean) => {
   const links = [];
   
   if (!isLoginScreen) {
@@ -213,7 +213,7 @@ export default function Header() {
       </div>
     );
   } else {
-    const links = createNavLinks(isLoginScreen);
+    const links = createNavLinks(location, isLoginScreen);
     navLinks = (
       <div className="flex items-center gap-1">
         {links}
@@ -231,7 +231,7 @@ export default function Header() {
         <div className={HEADER_STYLES.wrapper}>
           {/* 프리미엄 로고 */}
           <FadeSlideIn>
-            <PremiumLogo />
+            <PremiumLogo isScrolled={isScrolled} />
           </FadeSlideIn>
 
           {/* 데스크탑 네비게이션 */}
@@ -276,12 +276,12 @@ export default function Header() {
               {(location.pathname === '/' || (!isAdminScreen && !isProjectListScreen)) && navLinks && (
                 <div className="space-y-1">
                   {React.Children.map(navLinks, (child, index) => {
-                    if (React.isValidElement(child)) {
+                    if (React.isValidElement(child) && child.props.children) {
                       const childProps = child.props as any;
                       return (
                         <FadeSlideIn key={index} delay={500 + index * 100}>
                           <div className="transform transition-all duration-300">
-                            {childProps?.to ? (
+                            {childProps.to ? (
                               <Link 
                                 to={childProps.to} 
                                 className={HEADER_STYLES.mobile.menuItem}
@@ -289,7 +289,7 @@ export default function Header() {
                               >
                                 {childProps.children}
                               </Link>
-                            ) : childProps?.href ? (
+                            ) : childProps.href ? (
                               <a 
                                 href={childProps.href} 
                                 className={HEADER_STYLES.mobile.menuItem}
@@ -299,7 +299,7 @@ export default function Header() {
                               </a>
                             ) : (
                               <div className={HEADER_STYLES.mobile.menuItem}>
-                                {childProps?.children || child}
+                                {childProps.children}
                               </div>
                             )}
                           </div>

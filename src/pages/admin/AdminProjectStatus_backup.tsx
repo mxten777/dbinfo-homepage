@@ -4,63 +4,90 @@ import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase
 import { db } from '../../firebaseConfig';
 
 const initialForm = {
-  title: '',
-  content: '',
-  author: '',
-  date: '',
+  project: '',
+  client: '',
+  requestDate: '',
+  period: '',
+  location: '',
+  developer: '',
+  deployments: [{ status: '진행', statusChangeDate: '' }],
 };
 
-const AdminCompanyNewsManage: React.FC = () => {
-  // const navigate = useNavigate(); // 사용하지 않으므로 제거
-  const [newsList, setNewsList] = useState<any[]>([]);
+const AdminProjectStatus: React.FC = () => {
+  const [projects, setProjects] = useState<any[]>([]);
   const [form, setForm] = useState(initialForm);
   const [editId, setEditId] = useState<string | null>(null);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    const fetchNews = async () => {
-      const snap = await getDocs(collection(db, 'companyNews'));
-      setNewsList(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    const fetchProjects = async () => {
+      const snap = await getDocs(collection(db, 'projects'));
+      setProjects(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     };
-    fetchNews();
+    fetchProjects();
   }, [message]);
 
-  const handleEdit = (news: any) => {
+  const handleEdit = (project: any) => {
     setForm({
-      title: news.title || '',
-      content: news.content || '',
-      author: news.author || '',
-      date: news.date || '',
+      project: project.project || '',
+      client: project.client || '',
+      requestDate: project.requestDate || '',
+      period: project.period || '',
+      location: project.location || '',
+      developer: project.developer || '',
+      deployments: project.deployments && project.deployments.length > 0
+        ? project.deployments.map((d: any) => ({
+            ...d,
+            status: d.status === '진행중' ? '진행' : d.status
+          }))
+        : [{ status: '진행', statusChangeDate: '' }],
     });
-    setEditId(news.id);
+    setEditId(project.id);
   };
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm('정말 삭제하시겠습니까?')) {
-      await deleteDoc(doc(db, 'companyNews', id));
-      setMessage('삭제되었습니다.');
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+    if (name === 'status' || name === 'statusChangeDate') {
+      setForm({
+        ...form,
+        deployments: [{
+          ...form.deployments[0],
+          [name]: value,
+        }],
+      });
+    } else {
+      setForm({ ...form, [name]: value });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       if (editId) {
-        await updateDoc(doc(db, 'companyNews', editId), form);
+        await updateDoc(doc(db, 'projects', editId), form);
         setMessage('수정되었습니다.');
         setEditId(null);
       } else {
-        await addDoc(collection(db, 'companyNews'), form);
+        const newForm = {
+          ...form,
+          deployments: [{
+            ...form.deployments[0],
+            status: '진행',
+          }],
+        };
+        await addDoc(collection(db, 'projects'), newForm);
         setMessage('등록되었습니다.');
       }
       setForm(initialForm);
     } catch (err) {
       setMessage('처리 실패: ' + (err as Error).message);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('정말 삭제하시겠습니까?')) {
+      await deleteDoc(doc(db, 'projects', id));
+      setMessage('삭제되었습니다.');
     }
   };
 
@@ -73,21 +100,21 @@ const AdminCompanyNewsManage: React.FC = () => {
             <div className="space-y-3">
               <div className="inline-flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-brand-100 to-accent-100 rounded-full border border-brand-200/50">
                 <div className="w-3 h-3 bg-gradient-to-r from-brand-500 to-accent-500 rounded-full animate-pulse"></div>
-                <span className="text-brand-700 font-bold text-sm">COMPANY NEWS MANAGEMENT</span>
+                <span className="text-brand-700 font-bold text-sm">PROJECT MANAGEMENT</span>
               </div>
               <h1 className="text-4xl font-black gradient-text font-display tracking-tight">
-                사내소식 관리
+                프로젝트 관리
               </h1>
               <p className="text-neutral-600 text-lg">
-                회사의 최신 소식과 공지사항을 관리하세요
+                프로젝트 등록, 수정, 삭제 및 진행 상황을 관리하세요
               </p>
             </div>
             
             <div className="flex items-center gap-4">
               <div className="glass rounded-2xl p-4 bg-gradient-to-br from-brand-50/50 to-accent-50/50 border border-brand-200/30">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-brand-700">{newsList.length}</div>
-                  <div className="text-sm text-brand-600 font-medium">등록된 소식</div>
+                  <div className="text-3xl font-bold text-brand-700">{projects.length}</div>
+                  <div className="text-sm text-brand-600 font-medium">등록된 프로젝트</div>
                 </div>
               </div>
               
@@ -105,71 +132,113 @@ const AdminCompanyNewsManage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-          {/* 등록/수정 폼 섹션 */}
+          {/* 프로젝트 등록/수정 폼 섹션 */}
           <div className="xl:col-span-1">
             <div className="glass-strong rounded-3xl shadow-glass border border-white/30 bg-gradient-to-br from-white/95 to-white/80 overflow-hidden">
               <div className="p-8">
                 <div className="flex items-center gap-3 pb-6 border-b border-neutral-200/50">
                   <div className="w-10 h-10 bg-gradient-to-br from-brand-500 to-accent-500 rounded-2xl flex items-center justify-center shadow-glow">
                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-neutral-800">
-                      {editId ? '소식 수정' : '새 소식 작성'}
+                      {editId ? '프로젝트 수정' : '새 프로젝트 등록'}
                     </h3>
                     <p className="text-sm text-neutral-600">
-                      {editId ? '기존 소식을 수정합니다' : '새로운 사내 소식을 작성하세요'}
+                      {editId ? '기존 프로젝트 정보를 수정합니다' : '새로운 프로젝트를 등록하세요'}
                     </p>
                   </div>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6 mt-6">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-bold text-neutral-700">제목 *</label>
-                    <input 
-                      name="title" 
-                      value={form.title} 
-                      onChange={handleChange} 
-                      placeholder="소식의 제목을 입력하세요" 
-                      className="w-full glass rounded-xl px-4 py-3 border border-brand-200/30 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all duration-300 bg-gradient-to-r from-white/90 to-brand-50/20"
-                      required 
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="block text-sm font-bold text-neutral-700">내용 *</label>
-                    <textarea 
-                      name="content" 
-                      value={form.content} 
-                      onChange={handleChange} 
-                      placeholder="상세 내용을 입력하세요..." 
-                      rows={6}
-                      className="w-full glass rounded-xl px-4 py-3 border border-brand-200/30 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all duration-300 bg-gradient-to-r from-white/90 to-brand-50/20 resize-none"
-                      required 
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="block text-sm font-bold text-neutral-700">작성자</label>
+                      <label className="block text-sm font-bold text-neutral-700">프로젝트명 *</label>
                       <input 
-                        name="author" 
-                        value={form.author} 
+                        name="project" 
+                        value={form.project} 
                         onChange={handleChange} 
-                        placeholder="작성자 이름" 
+                        placeholder="프로젝트 이름을 입력하세요" 
+                        className="w-full glass rounded-xl px-4 py-3 border border-brand-200/30 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all duration-300 bg-gradient-to-r from-white/90 to-brand-50/20"
+                        required 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-bold text-neutral-700">고객사</label>
+                      <input 
+                        name="client" 
+                        value={form.client} 
+                        onChange={handleChange} 
+                        placeholder="고객사명을 입력하세요" 
                         className="w-full glass rounded-xl px-4 py-3 border border-success-200/30 focus:ring-2 focus:ring-success-500 focus:border-success-500 outline-none transition-all duration-300 bg-gradient-to-r from-white/90 to-success-50/20"
                       />
                     </div>
                     <div className="space-y-2">
                       <label className="block text-sm font-bold text-neutral-700">등록일</label>
                       <input 
-                        name="date" 
-                        type="date" 
-                        value={form.date} 
+                        name="requestDate" 
+                        type="date"
+                        value={form.requestDate} 
                         onChange={handleChange} 
                         className="w-full glass rounded-xl px-4 py-3 border border-success-200/30 focus:ring-2 focus:ring-success-500 focus:border-success-500 outline-none transition-all duration-300 bg-gradient-to-r from-white/90 to-success-50/20"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-bold text-neutral-700">프로젝트 기간</label>
+                      <input 
+                        name="period" 
+                        value={form.period} 
+                        onChange={handleChange} 
+                        placeholder="예: 2024.01 ~ 2024.12" 
+                        className="w-full glass rounded-xl px-4 py-3 border border-success-200/30 focus:ring-2 focus:ring-success-500 focus:border-success-500 outline-none transition-all duration-300 bg-gradient-to-r from-white/90 to-success-50/20"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-bold text-neutral-700">장소</label>
+                      <input 
+                        name="location" 
+                        value={form.location} 
+                        onChange={handleChange} 
+                        placeholder="프로젝트 수행 장소" 
+                        className="w-full glass rounded-xl px-4 py-3 border border-accent-200/30 focus:ring-2 focus:ring-accent-500 focus:border-accent-500 outline-none transition-all duration-300 bg-gradient-to-r from-white/90 to-accent-50/20"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-bold text-neutral-700">개발자</label>
+                      <input 
+                        name="developer" 
+                        value={form.developer} 
+                        onChange={handleChange} 
+                        placeholder="담당 개발자명" 
+                        className="w-full glass rounded-xl px-4 py-3 border border-accent-200/30 focus:ring-2 focus:ring-accent-500 focus:border-accent-500 outline-none transition-all duration-300 bg-gradient-to-r from-white/90 to-accent-50/20"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-bold text-neutral-700">프로젝트 상태</label>
+                      <select
+                        name="status"
+                        value={form.deployments[0].status}
+                        onChange={handleChange}
+                        disabled={!editId}
+                        className="w-full glass rounded-xl px-4 py-3 border border-warning-200/30 focus:ring-2 focus:ring-warning-500 focus:border-warning-500 outline-none transition-all duration-300 bg-gradient-to-r from-white/90 to-warning-50/20 disabled:opacity-50"
+                      >
+                        <option value="진행">진행중</option>
+                        <option value="완료">완료</option>
+                      </select>
+                      {!editId && (
+                        <p className="text-xs text-warning-600">* 신규 등록시 자동으로 '진행중'으로 설정됩니다</p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-bold text-neutral-700">상태 변경일</label>
+                      <input 
+                        name="statusChangeDate" 
+                        type="date"
+                        value={form.deployments[0].statusChangeDate} 
+                        onChange={handleChange} 
+                        className="w-full glass rounded-xl px-4 py-3 border border-warning-200/30 focus:ring-2 focus:ring-warning-500 focus:border-warning-500 outline-none transition-all duration-300 bg-gradient-to-r from-white/90 to-warning-50/20"
                       />
                     </div>
                   </div>
@@ -182,7 +251,7 @@ const AdminCompanyNewsManage: React.FC = () => {
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      {editId ? '수정 완료' : '소식 등록'}
+                      {editId ? '수정 완료' : '프로젝트 등록'}
                     </button>
                     {editId && (
                       <button 
@@ -202,37 +271,37 @@ const AdminCompanyNewsManage: React.FC = () => {
             </div>
           </div>
 
-          {/* 소식 목록 섹션 */}
+          {/* 프로젝트 목록 섹션 */}
           <div className="xl:col-span-1">
             <div className="glass-strong rounded-3xl shadow-glass border border-white/30 bg-gradient-to-br from-white/95 to-white/80 overflow-hidden">
               <div className="p-8">
                 <div className="flex items-center gap-3 pb-6 border-b border-neutral-200/50">
                   <div className="w-10 h-10 bg-gradient-to-br from-success-500 to-brand-500 rounded-2xl flex items-center justify-center shadow-glow">
                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-neutral-800">등록된 소식</h3>
-                    <p className="text-sm text-neutral-600">현재 등록된 사내 소식 목록</p>
+                    <h3 className="text-xl font-bold text-neutral-800">프로젝트 목록</h3>
+                    <p className="text-sm text-neutral-600">등록된 모든 프로젝트</p>
                   </div>
                 </div>
 
                 <div className="mt-6 space-y-4 max-h-[600px] overflow-y-auto pr-2">
-                  {newsList.length === 0 ? (
+                  {projects.length === 0 ? (
                     <div className="text-center py-12">
                       <div className="w-16 h-16 bg-gradient-to-br from-neutral-400 to-neutral-500 rounded-3xl flex items-center justify-center mx-auto mb-4">
                         <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
                       </div>
-                      <h4 className="text-xl font-bold text-neutral-700 mb-2">등록된 소식이 없습니다</h4>
-                      <p className="text-neutral-600 mb-4">첫 번째 사내 소식을 작성해보세요.</p>
+                      <h4 className="text-xl font-bold text-neutral-700 mb-2">등록된 프로젝트가 없습니다</h4>
+                      <p className="text-neutral-600 mb-4">첫 번째 프로젝트를 등록해보세요.</p>
                     </div>
                   ) : (
-                    newsList.map((news, index) => (
+                    projects.map((project, index) => (
                       <div 
-                        key={news.id} 
+                        key={project.id} 
                         className="group glass rounded-2xl p-6 border border-neutral-200/30 hover:border-brand-300/50 transition-all duration-300 hover:shadow-glow bg-gradient-to-br from-white/80 to-neutral-50/30"
                       >
                         <div className="space-y-4">
@@ -242,31 +311,31 @@ const AdminCompanyNewsManage: React.FC = () => {
                                 <div className="w-6 h-6 bg-gradient-to-br from-brand-500 to-accent-500 rounded-lg flex items-center justify-center text-white text-xs font-bold">
                                   {index + 1}
                                 </div>
-                                <h4 className="font-bold text-neutral-800 truncate">{news.title}</h4>
+                                <h4 className="font-bold text-neutral-800 truncate">{project.project}</h4>
+                                <div className={`px-2 py-1 rounded-full text-xs font-bold ${
+                                  project.deployments?.[0]?.status === '완료' 
+                                    ? 'bg-gradient-to-r from-success-100 to-brand-100 text-success-700' 
+                                    : 'bg-gradient-to-r from-warning-100 to-accent-100 text-warning-700'
+                                }`}>
+                                  {project.deployments?.[0]?.status || '진행'}
+                                </div>
                               </div>
-                              <p className="text-sm text-neutral-600 line-clamp-3">{news.content}</p>
+                              <div className="text-sm text-neutral-600 space-y-1">
+                                <div><span className="font-medium">고객사:</span> {project.client || '-'}</div>
+                                <div><span className="font-medium">기간:</span> {project.period || '-'}</div>
+                                <div><span className="font-medium">개발자:</span> {project.developer || '-'}</div>
+                              </div>
                             </div>
                           </div>
 
                           <div className="flex items-center justify-between pt-3 border-t border-neutral-200/30">
-                            <div className="flex items-center gap-4 text-xs text-neutral-500">
-                              <div className="flex items-center gap-1">
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                                <span>{news.author || '익명'}</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 4v10m6-10v10m1-12a2 2 0 114 0v2a2 2 0 01-2 2H7a2 2 0 01-2-2v-2a2 2 0 012-2h10z" />
-                                </svg>
-                                <span>{news.date || '미정'}</span>
-                              </div>
+                            <div className="text-xs text-neutral-500">
+                              등록일: {project.requestDate || '미정'}
                             </div>
 
                             <div className="flex items-center gap-2">
                               <button 
-                                onClick={() => handleEdit(news)} 
+                                onClick={() => handleEdit(project)} 
                                 className="w-8 h-8 bg-gradient-to-br from-warning-500 to-accent-500 rounded-lg flex items-center justify-center text-white hover:scale-110 transition-transform duration-300 shadow-glow"
                                 title="수정"
                               >
@@ -275,7 +344,7 @@ const AdminCompanyNewsManage: React.FC = () => {
                                 </svg>
                               </button>
                               <button 
-                                onClick={() => handleDelete(news.id!)} 
+                                onClick={() => handleDelete(project.id!)} 
                                 className="w-8 h-8 bg-gradient-to-br from-error-500 to-warning-500 rounded-lg flex items-center justify-center text-white hover:scale-110 transition-transform duration-300 shadow-glow"
                                 title="삭제"
                               >
@@ -337,7 +406,45 @@ const AdminCompanyNewsManage: React.FC = () => {
         )}
       </div>
     </div>
+                <tr>
+                  <th className="border px-4 py-2">프로젝트명</th>
+                  <th className="border px-4 py-2">고객사</th>
+                  <th className="border px-4 py-2">등록일</th>
+                  <th className="border px-4 py-2">기간</th>
+                  <th className="border px-4 py-2">장소</th>
+                  <th className="border px-4 py-2">개발자</th>
+                  <th className="border px-4 py-2">상태</th>
+                  <th className="border px-4 py-2">상태변경일</th>
+                  <th className="border px-4 py-2">수정</th>
+                  <th className="border px-4 py-2">삭제</th>
+                </tr>
+              </thead>
+              <tbody>
+                {projects.map(project => (
+                  <tr key={project.id} className="hover:bg-blue-50 transition">
+                    <td className="border px-4 py-2">{project.project}</td>
+                    <td className="border px-4 py-2">{project.client}</td>
+                    <td className="border px-4 py-2">{project.requestDate}</td>
+                    <td className="border px-4 py-2">{project.period}</td>
+                    <td className="border px-4 py-2">{project.location}</td>
+                    <td className="border px-4 py-2">{project.developer}</td>
+                    <td className="border px-4 py-2">{project.deployments?.[0]?.status || '-'}</td>
+                    <td className="border px-4 py-2">{project.deployments?.[0]?.statusChangeDate || '-'}</td>
+                    <td className="border px-4 py-2">
+                      <button onClick={() => handleEdit(project)} className="px-3 py-1 bg-yellow-200 text-yellow-900 rounded-lg font-bold shadow hover:bg-yellow-300 transition">수정</button>
+                    </td>
+                    <td className="border px-4 py-2">
+                      <button onClick={() => handleDelete(project.id!)} className="px-3 py-1 bg-red-500 text-white rounded-lg font-bold shadow hover:bg-red-600 transition">삭제</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
-export default AdminCompanyNewsManage;
+export default AdminProjectStatus;
