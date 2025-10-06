@@ -1,0 +1,135 @@
+// 🔐 Firebase 보안 규칙 (Firestore)
+// 이 파일을 Firebase Console > Firestore > 규칙에 적용하세요
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 🎯 관리자 계정 보안
+    match /admins/{adminId} {
+      // 읽기: 인증된 관리자만
+      allow read: if isAdmin();
+      // 쓰기: 슈퍼 관리자나 자기 자신만 (비밀번호 변경 등)
+      allow write: if isSuperAdmin() || (isAdmin() && resource.data.email == request.auth.token.email);
+    }
+    
+    // 👥 직원 정보 보안
+    match /employees/{employeeId} {
+      // 읽기: 관리자 또는 본인만
+      allow read: if isAdmin() || isOwner(employeeId);
+      // 생성: 관리자만
+      allow create: if isAdmin();
+      // 수정: 관리자만 (직원은 일부 필드만 수정 가능하도록 별도 규칙)
+      allow update: if isAdmin() || (isOwner(employeeId) && isValidEmployeeUpdate());
+      // 삭제: 관리자만
+      allow delete: if isAdmin();
+    }
+    
+    // 📋 연차 신청 보안
+    match /leaves/{leaveId} {
+      // 읽기: 관리자 또는 신청자 본인
+      allow read: if isAdmin() || request.auth.uid == resource.data.employeeId;
+      // 생성: 인증된 직원 (본인 신청만)
+      allow create: if request.auth != null && 
+                   request.auth.uid == request.resource.data.employeeId &&
+                   isValidLeaveRequest();
+      // 수정: 관리자만 (상태 변경) 또는 신청자 본인 (pending 상태일 때만)
+      allow update: if isAdmin() || 
+                   (request.auth.uid == resource.data.employeeId && 
+                    resource.data.status == 'pending' && 
+                    isValidLeaveUpdate());
+      // 삭제: 관리자 또는 신청자 본인 (pending 상태일 때만)
+      allow delete: if isAdmin() || 
+                   (request.auth.uid == resource.data.employeeId && 
+                    resource.data.status == 'pending');
+    }
+    
+    // 🔄 대리신청 보안
+    match /deputyRequests/{requestId} {
+      // 읽기: 관리자만
+      allow read: if isAdmin();
+      // 생성: 관리자만
+      allow create: if isAdmin() && isValidDeputyRequest();
+      // 수정: 관리자만
+      allow update: if isAdmin();
+      // 삭제: 관리자만
+      allow delete: if isAdmin();
+    }
+    
+    // 🗞️ 회사 소식 보안
+    match /companyNews/{newsId} {
+      // 읽기: 모든 인증된 사용자
+      allow read: if request.auth != null;
+      // 쓰기: 관리자만
+      allow write: if isAdmin();
+    }
+    
+    // 📊 프로젝트 상태 보안
+    match /projects/{projectId} {
+      // 읽기: 인증된 사용자
+      allow read: if request.auth != null;
+      // 쓰기: 관리자만
+      allow write: if isAdmin();
+    }
+    
+    // ⛔ 기본적으로 모든 다른 경로 차단
+    match /{document=**} {
+      allow read, write: if false;
+    }
+    
+    // 🛡️ 보안 함수들
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return request.auth != null && 
+             request.auth.token.email != null &&
+             exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    
+    function isSuperAdmin() {
+      return isAdmin() && 
+             get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'super';
+    }
+    
+    function isOwner(resourceId) {
+      return request.auth != null && request.auth.uid == resourceId;
+    }
+    
+    function isValidEmployeeUpdate() {
+      // 직원이 수정 가능한 필드만 허용
+      let allowedFields = ['name', 'contact', 'password'];
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasAll(allowedFields.toSet());
+    }
+    
+    function isValidLeaveRequest() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['employeeId', 'employeeName', 'startDate', 'endDate', 'reason', 'type', 'days']) &&
+             data.startDate is timestamp &&
+             data.endDate is timestamp &&
+             data.days is number && data.days > 0 &&
+             data.reason is string && data.reason.size() > 0 &&
+             data.type in ['연차', '반차', '병가', '경조사'] &&
+             data.status == 'pending';
+    }
+    
+    function isValidLeaveUpdate() {
+      // 직원은 pending 상태일 때만 사유, 날짜 수정 가능
+      let allowedFields = ['reason', 'startDate', 'endDate', 'days'];
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasAll(allowedFields.toSet()) &&
+        request.resource.data.status == 'pending';
+    }
+    
+    function isValidDeputyRequest() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['targetEmployeeId', 'startDate', 'endDate', 'reason', 'requestedBy']) &&
+             data.startDate is timestamp &&
+             data.endDate is timestamp &&
+             data.reason is string && data.reason.size() > 0 &&
+             data.requestedBy == request.auth.uid;
+    }
+  }
+}

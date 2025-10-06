@@ -576,12 +576,6 @@ const ContactSection: React.FC = () => (
 
 // 🏠 메인 홈 컴포넌트
 export default function Home() {
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoaded(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
 
   // 스크롤 이동 함수
   const scrollToSection = (id: string) => {

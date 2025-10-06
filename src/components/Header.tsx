@@ -8,8 +8,8 @@ const HEADER_STYLES = {
   container: (isScrolled: boolean) => 
     `fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${
       isScrolled 
-        ? 'backdrop-blur-2xl bg-slate-900/95 border-b border-white/10 shadow-2xl shadow-black/20' 
-        : 'backdrop-blur-xl bg-slate-900/80 border-b border-white/5'
+        ? 'backdrop-blur-2xl bg-white/98 border-b-2 border-slate-200 shadow-2xl' 
+        : 'backdrop-blur-xl bg-white/95 border-b border-slate-200'
     }`,
   wrapper: "max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4",
   logo: {
@@ -18,32 +18,32 @@ const HEADER_STYLES = {
     badge: "absolute -top-2 -right-2 w-5 h-5 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full animate-pulse shadow-lg",
     glow: "absolute inset-0 bg-gradient-to-br from-blue-600/30 to-purple-600/30 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-500 opacity-70",
     text: {
-      main: "text-3xl font-black bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent group-hover:from-blue-200 group-hover:to-white transition-all duration-500",
-      sub: "text-xs text-gray-300 font-medium -mt-1 group-hover:text-blue-200 transition-colors duration-300 tracking-wide"
+      main: "text-3xl font-black text-slate-900 group-hover:text-blue-700 transition-all duration-500 drop-shadow-sm",
+      sub: "text-xs text-slate-700 font-bold -mt-1 group-hover:text-blue-600 transition-colors duration-300 tracking-wide"
     }
   },
   nav: {
     desktop: "hidden lg:flex items-center gap-2",
     tablet: "hidden md:flex lg:hidden items-center gap-2",
-    container: "glass-card rounded-2xl p-2 border border-white/10 backdrop-blur-xl shadow-glass",
-    link: "relative px-4 py-2 text-white font-medium rounded-xl transition-all duration-300 hover:bg-white/10 hover:scale-105 group",
-    linkActive: "bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-white/20"
+    container: "bg-white/95 backdrop-blur-xl rounded-2xl p-2 border-2 border-slate-200 shadow-2xl",
+    link: "relative px-4 py-2 text-slate-800 font-bold rounded-xl transition-all duration-300 hover:bg-blue-600 hover:text-white hover:scale-105 group shadow-sm",
+    linkActive: "bg-blue-600 text-white shadow-lg border border-blue-700"
   },
   mobile: {
     button: (isMenuOpen: boolean) => 
-      `md:hidden relative w-14 h-14 rounded-2xl glass-card flex flex-col items-center justify-center gap-1.5 hover:bg-white/10 hover:scale-105 transition-all duration-300 focus:outline-none group ${
-        isMenuOpen ? 'bg-blue-600/20 border-white/20 scale-105' : 'border-white/10'
+      `md:hidden relative w-14 h-14 rounded-2xl bg-white/90 backdrop-blur-xl flex flex-col items-center justify-center gap-1.5 hover:bg-white hover:scale-105 transition-all duration-300 focus:outline-none group border-2 border-slate-200 shadow-lg ${
+        isMenuOpen ? 'bg-blue-600 border-blue-700 scale-105' : ''
       }`,
     line: (isMenuOpen: boolean, transform: string) =>
-      `block w-7 h-0.5 bg-white rounded-full transition-all duration-300 ${
-        isMenuOpen ? `${transform} bg-blue-400` : 'group-hover:w-8 group-hover:bg-blue-200'
+      `block w-7 h-0.5 rounded-full transition-all duration-300 ${
+        isMenuOpen ? `${transform} bg-white` : 'bg-slate-700 group-hover:w-8 group-hover:bg-blue-600'
       }`,
     menu: (isMenuOpen: boolean) =>
       `md:hidden overflow-hidden transition-all duration-700 ease-out ${
         isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
       }`,
-    menuContent: "bg-slate-900/98 backdrop-blur-2xl border-t border-white/10 shadow-2xl",
-    menuItem: "block w-full px-6 py-4 text-left text-lg font-medium text-white hover:text-blue-200 hover:bg-white/5 transition-all duration-300 hover:translate-x-2 border-b border-white/5 last:border-b-0"
+    menuContent: "bg-white/95 backdrop-blur-2xl border-t-2 border-slate-200 shadow-2xl",
+    menuItem: "block w-full px-6 py-4 text-left text-lg font-bold text-slate-800 hover:text-blue-600 hover:bg-blue-50 transition-all duration-300 hover:translate-x-2 border-b border-slate-200 last:border-b-0"
   }
 } as const;
 

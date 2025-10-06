@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import FadeSlideIn from './FadeSlideIn';
@@ -174,23 +174,6 @@ export async function uploadUniqueEmployees(setUploadMessage: (msg: string) => v
 }
 
 function Footer() {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsVisible(entry.isIntersecting);
-      },
-      { threshold: 0.1 }
-    );
-
-    const footerElement = document.getElementById('footer');
-    if (footerElement) {
-      observer.observe(footerElement);
-    }
-
-    return () => observer.disconnect();
-  }, []);
 
   const serviceLinks = [
     { href: "#", label: "🌐 웹 개발" },

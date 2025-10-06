@@ -1,0 +1,75 @@
+// 🔐 Firebase Storage 보안 규칙
+// 이 파일을 Firebase Console > Storage > 규칙에 적용하세요
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // 👤 프로필 사진 업로드
+    match /profiles/{userId}/{filename} {
+      // 읽기: 인증된 사용자만
+      allow read: if request.auth != null;
+      // 업로드: 본인만, 이미지 파일만, 5MB 이하
+      allow write: if request.auth != null &&
+                  request.auth.uid == userId &&
+                  isImageFile() &&
+                  request.resource.size < 5 * 1024 * 1024;
+    }
+    
+    // 🏢 회사 관련 이미지
+    match /company/{filename} {
+      // 읽기: 모든 사용자 (공개)
+      allow read: if true;
+      // 업로드: 관리자만
+      allow write: if isAdmin() &&
+                  isImageFile() &&
+                  request.resource.size < 10 * 1024 * 1024;
+    }
+    
+    // 📊 프로젝트 관련 파일
+    match /projects/{projectId}/{filename} {
+      // 읽기: 인증된 사용자만
+      allow read: if request.auth != null;
+      // 업로드: 관리자만, 20MB 이하
+      allow write: if isAdmin() &&
+                  request.resource.size < 20 * 1024 * 1024;
+    }
+    
+    // 📄 문서 파일 (계약서, 증명서 등)
+    match /documents/{category}/{filename} {
+      // 읽기: 관리자만
+      allow read: if isAdmin();
+      // 업로드: 관리자만, 문서 파일만, 50MB 이하
+      allow write: if isAdmin() &&
+                  isDocumentFile() &&
+                  request.resource.size < 50 * 1024 * 1024;
+    }
+    
+    // ⛔ 기본적으로 모든 다른 경로 차단
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+    
+    // 🛡️ 보안 함수들
+    function isAdmin() {
+      return request.auth != null && 
+             request.auth.token.admin == true;
+    }
+    
+    function isImageFile() {
+      return request.resource.contentType.matches('image/.*');
+    }
+    
+    function isDocumentFile() {
+      return request.resource.contentType in [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'text/plain',
+        'text/csv'
+      ];
+    }
+  }
+}

@@ -48,7 +48,7 @@ const HEADER_STYLES = {
 } as const;
 
 // 🌟 로고 애니메이션 컴포넌트
-const PremiumLogo: React.FC<{ isScrolled: boolean }> = ({ isScrolled }) => (
+const PremiumLogo: React.FC<{ isScrolled: boolean }> = ({ }) => (
   <Link to="/" className={HEADER_STYLES.logo.container}>
     <div className="relative">
       <div className={HEADER_STYLES.logo.glow}></div>
@@ -118,7 +118,7 @@ const MobileMenuButton: React.FC<{
 );
 
 // 📋 네비게이션 메뉴 생성 함수
-const createNavLinks = (location: any, isLoginScreen: boolean) => {
+const createNavLinks = (isLoginScreen: boolean) => {
   const links = [];
   
   if (!isLoginScreen) {
@@ -213,7 +213,7 @@ export default function Header() {
       </div>
     );
   } else {
-    const links = createNavLinks(location, isLoginScreen);
+    const links = createNavLinks(isLoginScreen);
     navLinks = (
       <div className="flex items-center gap-1">
         {links}
@@ -276,7 +276,7 @@ export default function Header() {
               {(location.pathname === '/' || (!isAdminScreen && !isProjectListScreen)) && navLinks && (
                 <div className="space-y-1">
                   {React.Children.map(navLinks, (child, index) => {
-                    if (React.isValidElement(child) && child.props.children) {
+                    if (React.isValidElement(child) && (child.props as any)?.children) {
                       const childProps = child.props as any;
                       return (
                         <FadeSlideIn key={index} delay={500 + index * 100}>

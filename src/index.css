@@ -88,6 +88,28 @@
   .gradient-text-light {
     @apply bg-gradient-to-r from-brand-400 to-accent-400 bg-clip-text text-transparent;
   }
+  
+  /* 모달 오버레이 */
+  .modal-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 99999 !important;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  
+  /* 모달 컨테이너 */
+  .modal-container {
+    position: relative !important;
+    z-index: 100000 !important;
+    max-width: 90vw;
+    max-height: 90vh;
+    margin: auto;
+  }
 }
 
 /* 유틸리티 레이어 */

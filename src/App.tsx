@@ -113,11 +113,13 @@ function DummyPage({ title }: { title: string }) {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <AppRoutesWithHeader />
-      </Router>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <Router>
+          <AppRoutesWithHeader />
+        </Router>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 

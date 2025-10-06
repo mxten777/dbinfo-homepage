@@ -3,33 +3,33 @@ import { collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore'
 import { db } from '../firebaseConfig';
 import FadeSlideIn from './FadeSlideIn';
 
-// 🎨 프리미엄 푸터 스타일 시스템
+// 🎨 프리미엄 푸터 스타일 시스템 - 극강 가독성
 const FOOTER_STYLES = {
-  container: "bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 relative overflow-hidden",
+  container: "bg-slate-800 relative overflow-hidden",
   wrapper: "relative z-10 max-w-7xl mx-auto",
   background: "absolute inset-0 overflow-hidden",
   orb: {
-    primary: "absolute top-20 right-32 w-80 h-80 bg-blue-500/8 rounded-full blur-3xl animate-pulse-slow",
-    secondary: "absolute bottom-20 left-32 w-64 h-64 bg-purple-500/6 rounded-full blur-3xl animate-pulse-slow",
-    tertiary: "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/4 rounded-full blur-3xl animate-float"
+    primary: "absolute top-20 right-32 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl animate-pulse-slow",
+    secondary: "absolute bottom-20 left-32 w-64 h-64 bg-purple-500/4 rounded-full blur-3xl animate-pulse-slow",
+    tertiary: "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/3 rounded-full blur-3xl animate-float"
   },
   grid: "grid lg:grid-cols-4 md:grid-cols-2 gap-8 px-6 py-16",
-  card: "glass-card rounded-2xl border border-white/10 backdrop-blur-xl p-6 hover:border-white/20 transition-all duration-500",
-  heading: "text-2xl font-bold bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent mb-6",
+  card: "bg-white/95 rounded-2xl border-2 border-slate-200 shadow-xl p-8 hover:shadow-2xl transition-all duration-500",
+  heading: "text-2xl font-bold text-slate-900 mb-6 drop-shadow-lg",
   contact: {
-    item: "flex items-start gap-4 p-4 glass rounded-xl border border-white/10 hover:border-white/20 transition-all duration-300 group",
-    icon: "w-12 h-12 rounded-2xl flex items-center justify-center shadow-glass transition-all duration-300 group-hover:scale-105",
+    item: "flex items-start gap-4 p-5 bg-slate-100 rounded-xl border-2 border-slate-300 hover:border-slate-400 transition-all duration-300 group shadow-lg",
+    icon: "w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-all duration-300 group-hover:scale-105",
     iconPrimary: "bg-gradient-to-r from-blue-600 to-indigo-600",
     iconSecondary: "bg-gradient-to-r from-indigo-600 to-purple-600",
     iconTertiary: "bg-gradient-to-r from-green-600 to-emerald-600"
   },
-  link: "text-gray-300 hover:text-white transition-all duration-300 text-sm hover:translate-x-1 block py-1",
+  link: "text-slate-700 hover:text-slate-900 transition-all duration-300 text-base font-semibold hover:translate-x-1 block py-2 hover:bg-slate-200 px-3 rounded-lg",
   social: {
-    container: "flex items-center gap-3",
-    button: "w-12 h-12 glass-card rounded-2xl flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300 hover:scale-110 border border-white/10 hover:border-white/20"
+    container: "flex items-center gap-4",
+    button: "w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-700 hover:text-slate-900 hover:bg-slate-200 transition-all duration-300 hover:scale-110 border-2 border-slate-300 hover:border-slate-400 shadow-lg"
   },
-  bottom: "border-t border-white/10 px-6 py-8",
-  backToTop: "w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center text-white hover:scale-110 transition-all duration-300 shadow-glow hover:shadow-blue-500/25"
+  bottom: "border-t-2 border-slate-300 px-6 py-8 bg-slate-100",
+  backToTop: "w-14 h-14 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center text-white hover:scale-110 transition-all duration-300 shadow-glow hover:shadow-blue-500/25"
 } as const;
 
 // 🌟 배경 애니메이션 컴포넌트
@@ -56,8 +56,8 @@ const ContactCard: React.FC<{
         {icon}
       </div>
       <div className="flex-1">
-        <h4 className="text-white font-bold mb-2">{title}</h4>
-        <div className="text-gray-300 text-sm leading-relaxed">
+        <h4 className="text-slate-900 font-bold text-lg mb-3 drop-shadow-sm">{title}</h4>
+        <div className="text-slate-800 text-base leading-relaxed font-semibold">
           {content}
         </div>
       </div>
@@ -248,7 +248,7 @@ function Footer() {
                 content={
                   <>
                     hankjae@db-info.co.kr<br />
-                    6511kesuk@db-info.co.kr <span className="text-xs text-gray-400">(관리이사)</span>
+                    6511kesuk@db-info.co.kr <span className="text-xs text-slate-600 font-semibold">(관리이사)</span>
                   </>
                 }
                 iconStyle={FOOTER_STYLES.contact.iconSecondary}
@@ -264,8 +264,8 @@ function Footer() {
                 title="전화번호"
                 content={
                   <>
-                    02-2025-8511 <span className="text-xs text-gray-400">(전화)</span><br />
-                    02-2025-8512 <span className="text-xs text-gray-400">(팩스)</span>
+                    02-2025-8511 <span className="text-xs text-slate-600 font-semibold">(전화)</span><br />
+                    02-2025-8512 <span className="text-xs text-slate-600 font-semibold">(팩스)</span>
                   </>
                 }
                 iconStyle={FOOTER_STYLES.contact.iconTertiary}
@@ -294,14 +294,14 @@ function Footer() {
           <FadeSlideIn delay={700}>
             <div className="flex flex-col md:flex-row justify-between items-center gap-6">
               {/* 저작권 */}
-              <div className="text-gray-300 text-sm">
+              <div className="text-slate-800 text-base font-semibold">
                 © 2024 DB.INFO Co., Ltd. All rights reserved. | 
-                <span className="text-blue-300 ml-2">Premium IT Solutions Partner</span>
+                <span className="text-blue-700 ml-2 font-bold">Premium IT Solutions Partner</span>
               </div>
 
               {/* 소셜 링크 */}
-              <div className="flex items-center gap-4">
-                <span className="text-gray-300 text-sm font-medium">Follow us:</span>
+              <div className="flex items-center gap-6">
+                <span className="text-slate-800 text-base font-bold">Follow us:</span>
                 <div className={FOOTER_STYLES.social.container}>
                   <SocialButton
                     href="#"

@@ -98,11 +98,10 @@ const StatCard: React.FC<{
 // 👤 프리미엄 직원 카드 컴포넌트
 const EmployeeCard: React.FC<{
   employee: any;
-  index: number;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   delay?: number;
-}> = ({ employee, index, onEdit, onDelete, delay = 0 }) => {
+}> = ({ employee, onEdit, onDelete, delay = 0 }) => {
   const usedRatio = employee.totalLeaves > 0 ? (employee.usedLeaves / employee.totalLeaves) * 100 : 0;
   const remainingLeaves = (employee.totalLeaves ?? 0) - (employee.usedLeaves ?? 0);
   
@@ -415,7 +414,6 @@ const AdminEmployeeStatus: React.FC = () => {
                   <EmployeeCard
                     key={employee.id}
                     employee={employee}
-                    index={index}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     delay={700 + index * 100}
