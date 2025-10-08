@@ -1,7 +1,22 @@
 import React, { useEffect, useState, useRef } from 'react';
 
+// 애니메이션 스타일 타입
+interface AnimationStyle {
+  opacity?: number;
+  x?: number;
+  y?: number;
+  scale?: number;
+  rotate?: number;
+}
+
+// 애니메이션 variant 타입
+interface AnimationVariant {
+  initial: AnimationStyle;
+  animate: AnimationStyle;
+}
+
 // 🎭 애니메이션 variants
-export const ANIMATION_VARIANTS = {
+export const ANIMATION_VARIANTS: Record<string, AnimationVariant> = {
   // 📍 기본 방향성 애니메이션
   fadeIn: {
     initial: { opacity: 0 },
@@ -108,7 +123,7 @@ export const EnhancedAnimate: React.FC<EnhancedAnimateProps> = ({
   }, [delay, threshold, triggerOnce, hasTriggered]);
 
   const animation = ANIMATION_VARIANTS[variant];
-  const animationStyle: any = isVisible ? animation.animate : animation.initial;
+  const animationStyle: AnimationStyle = isVisible ? animation.animate : animation.initial;
 
   return (
     <div

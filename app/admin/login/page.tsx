@@ -50,8 +50,9 @@ const AdminLogin: React.FC = () => {
     try {
       // 실제로는 Firebase sendPasswordResetEmail을 사용
       setResetMsg('비밀번호 재설정 메일이 발송되었습니다.');
-    } catch (err: any) {
-      setResetMsg('재설정 실패: ' + (err?.message || '오류 발생'));
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '오류 발생';
+      setResetMsg('재설정 실패: ' + errorMessage);
     }
   };
 
@@ -64,8 +65,9 @@ const AdminLogin: React.FC = () => {
       // 데모용 계정 생성 시뮬레이션
       await new Promise(resolve => setTimeout(resolve, 2000));
       setSuccess('관리자 계정이 성공적으로 생성되었습니다!');
-    } catch (error: any) {
-      setError('계정 생성 실패: ' + error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다';
+      setError('계정 생성 실패: ' + errorMessage);
     } finally {
       setIsCreatingAccounts(false);
     }
