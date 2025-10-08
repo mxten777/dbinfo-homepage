@@ -25,7 +25,9 @@ const AdminLogin: React.FC = () => {
     console.log('로그인 시도:', emailTrimmed, passwordTrimmed); // 디버깅용
     
     if ((emailTrimmed === 'hankjae@db-info.co.kr' && passwordTrimmed === 'admin123') ||
-        (emailTrimmed === '6511kesuk@db-info.co.kr' && passwordTrimmed === 'admin123')) {
+        (emailTrimmed === '6511kesuk@db-info.co.kr' && passwordTrimmed === 'admin123') ||
+        (emailTrimmed === 'admin@db-info.co.kr' && passwordTrimmed === 'admin123') ||
+        (emailTrimmed === 'test@db-info.co.kr' && passwordTrimmed === 'admin123')) {
       setSuccess('로그인 성공!');
       setError('');
       // 관리자 모드 활성화
@@ -244,6 +246,14 @@ const AdminLogin: React.FC = () => {
                 <div className="flex items-center justify-center gap-2">
                   <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
                   6511kesuk@db-info.co.kr
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                  admin@db-info.co.kr
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                  test@db-info.co.kr
                 </div>
                 <div className="mt-3 text-blue-200">
                   <p>데모 비밀번호: <span className="font-mono bg-white/10 px-2 py-1 rounded">admin123</span></p>
