@@ -22,13 +22,7 @@ const NotificationSystem = dynamic(() => import('@/components/notification/Notif
   ssr: false 
 });
 
-const SecuritySystem = dynamic(() => import('@/components/security/SecuritySystem').then(mod => ({ default: mod.SecuritySystem })), { 
-  ssr: false 
-});
 
-const AnalyticsDashboard = dynamic(() => import('@/components/analytics/AnalyticsDashboard'), { 
-  ssr: false 
-});
 
 export default function Home() {
   return (
@@ -351,18 +345,12 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* Advanced Components - Client-side only */}
-      <Suspense fallback={null}>
-        <AnalyticsDashboard />
-      </Suspense>
+      {/* Client-side Components */}
       <Suspense fallback={null}>
         <ChatSystem />
       </Suspense>
       <Suspense fallback={null}>
         <NotificationSystem />
-      </Suspense>
-      <Suspense fallback={null}>
-        <SecuritySystem />
       </Suspense>
     </div>
   );
