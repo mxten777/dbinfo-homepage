@@ -385,9 +385,9 @@ const EmployeeManagement: React.FC = () => {
                         수정
                       </button>
                       <button
-                        onClick={() => handleDeleteEmployee(employee.id)}
+                        onClick={() => employee.id && handleDeleteEmployee(employee.id)}
                         className="text-red-600 hover:text-red-900"
-                        disabled={!firebaseConnected}
+                        disabled={!firebaseConnected || !employee.id}
                       >
                         삭제
                       </button>

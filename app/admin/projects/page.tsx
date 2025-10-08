@@ -465,9 +465,9 @@ const ProjectManagement: React.FC = () => {
                         수정
                       </button>
                       <button
-                        onClick={() => handleDeleteProject(project.id)}
+                        onClick={() => project.id && handleDeleteProject(project.id)}
                         className="text-red-600 hover:text-red-900"
-                        disabled={!firebaseConnected}
+                        disabled={!firebaseConnected || !project.id}
                       >
                         삭제
                       </button>
