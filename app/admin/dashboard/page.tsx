@@ -2,11 +2,30 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { db } from '../../../lib/firebase';
+
+// 메뉴 아이템 타입 정의
+interface MenuItem {
+  title: string;
+  icon: React.ReactElement;
+  active?: boolean;
+  path?: string;
+  category?: 'enhanced' | 'original' | 'reset';
+  badge?: string;
+}
 
 const AdminDashboard: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminUser, setAdminUser] = useState('');
   const [loading, setLoading] = useState(true);
+  const [firebaseConnected, setFirebaseConnected] = useState(false);
+  const [stats, setStats] = useState({
+    totalEmployees: 0,
+    totalProjects: 0,
+    totalLeaves: 0,
+    totalRevenue: '0'
+  });
   const router = useRouter();
 
   useEffect(() => {
@@ -17,11 +36,65 @@ const AdminDashboard: React.FC = () => {
     if (adminMode === 'true' && user) {
       setIsAuthenticated(true);
       setAdminUser(user);
+      loadFirebaseData();
     } else {
       router.push('/admin/login');
     }
     setLoading(false);
   }, [router]);
+
+  // Firebase 데이터 로드
+  const loadFirebaseData = async () => {
+    try {
+      if (!db) {
+        console.log('Firebase가 연결되지 않음 - 데모 데이터 사용');
+        setFirebaseConnected(false);
+        return;
+      }
+
+      setFirebaseConnected(true);
+      console.log('Firebase 데이터 로드 시작...');
+
+      // 직원 수 확인
+      const employeesSnapshot = await getDocs(collection(db, 'employees'));
+      const employeeCount = employeesSnapshot.size;
+
+      // 프로젝트 수 확인
+      const projectsSnapshot = await getDocs(collection(db, 'projects'));
+      const projectCount = projectsSnapshot.size;
+
+      // 연차 신청 수 확인
+      const leavesSnapshot = await getDocs(collection(db, 'leaves'));
+      const leaveCount = leavesSnapshot.size;
+
+      // 매출 계산 (프로젝트의 total 합산)
+      let totalRevenue = 0;
+      projectsSnapshot.forEach((doc) => {
+        const project = doc.data();
+        if (project.total) {
+          totalRevenue += project.total;
+        }
+      });
+
+      setStats({
+        totalEmployees: employeeCount,
+        totalProjects: projectCount,
+        totalLeaves: leaveCount,
+        totalRevenue: `₩ ${(totalRevenue / 1000000).toFixed(0)}M`
+      });
+
+      console.log('Firebase 데이터 로드 완료:', {
+        employees: employeeCount,
+        projects: projectCount,
+        leaves: leaveCount,
+        revenue: totalRevenue
+      });
+
+    } catch (error) {
+      console.error('Firebase 데이터 로드 실패:', error);
+      setFirebaseConnected(false);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('admin_mode');
@@ -31,9 +104,9 @@ const AdminDashboard: React.FC = () => {
 
   const dashboardStats = [
     {
-      title: '총 방문자 수',
-      value: '12,547',
-      change: '+18.2%',
+      title: '총 직원 수',
+      value: firebaseConnected ? stats.totalEmployees.toString() : '로드 중...',
+      change: firebaseConnected ? 'Firebase 연결됨' : '데모 모드',
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
@@ -42,9 +115,9 @@ const AdminDashboard: React.FC = () => {
       color: 'from-blue-500 to-cyan-500'
     },
     {
-      title: '문의 접수',
-      value: '342',
-      change: '+12.8%',
+      title: '연차 신청',
+      value: firebaseConnected ? stats.totalLeaves.toString() : '로드 중...',
+      change: firebaseConnected ? 'Firebase 연결됨' : '데모 모드',
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -54,8 +127,8 @@ const AdminDashboard: React.FC = () => {
     },
     {
       title: '프로젝트 진행',
-      value: '28',
-      change: '+5.4%',
+      value: firebaseConnected ? stats.totalProjects.toString() : '로드 중...',
+      change: firebaseConnected ? 'Firebase 연결됨' : '데모 모드',
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -65,8 +138,8 @@ const AdminDashboard: React.FC = () => {
     },
     {
       title: '수익 현황',
-      value: '₩ 847M',
-      change: '+23.1%',
+      value: firebaseConnected ? stats.totalRevenue : '로드 중...',
+      change: firebaseConnected ? 'Firebase 연결됨' : '데모 모드',
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
@@ -76,48 +149,160 @@ const AdminDashboard: React.FC = () => {
     }
   ];
 
-  const menuItems = [
+  const menuItems: MenuItem[] = [
+    // 🚀 고도화된 5가지 기능 (enhanced functions)
     { 
-      title: '대시보드', 
+      title: '고급 분석', 
+      path: '/admin/analytics',
+      category: 'enhanced',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
         </svg>
       ),
-      active: true 
+      badge: '고급'
     },
     { 
-      title: '사용자 관리', 
+      title: '실시간 모니터링', 
+      path: '/admin/monitoring',
+      category: 'enhanced',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      ),
+      badge: '실시간'
+    },
+    { 
+      title: '보안 관리', 
+      path: '/admin/security',
+      category: 'enhanced',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+      ),
+      badge: '보안'
+    },
+    { 
+      title: '성능 최적화', 
+      path: '/admin/performance',
+      category: 'enhanced',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      ),
+      badge: '고급'
+    },
+    { 
+      title: '고급 설정', 
+      path: '/admin/settings',
+      category: 'enhanced',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      ),
+      badge: '고급'
+    },
+
+    // 📋 기존 6가지 관리자 기능 (GitHub에서 확인됨) 
+    { 
+      title: '직원 현황', 
+      path: '/admin/employee-status',
+      category: 'original',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
         </svg>
       )
     },
     { 
-      title: '콘텐츠 관리', 
+      title: '직원 관리', 
+      path: '/admin/employees',
+      category: 'original',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      )
+    },
+    { 
+      title: '연차 관리', 
+      path: '/admin/leaves',
+      category: 'original',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      )
+    },
+    { 
+      title: '프로젝트 관리', 
+      path: '/admin/projects',
+      category: 'original',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+        </svg>
+      )
+    },
+    { 
+      title: '회사 소식', 
+      path: '/admin/company-news-manage',
+      category: 'original',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+        </svg>
+      )
+    },
+    { 
+      title: '대리 신청', 
+      path: '/admin/deputy-request',
+      category: 'original',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
       )
     },
+
+    // 🔄 초기화 기능 3가지 (기존 관리자 메뉴에 있던 것들)
     { 
-      title: '분석', 
+      title: '연차 기록 초기화', 
+      path: '/admin/reset-leaves',
+      category: 'reset',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
         </svg>
-      )
+      ),
+      badge: '위험'
     },
     { 
-      title: '설정', 
+      title: '대리신청 초기화', 
+      path: '/admin/reset-deputy',
+      category: 'reset',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
         </svg>
-      )
+      ),
+      badge: '위험'
+    },
+    { 
+      title: '관리자 시스템 초기화', 
+      path: '/admin/reset-admin',
+      category: 'reset',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+      ),
+      badge: '매우위험'
     }
   ];
 
@@ -167,22 +352,133 @@ const AdminDashboard: React.FC = () => {
 
       <div className="flex">
         {/* Sidebar */}
-        <aside className="w-64 bg-white/5 backdrop-blur-md border-r border-white/10 min-h-[calc(100vh-88px)]">
+        <aside className="w-80 bg-white/5 backdrop-blur-md border-r border-white/10 min-h-[calc(100vh-88px)] overflow-y-auto">
           <nav className="p-4">
-            <ul className="space-y-2">
-              {menuItems.map((item, index) => (
-                <li key={index}>
-                  <button className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                    item.active 
-                      ? 'bg-blue-500/30 text-white border border-blue-500/50' 
-                      : 'text-blue-200 hover:bg-white/10 hover:text-white'
-                  }`}>
-                    {item.icon}
-                    <span className="font-medium">{item.title}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
+            {/* 고도화된 기능 */}
+            <div className="mb-6">
+              <h3 className="text-xs font-semibold text-blue-300 uppercase tracking-wider mb-3 px-2">
+                🚀 고도화된 관리 기능
+              </h3>
+              <ul className="space-y-1">
+                {menuItems.filter(item => item.category === 'enhanced').map((item, index) => (
+                  <li key={index}>
+                    <button 
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                        item.active 
+                          ? 'bg-gradient-to-r from-blue-500/40 to-indigo-500/40 text-white border border-blue-400/50 shadow-lg' 
+                          : 'text-blue-200 hover:bg-white/10 hover:text-white hover:scale-105'
+                      }`}
+                      onClick={() => {
+                        if (item.path) {
+                          router.push(item.path);
+                        } else {
+                          alert(`${item.title} 기능을 준비 중입니다.`);
+                        }
+                      }}
+                    >
+                      {item.icon}
+                      <div className="flex-1 text-left">
+                        <span className="font-medium">{item.title}</span>
+                        {item.badge && (
+                          <span className="ml-2 px-2 py-0.5 bg-blue-400/20 text-blue-300 text-xs rounded-full">
+                            {item.badge}
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* 기존 기본 기능들 */}
+            <div className="mb-6">
+              <h3 className="text-xs font-semibold text-emerald-300 uppercase tracking-wider mb-3 px-2">
+                📋 기존 관리 기능 (6가지)
+              </h3>
+              <ul className="space-y-1">
+                {menuItems.filter(item => item.category === 'original').map((item, index) => (
+                  <li key={`legacy-${index}`}>
+                    <button 
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-emerald-200 hover:bg-emerald-500/10 hover:text-emerald-100 hover:scale-105"
+                      onClick={() => {
+                        if (item.path) {
+                          router.push(item.path);
+                        }
+                      }}
+                    >
+                      {item.icon}
+                      <div className="flex-1 text-left">
+                        <span className="font-medium">{item.title}</span>
+                        <div className="text-xs text-emerald-400 opacity-70">
+                          {item.path}
+                        </div>
+                      </div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* 초기화 기능들 */}
+            <div className="mb-6">
+              <h3 className="text-xs font-semibold text-red-300 uppercase tracking-wider mb-3 px-2">
+                🔄 시스템 초기화 (3가지)
+              </h3>
+              <ul className="space-y-1">
+                {menuItems.filter(item => item.category === 'reset').map((item, index) => (
+                  <li key={`reset-${index}`}>
+                    <button 
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-red-200 hover:bg-red-500/10 hover:text-red-100 hover:scale-105 border border-red-500/20"
+                      onClick={() => {
+                        if (item.path) {
+                          // 위험한 기능이므로 확인 후 이동
+                          if (confirm(`⚠️ ${item.title} 페이지로 이동하시겠습니까?\n\n주의: 이 기능은 되돌릴 수 없습니다!`)) {
+                            router.push(item.path);
+                          }
+                        }
+                      }}
+                    >
+                      {item.icon}
+                      <div className="flex-1 text-left">
+                        <span className="font-medium">{item.title}</span>
+                        {item.badge && (
+                          <span className="ml-2 px-2 py-0.5 bg-red-400/20 text-red-300 text-xs rounded-full">
+                            {item.badge}
+                          </span>
+                        )}
+                        <div className="text-xs text-red-400 opacity-70">
+                          {item.path}
+                        </div>
+                      </div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* 통계 요약 */}
+            <div className="mt-8 p-4 bg-white/5 rounded-xl border border-white/10">
+              <h4 className="text-sm font-semibold text-white mb-2">관리 기능 현황</h4>
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between text-blue-300">
+                  <span>고도화 기능:</span>
+                  <span className="font-bold">{menuItems.filter(item => item.category === 'enhanced').length}개</span>
+                </div>
+                <div className="flex justify-between text-emerald-300">
+                  <span>기존 기능:</span>
+                  <span className="font-bold">{menuItems.filter(item => item.category === 'original').length}개</span>
+                </div>
+                <div className="flex justify-between text-red-300">
+                  <span>초기화 기능:</span>
+                  <span className="font-bold">{menuItems.filter(item => item.category === 'reset').length}개</span>
+                </div>
+                <div className="flex justify-between text-white font-semibold border-t border-white/20 pt-2">
+                  <span>총 기능:</span>
+                  <span>{menuItems.length}개</span>
+                </div>
+              </div>
+            </div>
           </nav>
         </aside>
 

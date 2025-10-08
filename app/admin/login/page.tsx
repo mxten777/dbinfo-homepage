@@ -11,34 +11,109 @@ const AdminLogin: React.FC = () => {
   const [resetMsg, setResetMsg] = useState('');
   const [isCreatingAccounts, setIsCreatingAccounts] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    setLoading(true);
     
-    // 간단한 데모 인증 (실제로는 Firebase 등을 사용)
-    const emailTrimmed = id.trim().toLowerCase();
+    let emailTrimmed = id.trim().toLowerCase();
     const passwordTrimmed = pw.trim();
     
-    console.log('로그인 시도:', emailTrimmed, passwordTrimmed); // 디버깅용
+    // 데모 계정 매핑 (ID -> 이메일)
+    const demoAccounts: {[key: string]: string} = {
+      'admin': 'admin@db-info.co.kr',
+      'test': 'test@db-info.co.kr',
+      'hankjae': 'hankjae@db-info.co.kr',
+      '6511kesuk': '6511kesuk@db-info.co.kr'
+    };
     
-    if ((emailTrimmed === 'hankjae@db-info.co.kr' && passwordTrimmed === 'admin123') ||
-        (emailTrimmed === '6511kesuk@db-info.co.kr' && passwordTrimmed === 'admin123') ||
-        (emailTrimmed === 'admin@db-info.co.kr' && passwordTrimmed === 'admin123') ||
-        (emailTrimmed === 'test@db-info.co.kr' && passwordTrimmed === 'admin123')) {
-      setSuccess('로그인 성공!');
-      setError('');
-      // 관리자 모드 활성화
+    // ID로 입력한 경우 이메일로 변환
+    if (demoAccounts[emailTrimmed]) {
+      emailTrimmed = demoAccounts[emailTrimmed];
+    }
+    
+    // 데모 계정 확인 (Firebase 시도 전에 먼저 확인)
+    const isDemoAccount = (
+      (emailTrimmed === 'admin@db-info.co.kr' && passwordTrimmed === 'admin123') ||
+      (emailTrimmed === 'test@db-info.co.kr' && passwordTrimmed === 'admin123') ||
+      (emailTrimmed === 'hankjae@db-info.co.kr' && passwordTrimmed === 'admin123') ||
+      (emailTrimmed === '6511kesuk@db-info.co.kr' && passwordTrimmed === 'admin123')
+    );
+    
+    if (isDemoAccount) {
+      console.log('데모 계정으로 로그인:', emailTrimmed);
+      setSuccess('데모 관리자 로그인 성공!');
       localStorage.setItem('admin_mode', 'true');
-      localStorage.setItem('admin_user', id);
-      // 관리자 대시보드로 리다이렉트
+      localStorage.setItem('admin_user', emailTrimmed);
       setTimeout(() => {
         router.push('/admin/dashboard');
-      }, 1000);
-    } else {
-      setError(`로그인 실패: 입력된 정보를 확인해주세요. (이메일: ${emailTrimmed})`);
+      }, 1500);
+      setLoading(false);
+      return;
+    }
+    
+    try {
+      // Firebase Authentication 사용
+      const { signInWithEmailAndPassword } = await import('firebase/auth');
+      const { doc, getDoc } = await import('firebase/firestore');
+      const { auth, db } = await import('../../../lib/firebase');
+      
+      // Firebase가 초기화되지 않았으면 바로 데모 모드로
+      if (!auth || !db) {
+        console.log('Firebase가 초기화되지 않음. 데모 모드만 사용 가능합니다.');
+        setError('Firebase 연결 안됨. 데모 계정(admin/admin123)을 사용하세요.');
+        setLoading(false);
+        return;
+      }
+      
+      console.log('Firebase 로그인 시도:', emailTrimmed);
+      
+      // Firebase로 로그인 시도
+      const userCredential = await signInWithEmailAndPassword(auth, emailTrimmed, passwordTrimmed);
+      const user = userCredential.user;
+      
+      console.log('Firebase 인증 성공:', user.uid);
+      
+      // 관리자 권한 확인
+      const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+      
+      if (adminDoc.exists() && adminDoc.data()?.isAdmin) {
+        // 관리자 인증 성공
+        setSuccess('관리자 로그인 성공!');
+        localStorage.setItem('admin_mode', 'true');
+        localStorage.setItem('admin_user', emailTrimmed);
+        localStorage.setItem('admin_uid', user.uid);
+        
+        console.log('관리자 로그인 성공:', emailTrimmed);
+        setTimeout(() => {
+          router.push('/admin/dashboard');
+        }, 1000);
+      } else {
+        setError('관리자 권한이 없습니다. Firebase 콘솔에서 관리자 권한을 확인해주세요.');
+        await auth.signOut();
+      }
+    } catch (error: unknown) {
+      const firebaseError = error as { code?: string; message?: string };
+      console.error('Firebase 로그인 오류:', error);
+      
+      // Firebase 에러 메시지를 한글로 변환
+      if (firebaseError.code === 'auth/user-not-found') {
+        setError('등록되지 않은 사용자입니다. 데모 계정: admin/admin123');
+      } else if (firebaseError.code === 'auth/wrong-password' || firebaseError.code === 'auth/invalid-credential') {
+        setError('비밀번호가 올바르지 않습니다. 데모 계정: admin/admin123');
+      } else if (firebaseError.code === 'auth/invalid-email') {
+        setError('올바른 이메일 형식이 아닙니다. 데모 계정: admin/admin123');
+      } else if (firebaseError.code === 'auth/too-many-requests') {
+        setError('로그인 시도가 너무 많습니다. 잠시 후 다시 시도해주세요.');
+      } else {
+        setError('Firebase 인증 실패. 데모 계정을 사용하세요: admin/admin123');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -192,9 +267,10 @@ const AdminLogin: React.FC = () => {
 
               <button
                 type="submit"
-                className="w-full py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                disabled={loading}
+                className="w-full py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 hover:scale-105 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
-                로그인
+                {loading ? '로그인 중...' : '로그인'}
               </button>
 
               <button
@@ -235,28 +311,30 @@ const AdminLogin: React.FC = () => {
               </div>
             )}
 
-            {/* Admin Info */}
+            {/* Demo Account Info */}
             <div className="mt-8 pt-6 border-t border-white/20">
-              <h3 className="text-sm font-semibold text-blue-200 mb-3 text-center">등록된 관리자</h3>
+              <h3 className="text-sm font-semibold text-blue-200 mb-3 text-center">🎯 데모 계정 (테스트용)</h3>
               <div className="space-y-2 text-xs text-blue-300 text-center">
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                  hankjae@db-info.co.kr
+                <div className="bg-white/10 rounded-lg p-3 mb-3">
+                  <p className="text-blue-200 font-semibold mb-2">ID로 간단하게 로그인:</p>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="bg-white/10 rounded px-2 py-1">
+                      <span className="text-emerald-300">ID:</span> admin
+                    </div>
+                    <div className="bg-white/10 rounded px-2 py-1">
+                      <span className="text-emerald-300">ID:</span> test
+                    </div>
+                  </div>
+                  <p className="mt-2 text-blue-200">비밀번호: <span className="font-mono bg-white/10 px-2 py-1 rounded">admin123</span></p>
                 </div>
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                  6511kesuk@db-info.co.kr
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                  admin@db-info.co.kr
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                  test@db-info.co.kr
-                </div>
-                <div className="mt-3 text-blue-200">
-                  <p>데모 비밀번호: <span className="font-mono bg-white/10 px-2 py-1 rounded">admin123</span></p>
+                <div className="text-xs text-blue-400">
+                  <p>또는 전체 이메일로 로그인:</p>
+                  <div className="space-y-1 mt-2">
+                    <div>admin@db-info.co.kr</div>
+                    <div>test@db-info.co.kr</div>
+                    <div>hankjae@db-info.co.kr</div>
+                    <div>6511kesuk@db-info.co.kr</div>
+                  </div>
                 </div>
               </div>
             </div>
