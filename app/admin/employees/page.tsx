@@ -126,7 +126,7 @@ const EmployeeManagement: React.FC = () => {
   };
 
   const handleUpdateEmployee = async () => {
-    if (!firebaseConnected || !db || !editingEmployee) {
+    if (!firebaseConnected || !db || !editingEmployee || !editingEmployee.id) {
       alert('Firebase가 연결되지 않았습니다.');
       return;
     }

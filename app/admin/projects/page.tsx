@@ -146,7 +146,7 @@ const ProjectManagement: React.FC = () => {
   };
 
   const handleUpdateProject = async () => {
-    if (!firebaseConnected || !db || !editingProject) {
+    if (!firebaseConnected || !db || !editingProject || !editingProject.id) {
       alert('Firebase가 연결되지 않았습니다.');
       return;
     }
