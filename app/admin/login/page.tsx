@@ -19,7 +19,13 @@ const AdminLogin: React.FC = () => {
     setSuccess('');
     
     // 간단한 데모 인증 (실제로는 Firebase 등을 사용)
-    if (id === 'hankjae@db-info.co.kr' && pw === 'admin123') {
+    const emailTrimmed = id.trim().toLowerCase();
+    const passwordTrimmed = pw.trim();
+    
+    console.log('로그인 시도:', emailTrimmed, passwordTrimmed); // 디버깅용
+    
+    if ((emailTrimmed === 'hankjae@db-info.co.kr' && passwordTrimmed === 'admin123') ||
+        (emailTrimmed === '6511kesuk@db-info.co.kr' && passwordTrimmed === 'admin123')) {
       setSuccess('로그인 성공!');
       setError('');
       // 관리자 모드 활성화
@@ -29,16 +35,8 @@ const AdminLogin: React.FC = () => {
       setTimeout(() => {
         router.push('/admin/dashboard');
       }, 1000);
-    } else if (id === '6511kesuk@db-info.co.kr' && pw === 'admin123') {
-      setSuccess('로그인 성공!');
-      setError('');
-      localStorage.setItem('admin_mode', 'true');
-      localStorage.setItem('admin_user', id);
-      setTimeout(() => {
-        router.push('/admin/dashboard');
-      }, 1000);
     } else {
-      setError('로그인 실패: 이메일 또는 비밀번호가 올바르지 않습니다.');
+      setError(`로그인 실패: 입력된 정보를 확인해주세요. (이메일: ${emailTrimmed})`);
     }
   };
 
