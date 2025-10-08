@@ -1,8 +1,8 @@
 // 직원 타입 정의
 export interface Employee {
   id?: string;
-  uid: string;
-  empNo: string;
+  uid?: string;
+  empNo?: string;
   name: string;
   email: string;
   residentId?: string;
@@ -12,13 +12,16 @@ export interface Employee {
   jobType?: string;
   joinDate: string;
   contact?: string;
-  role: 'admin' | 'employee';
-  totalLeaves: number;
-  carryOverLeaves: number;
-  annualLeaves: number;
-  usedLeaves: number;
-  remainingLeaves: number;
-  createdAt: string;
+  phone: string;
+  salary: number;
+  role?: 'admin' | 'employee';
+  status: 'active' | 'inactive' | 'on_leave';
+  totalLeaves?: number;
+  carryOverLeaves?: number;
+  annualLeaves?: number;
+  usedLeaves?: number;
+  remainingLeaves?: number;
+  createdAt?: string;
   updatedAt?: string;
 }
 
