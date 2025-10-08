@@ -223,13 +223,13 @@ const ProjectManagement: React.FC = () => {
       period: project.period,
       location: project.location,
       developer: project.developer,
-      grade: project.grade,
-      department: project.department,
-      skill: project.skill,
+      grade: project.grade || '',
+      department: project.department || '',
+      skill: project.skill || '',
       pay: project.pay?.toString() || '',
       supply: project.supply?.toString() || '',
       total: project.total?.toString() || '',
-      result: project.result
+      result: project.result || ''
     });
     setShowAddForm(true);
   };
