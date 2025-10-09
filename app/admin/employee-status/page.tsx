@@ -38,7 +38,8 @@ const EmployeeStatusPage: React.FC = () => {
           // 데모 직원 데이터
           const demoEmployees: EmployeeWithStatus[] = [
             { 
-              id: 'demo1', 
+              id: 'demo1',
+              empNo: 'EMP001', 
               name: '김철수', 
               email: 'kim@db-info.co.kr', 
               department: '개발팀', 
@@ -52,7 +53,8 @@ const EmployeeStatusPage: React.FC = () => {
               annualLeaveRemaining: 10
             },
             { 
-              id: 'demo2', 
+              id: 'demo2',
+              empNo: 'EMP002', 
               name: '이영희', 
               email: 'lee@db-info.co.kr', 
               department: '기획팀', 
@@ -79,7 +81,8 @@ const EmployeeStatusPage: React.FC = () => {
               }
             },
             { 
-              id: 'demo3', 
+              id: 'demo3',
+              empNo: 'EMP003', 
               name: '박민수', 
               email: 'park@db-info.co.kr', 
               department: '개발팀', 
