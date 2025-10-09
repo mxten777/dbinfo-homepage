@@ -229,89 +229,88 @@ const LeavesManagePage: React.FC = () => {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
+      <div className="container mx-auto px-4 lg:px-6 py-8">
         {/* 헤더 */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-800">연차 관리</h1>
-              <div className="flex items-center mt-2">
-                <div className={`w-3 h-3 rounded-full ${firebaseConnected ? 'bg-green-500' : 'bg-red-500'} mr-2`}></div>
-                <p className="text-gray-600">
-                  {firebaseConnected ? 'Firebase 연결됨' : '데모 모드 (Firebase 연결 안됨)'}
-                </p>
+        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 lg:p-6 mb-6 lg:mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3 lg:gap-4">
+              <div className="w-10 h-10 lg:w-12 lg:h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center">
+                <svg className="w-6 h-6 lg:w-7 lg:h-7 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-xl lg:text-2xl font-bold text-white">연차 관리</h1>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className={`w-2 h-2 rounded-full ${firebaseConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                  <p className="text-xs lg:text-sm text-blue-200">
+                    {firebaseConnected ? 'Firebase 연결됨' : '데모 모드'} • {leaves.length}개 신청
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="space-x-3">
-              <button
-                onClick={() => router.push('/admin/dashboard')}
-                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
-              >
-                대시보드로
-              </button>
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowAddForm(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-3 py-1.5 lg:px-4 lg:py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 hover:text-emerald-200 rounded-lg transition-all duration-200 border border-emerald-500/30 text-sm"
               >
                 + 연차 신청
+              </button>
+              <button
+                onClick={() => router.push('/admin/dashboard')}
+                className="px-3 py-1.5 lg:px-4 lg:py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 hover:text-blue-200 rounded-lg transition-all duration-200 border border-blue-500/30 text-sm"
+              >
+                ← 대시보드
               </button>
             </div>
           </div>
         </div>
 
         {/* 통계 카드 */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6 mb-6 lg:mb-8">
+          <div className="bg-white/10 backdrop-blur-md rounded-xl p-3 lg:p-4 border border-white/20">
+            <div className="text-center">
+              <div className="w-8 h-8 lg:w-10 lg:h-10 bg-blue-500/20 rounded-lg flex items-center justify-center mx-auto mb-2">
+                <svg className="w-5 h-5 lg:w-6 lg:h-6 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <div>
-                <p className="text-sm text-gray-600">전체 신청</p>
-                <p className="text-2xl font-bold text-gray-800">{leaves.length}</p>
-              </div>
+              <div className="text-xl lg:text-2xl font-bold text-white">{leaves.length}</div>
+              <div className="text-xs lg:text-sm text-blue-200">전체 신청</div>
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mr-4">
-                <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white/10 backdrop-blur-md rounded-xl p-3 lg:p-4 border border-white/20">
+            <div className="text-center">
+              <div className="w-8 h-8 lg:w-10 lg:h-10 bg-yellow-500/20 rounded-lg flex items-center justify-center mx-auto mb-2">
+                <svg className="w-5 h-5 lg:w-6 lg:h-6 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <div>
-                <p className="text-sm text-gray-600">대기 중</p>
-                <p className="text-2xl font-bold text-gray-800">{leaves.filter(l => l.status === '신청').length}</p>
-              </div>
+              <div className="text-xl lg:text-2xl font-bold text-white">{leaves.filter(l => l.status === '신청').length}</div>
+              <div className="text-xs lg:text-sm text-blue-200">대기 중</div>
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white/10 backdrop-blur-md rounded-xl p-3 lg:p-4 border border-white/20">
+            <div className="text-center">
+              <div className="w-8 h-8 lg:w-10 lg:h-10 bg-green-500/20 rounded-lg flex items-center justify-center mx-auto mb-2">
+                <svg className="w-5 h-5 lg:w-6 lg:h-6 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <div>
-                <p className="text-sm text-gray-600">승인됨</p>
-                <p className="text-2xl font-bold text-gray-800">{leaves.filter(l => l.status === '승인').length}</p>
-              </div>
+              <div className="text-xl lg:text-2xl font-bold text-white">{leaves.filter(l => l.status === '승인').length}</div>
+              <div className="text-xs lg:text-sm text-blue-200">승인됨</div>
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mr-4">
-                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white/10 backdrop-blur-md rounded-xl p-3 lg:p-4 border border-white/20">
+            <div className="text-center">
+              <div className="w-8 h-8 lg:w-10 lg:h-10 bg-red-500/20 rounded-lg flex items-center justify-center mx-auto mb-2">
+                <svg className="w-5 h-5 lg:w-6 lg:h-6 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </div>
-              <div>
-                <p className="text-sm text-gray-600">반려됨</p>
-                <p className="text-2xl font-bold text-gray-800">{leaves.filter(l => l.status === '반려').length}</p>
-              </div>
+              <div className="text-xl lg:text-2xl font-bold text-white">{leaves.filter(l => l.status === '반려').length}</div>
+              <div className="text-xs lg:text-sm text-blue-200">반려됨</div>
             </div>
           </div>
         </div>
@@ -380,43 +379,42 @@ const LeavesManagePage: React.FC = () => {
           </div>
         )}
 
-        {/* 연차 목록 */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="px-6 py-4 bg-gray-50 border-b">
-            <h2 className="text-xl font-bold text-gray-800">
-              연차 신청 목록 ({filteredLeaves.length}건)
-            </h2>
+        {/* 데스크톱 테이블 뷰 */}
+        <div className="hidden lg:block bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl overflow-hidden mb-8">
+          <div className="p-6 border-b border-white/10">
+            <h2 className="text-xl font-bold text-white">연차 신청 목록 ({filteredLeaves.length}건)</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50">
+              <thead className="bg-white/5">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">직원</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">종류</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">기간</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">사유</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">상태</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">작업</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">직원</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">종류</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">기간</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">사유</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">상태</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">작업</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="divide-y divide-white/10">
                 {filteredLeaves.map((leave) => (
-                  <tr key={leave.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <tr key={leave.id} className="hover:bg-white/5">
+                    <td className="px-4 py-4 text-sm font-medium text-white">
                       {leave.employeeName}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4">
                       <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
                         {leave.type}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {leave.startDate} ~ {leave.endDate} ({leave.days}일)
+                    <td className="px-4 py-4 text-sm text-gray-300">
+                      {leave.startDate} ~ {leave.endDate}<br/>
+                      <span className="text-xs text-gray-400">({leave.days}일)</span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
+                    <td className="px-4 py-4 text-sm text-gray-300 max-w-xs truncate">
                       {leave.reason}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4">
                       <span className={`px-2 py-1 text-xs rounded-full ${
                         leave.status === '승인' ? 'bg-green-100 text-green-800' :
                         leave.status === '반려' ? 'bg-red-100 text-red-800' :
@@ -425,11 +423,11 @@ const LeavesManagePage: React.FC = () => {
                         {leave.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 space-x-2">
+                    <td className="px-4 py-4 text-sm space-x-2">
                       {leave.status === '신청' && (
                         <button
                           onClick={() => handleApproveLeave(leave.id!)}
-                          className="text-green-600 hover:text-green-900"
+                          className="text-emerald-400 hover:text-emerald-300 disabled:opacity-50"
                           disabled={!firebaseConnected}
                         >
                           승인
@@ -440,13 +438,161 @@ const LeavesManagePage: React.FC = () => {
                 ))}
               </tbody>
             </table>
-            {filteredLeaves.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
-                등록된 연차 신청이 없습니다.
-              </div>
-            )}
           </div>
         </div>
+
+        {/* 모바일 카드 뷰 */}
+        <div className="lg:hidden space-y-4">
+          {filteredLeaves.map((leave) => (
+            <div key={leave.id} className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-4">
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-white">{leave.employeeName}</h3>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                      {leave.type}
+                    </span>
+                    <span className={`px-2 py-1 text-xs rounded-full ${
+                      leave.status === '승인' ? 'bg-green-100 text-green-800' :
+                      leave.status === '반려' ? 'bg-red-100 text-red-800' :
+                      'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {leave.status}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-2 text-sm mb-3">
+                <div>
+                  <span className="text-gray-400">기간:</span>
+                  <div className="text-white">{leave.startDate} ~ {leave.endDate} ({leave.days}일)</div>
+                </div>
+                <div>
+                  <span className="text-gray-400">사유:</span>
+                  <div className="text-white">{leave.reason}</div>
+                </div>
+              </div>
+
+              {leave.status === '신청' && (
+                <button
+                  onClick={() => handleApproveLeave(leave.id!)}
+                  className="w-full px-3 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 rounded-lg transition-colors text-sm disabled:opacity-50"
+                  disabled={!firebaseConnected}
+                >
+                  승인
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {filteredLeaves.length === 0 && (
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-12 text-center">
+            <div className="w-16 h-16 bg-gray-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-medium text-white mb-2">등록된 연차 신청이 없습니다</h3>
+            <p className="text-gray-400 mb-4">새로운 연차 신청을 등록해보세요.</p>
+            <button
+              onClick={() => setShowAddForm(true)}
+              className="px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 rounded-lg transition-colors"
+            >
+              연차 신청하기
+            </button>
+          </div>
+        )}
+
+        {/* 연차 신청 모달 */}
+        {showAddForm && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+              <h3 className="text-xl font-bold text-white mb-6">연차 신청</h3>
+              
+              <form onSubmit={handleAddLeave} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">직원명</label>
+                  <input
+                    type="text"
+                    value={formData.employeeName}
+                    onChange={(e) => setFormData({...formData, employeeName: e.target.value})}
+                    className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    placeholder="이름을 입력하세요"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">연차 종류</label>
+                  <select
+                    value={formData.type}
+                    onChange={(e) => setFormData({...formData, type: e.target.value as '연차' | '병가' | '경조사' | '기타'})}
+                    className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  >
+                    <option value="연차">연차</option>
+                    <option value="병가">병가</option>
+                    <option value="경조사">경조사</option>
+                    <option value="기타">기타</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">시작일</label>
+                    <input
+                      type="date"
+                      value={formData.startDate}
+                      onChange={(e) => setFormData({...formData, startDate: e.target.value})}
+                      className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">종료일</label>
+                    <input
+                      type="date"
+                      value={formData.endDate}
+                      onChange={(e) => setFormData({...formData, endDate: e.target.value})}
+                      className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">사유</label>
+                  <textarea
+                    value={formData.reason}
+                    onChange={(e) => setFormData({...formData, reason: e.target.value})}
+                    className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    placeholder="연차 사유를 입력하세요"
+                    rows={3}
+                    required
+                  />
+                </div>
+
+                <div className="flex gap-3 mt-6">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddForm(false)}
+                    className="flex-1 px-4 py-2 bg-gray-500/20 hover:bg-gray-500/30 text-gray-300 rounded-lg transition-colors"
+                  >
+                    취소
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 rounded-lg transition-colors disabled:opacity-50"
+                    disabled={!firebaseConnected}
+                  >
+                    신청
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

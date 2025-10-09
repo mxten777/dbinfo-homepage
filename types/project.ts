@@ -4,6 +4,12 @@ export interface Deployment {
   statusChangeDate: string;
 }
 
+export interface Milestone {
+  name: string;
+  date: string;
+  completed: boolean;
+}
+
 export interface Project {
   id?: string;
   requestDate: string;
@@ -28,4 +34,8 @@ export interface Project {
   thumbnailUrl?: string;
   createdAt?: string;
   updatedAt?: string;
+  // 프로젝트 상태 관리용 추가 속성
+  progress?: number;
+  teamMembers?: string[];
+  milestones?: Milestone[];
 }
