@@ -321,28 +321,28 @@ const AdminDashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
       {/* Header */}
-      <header className="bg-white/10 backdrop-blur-md border-b border-white/20 px-6 py-4">
+      <header className="bg-white/10 backdrop-blur-md border-b border-white/20 px-4 lg:px-6 py-3 lg:py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="flex items-center gap-2 lg:gap-4">
+            <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center">
+              <svg className="w-4 h-4 lg:w-6 lg:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42" />
               </svg>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">DB.INFO</h1>
-              <p className="text-sm text-blue-200">관리자 대시보드</p>
+              <h1 className="text-lg lg:text-xl font-bold text-white">DB.INFO</h1>
+              <p className="text-xs lg:text-sm text-blue-200">관리자 대시보드</p>
             </div>
           </div>
           
-          <div className="flex items-center gap-4">
-            <div className="text-right">
-              <p className="text-sm text-white font-medium">{adminUser}</p>
+          <div className="flex items-center gap-2 lg:gap-4">
+            <div className="text-right hidden sm:block">
+              <p className="text-xs lg:text-sm text-white font-medium">{adminUser}</p>
               <p className="text-xs text-blue-200">관리자</p>
             </div>
             <button
               onClick={handleLogout}
-              className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-200 rounded-xl transition-all duration-200 border border-red-500/30"
+              className="px-3 lg:px-4 py-1.5 lg:py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-200 rounded-xl transition-all duration-200 border border-red-500/30 text-xs lg:text-sm"
             >
               로그아웃
             </button>
@@ -351,8 +351,8 @@ const AdminDashboard: React.FC = () => {
       </header>
 
       <div className="flex">
-        {/* Sidebar */}
-        <aside className="w-80 bg-white/5 backdrop-blur-md border-r border-white/10 min-h-[calc(100vh-88px)] overflow-y-auto">
+        {/* Sidebar - 모바일에서 숨김 */}
+        <aside className="hidden lg:block w-80 bg-white/5 backdrop-blur-md border-r border-white/10 min-h-[calc(100vh-88px)] overflow-y-auto">
           <nav className="p-4">
             {/* 고도화된 기능 */}
             <div className="mb-6">
@@ -483,42 +483,76 @@ const AdminDashboard: React.FC = () => {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-4 lg:p-6">
           {/* Welcome Section */}
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold text-white mb-2">환영합니다! 👋</h2>
-            <p className="text-blue-200">DB.INFO 관리 시스템에 오신 것을 환영합니다.</p>
+          <div className="mb-6 lg:mb-8">
+            <h2 className="text-2xl lg:text-3xl font-bold text-white mb-2">환영합니다! 👋</h2>
+            <p className="text-blue-200 text-sm lg:text-base">DB.INFO 관리 시스템에 오신 것을 환영합니다.</p>
+          </div>
+
+          {/* 모바일 빠른 메뉴 */}
+          <div className="lg:hidden mb-6">
+            <h3 className="text-lg font-semibold text-white mb-4">빠른 메뉴</h3>
+            <div className="grid grid-cols-2 gap-3">
+              {menuItems.filter(item => item.category === 'enhanced').slice(0, 4).map((item, index) => (
+                <button 
+                  key={index}
+                  className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 hover:bg-white/15 transition-all duration-300 text-left"
+                  onClick={() => {
+                    if (item.path) {
+                      router.push(item.path);
+                    } else {
+                      alert(`${item.title} 기능을 준비 중입니다.`);
+                    }
+                  }}
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 text-blue-300">
+                      {item.icon}
+                    </div>
+                  </div>
+                  <div className="text-white text-sm font-medium">{item.title}</div>
+                  {item.badge && (
+                    <div className="mt-1">
+                      <span className="px-2 py-1 bg-blue-400/20 text-blue-300 text-xs rounded-full">
+                        {item.badge}
+                      </span>
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
             {dashboardStats.map((stat, index) => (
-              <div key={index} className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300">
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`w-12 h-12 bg-gradient-to-r ${stat.color} rounded-xl flex items-center justify-center text-white`}>
+              <div key={index} className="bg-white/10 backdrop-blur-md rounded-2xl p-4 lg:p-6 border border-white/20 hover:bg-white/15 transition-all duration-300">
+                <div className="flex items-center justify-between mb-3 lg:mb-4">
+                  <div className={`w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-r ${stat.color} rounded-xl flex items-center justify-center text-white`}>
                     {stat.icon}
                   </div>
-                  <span className="text-emerald-400 text-sm font-semibold">{stat.change}</span>
+                  <span className="text-emerald-400 text-xs lg:text-sm font-semibold">{stat.change}</span>
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-1">{stat.value}</h3>
-                <p className="text-blue-200 text-sm">{stat.title}</p>
+                <h3 className="text-xl lg:text-2xl font-bold text-white mb-1">{stat.value}</h3>
+                <p className="text-blue-200 text-xs lg:text-sm">{stat.title}</p>
               </div>
             ))}
           </div>
 
           {/* Charts Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-6 lg:mb-8">
             {/* 방문자 통계 */}
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-              <h3 className="text-xl font-bold text-white mb-4">방문자 통계</h3>
-              <div className="h-64 bg-white/5 rounded-xl flex items-center justify-center">
-                <p className="text-blue-200">차트 영역 (Chart.js 연동 예정)</p>
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 lg:p-6 border border-white/20">
+              <h3 className="text-lg lg:text-xl font-bold text-white mb-3 lg:mb-4">방문자 통계</h3>
+              <div className="h-48 lg:h-64 bg-white/5 rounded-xl flex items-center justify-center">
+                <p className="text-blue-200 text-sm lg:text-base">차트 영역 (Chart.js 연동 예정)</p>
               </div>
             </div>
 
             {/* 최근 활동 */}
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-              <h3 className="text-xl font-bold text-white mb-4">최근 활동</h3>
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 lg:p-6 border border-white/20">
+              <h3 className="text-lg lg:text-xl font-bold text-white mb-3 lg:mb-4">최근 활동</h3>
               <div className="space-y-4">
                 {[
                   { type: '문의', content: '새로운 SI 프로젝트 문의가 등록되었습니다.', time: '5분 전' },
@@ -526,14 +560,14 @@ const AdminDashboard: React.FC = () => {
                   { type: '프로젝트', content: 'AI 데이터셋 플랫폼 업데이트가 완료되었습니다.', time: '1시간 전' },
                   { type: '시스템', content: '백업이 성공적으로 완료되었습니다.', time: '2시간 전' }
                 ].map((activity, index) => (
-                  <div key={index} className="flex items-start gap-3 p-3 bg-white/5 rounded-xl">
-                    <div className="w-8 h-8 bg-blue-500/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                  <div key={index} className="flex items-start gap-2 lg:gap-3 p-2 lg:p-3 bg-white/5 rounded-xl">
+                    <div className="w-6 h-6 lg:w-8 lg:h-8 bg-blue-500/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                      <div className="w-1.5 h-1.5 lg:w-2 lg:h-2 bg-blue-400 rounded-full"></div>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-white text-sm font-medium">{activity.content}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-xs lg:text-sm font-medium truncate">{activity.content}</p>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs text-blue-300 bg-blue-500/20 px-2 py-1 rounded-full">
+                        <span className="text-xs text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded-full">
                           {activity.type}
                         </span>
                         <span className="text-xs text-blue-200">{activity.time}</span>
@@ -546,11 +580,11 @@ const AdminDashboard: React.FC = () => {
           </div>
 
           {/* Quick Actions */}
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-            <h3 className="text-xl font-bold text-white mb-4">빠른 작업</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button className="p-4 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30 rounded-xl hover:from-blue-500/30 hover:to-cyan-500/30 transition-all duration-200 text-left group">
-                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200">
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 lg:p-6 border border-white/20">
+            <h3 className="text-lg lg:text-xl font-bold text-white mb-3 lg:mb-4">빠른 작업</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 lg:gap-4">
+              <button className="p-3 lg:p-4 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30 rounded-xl hover:from-blue-500/30 hover:to-cyan-500/30 transition-all duration-200 text-left group">
+                <div className="w-6 h-6 lg:w-8 lg:h-8 bg-blue-500 rounded-lg flex items-center justify-center mb-2 lg:mb-3 group-hover:scale-110 transition-transform duration-200">
                   <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>

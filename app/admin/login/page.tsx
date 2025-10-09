@@ -160,16 +160,16 @@ const AdminLogin: React.FC = () => {
       </div>
 
       {/* Brand Bar */}
-      <div className="relative z-10 w-full bg-gradient-to-r from-blue-600 to-indigo-600 h-16 flex items-center px-6 shadow-lg">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+      <div className="relative z-10 w-full bg-gradient-to-r from-blue-600 to-indigo-600 h-14 lg:h-16 flex items-center px-4 lg:px-6 shadow-lg">
+        <div className="flex items-center gap-2 lg:gap-3">
+          <div className="w-8 h-8 lg:w-10 lg:h-10 bg-white/20 rounded-lg flex items-center justify-center">
+            <svg className="w-5 h-5 lg:w-6 lg:h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42" />
             </svg>
           </div>
           <div>
-            <span className="text-white font-bold text-xl tracking-wide font-space">DB.INFO</span>
-            <span className="ml-3 px-3 py-1 bg-white/20 text-xs text-white rounded-full font-semibold backdrop-blur-md">
+            <span className="text-white font-bold text-lg lg:text-xl tracking-wide font-space">DB.INFO</span>
+            <span className="ml-2 lg:ml-3 px-2 lg:px-3 py-0.5 lg:py-1 bg-white/20 text-xs text-white rounded-full font-semibold backdrop-blur-md">
               ADMIN PORTAL
             </span>
           </div>
@@ -177,18 +177,18 @@ const AdminLogin: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 flex items-center justify-center min-h-[calc(100vh-64px)] p-6">
+      <div className="relative z-10 flex items-center justify-center min-h-[calc(100vh-56px)] lg:min-h-[calc(100vh-64px)] p-4 lg:p-6">
         <div className="w-full max-w-md">
           {/* Login Card */}
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 shadow-2xl">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 lg:p-8 border border-white/20 shadow-2xl">
+            <div className="text-center mb-6 lg:mb-8">
+              <div className="w-12 h-12 lg:w-16 lg:h-16 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center mx-auto mb-3 lg:mb-4">
+                <svg className="w-6 h-6 lg:w-8 lg:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-white mb-2">관리자 로그인</h2>
-              <p className="text-blue-200 text-sm">DB.INFO 관리 시스템에 접속하세요</p>
+              <h2 className="text-xl lg:text-2xl font-bold text-white mb-1 lg:mb-2">관리자 로그인</h2>
+              <p className="text-blue-200 text-xs lg:text-sm">DB.INFO 관리 시스템에 접속하세요</p>
             </div>
 
             {/* Alerts */}
