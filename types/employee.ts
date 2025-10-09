@@ -2,25 +2,25 @@
 export interface Employee {
   id?: string;
   uid?: string;
-  empNo?: string;
-  name: string;
-  email: string;
-  residentId?: string;
-  gender?: string;
-  position: string;
-  department: string;
-  jobType?: string;
-  joinDate: string;
-  contact?: string;
-  phone: string;
-  salary: number;
+  empNo: string;                        // 사원번호 (필수)
+  name: string;                         // 이름
+  email: string;                        // 이메일
+  residentId?: string;                  // 주민번호
+  gender?: 'male' | 'female' | 'other'; // 성별
+  position: string;                     // 직급
+  department: string;                   // 부서
+  jobType?: string;                     // 직무유형
+  joinDate: string;                     // 입사일
+  contact?: string;                     // 연락처
+  phone: string;                        // 전화번호
+  salary?: number;                      // 급여
   role?: 'admin' | 'employee';
   status: 'active' | 'inactive' | 'on_leave';
-  totalLeaves?: number;
-  carryOverLeaves?: number;
-  annualLeaves?: number;
-  usedLeaves?: number;
-  remainingLeaves?: number;
+  // 연차 관련 정보
+  totalLeaves?: number;                 // 총 연차일수 (입사년도 기준)
+  usedLeaves?: number;                  // 사용한 연차일수
+  remainingLeaves?: number;             // 남은 연차일수
+  carryOverLeaves?: number;             // 이월 연차일수
   createdAt?: string;
   updatedAt?: string;
 }

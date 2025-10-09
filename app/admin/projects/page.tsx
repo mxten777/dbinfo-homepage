@@ -413,37 +413,75 @@ const ProjectManagement: React.FC = () => {
               프로젝트 목록 ({projects.length}개)
             </h2>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          {/* 데스크톱 테이블 뷰 */}
+          <div className="hidden lg:block overflow-x-auto">
+            <table className="min-w-full table-auto">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">프로젝트</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">고객사</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">개발자</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">기간</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상태</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">금액</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">작업</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">요청일</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">고객사</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">프로젝트</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">기간</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">근무지</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">개발자</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">등급</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">부서</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">스킬</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">단가</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">공급가</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">총금액</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">결과</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">작업</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {projects.map((project) => (
                   <tr key={project.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">{project.project}</div>
-                        <div className="text-sm text-gray-500">{project.skill}</div>
-                      </div>
+                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {project.requestDate || '-'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{project.client}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div>
-                        <div className="text-sm text-gray-900">{project.developer}</div>
-                        <div className="text-sm text-gray-500">{project.grade} | {project.department}</div>
-                      </div>
+                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {project.client}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{project.period}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">{project.project}</div>
+                    </td>
+                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {project.period}
+                    </td>
+                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {project.location || '-'}
+                    </td>
+                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {project.developer}
+                    </td>
+                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        project.grade === '특급' ? 'bg-purple-100 text-purple-800' :
+                        project.grade === '고급' ? 'bg-blue-100 text-blue-800' :
+                        project.grade === '중급' ? 'bg-green-100 text-green-800' :
+                        project.grade === '초급' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {project.grade || '-'}
+                      </span>
+                    </td>
+                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {project.department || '-'}
+                    </td>
+                    <td className="px-3 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{project.skill || '-'}</div>
+                    </td>
+                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                      ₩ {project.pay ? Number(project.pay).toLocaleString() : '0'}
+                    </td>
+                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                      ₩ {project.supply ? Number(project.supply).toLocaleString() : '0'}
+                    </td>
+                    <td className="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      ₩ {project.total ? Number(project.total).toLocaleString() : '0'}
+                    </td>
+                    <td className="px-3 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 text-xs rounded-full ${
                         project.result === '완료' ? 'bg-green-100 text-green-800' :
                         project.result === '진행중' ? 'bg-blue-100 text-blue-800' :
@@ -451,13 +489,10 @@ const ProjectManagement: React.FC = () => {
                         project.result === '보류' ? 'bg-gray-100 text-gray-800' :
                         'bg-red-100 text-red-800'
                       }`}>
-                        {project.result}
+                        {project.result || '-'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ₩ {project.total?.toLocaleString() || '0'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 space-x-2">
+                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500 space-x-2">
                       <button
                         onClick={() => startEdit(project)}
                         className="text-blue-600 hover:text-blue-900"
@@ -476,6 +511,106 @@ const ProjectManagement: React.FC = () => {
                 ))}
               </tbody>
             </table>
+            {projects.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                등록된 프로젝트가 없습니다.
+              </div>
+            )}
+          </div>
+
+          {/* 모바일 카드 뷰 */}
+          <div className="lg:hidden space-y-4">
+            {projects.map((project) => (
+              <div key={project.id} className="bg-white border rounded-lg p-4 shadow-sm">
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">{project.project}</h3>
+                    <p className="text-sm text-gray-500">{project.client}</p>
+                    <p className="text-xs text-gray-400">요청일: {project.requestDate || '-'}</p>
+                  </div>
+                  <span className={`px-2 py-1 text-xs rounded-full ${
+                    project.result === '완료' ? 'bg-green-100 text-green-800' :
+                    project.result === '진행중' ? 'bg-blue-100 text-blue-800' :
+                    project.result === '검토중' ? 'bg-yellow-100 text-yellow-800' :
+                    project.result === '보류' ? 'bg-gray-100 text-gray-800' :
+                    'bg-red-100 text-red-800'
+                  }`}>
+                    {project.result || '-'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-sm mb-4">
+                  <div>
+                    <span className="font-medium text-gray-700">기간:</span>
+                    <span className="ml-1 text-gray-900">{project.period}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">근무지:</span>
+                    <span className="ml-1 text-gray-900">{project.location || '-'}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">개발자:</span>
+                    <span className="ml-1 text-gray-900">{project.developer}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">등급:</span>
+                    <span className={`ml-1 px-2 py-1 text-xs rounded-full ${
+                      project.grade === '특급' ? 'bg-purple-100 text-purple-800' :
+                      project.grade === '고급' ? 'bg-blue-100 text-blue-800' :
+                      project.grade === '중급' ? 'bg-green-100 text-green-800' :
+                      project.grade === '초급' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {project.grade || '-'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">부서:</span>
+                    <span className="ml-1 text-gray-900">{project.department || '-'}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">스킬:</span>
+                    <span className="ml-1 text-gray-900">{project.skill || '-'}</span>
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-gray-200">
+                  <div className="text-sm">
+                    <span className="font-medium text-gray-700">금액 정보:</span>
+                    <div className="mt-1 grid grid-cols-1 gap-1 text-xs">
+                      <div className="flex justify-between">
+                        <span>단가:</span>
+                        <span>₩ {project.pay ? Number(project.pay).toLocaleString() : '0'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>공급가:</span>
+                        <span>₩ {project.supply ? Number(project.supply).toLocaleString() : '0'}</span>
+                      </div>
+                      <div className="flex justify-between font-medium text-gray-900 pt-1 border-t">
+                        <span>총금액:</span>
+                        <span>₩ {project.total ? Number(project.total).toLocaleString() : '0'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 flex space-x-3">
+                  <button
+                    onClick={() => startEdit(project)}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    수정
+                  </button>
+                  <button
+                    onClick={() => project.id && handleDeleteProject(project.id)}
+                    className="flex-1 px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors"
+                    disabled={!firebaseConnected || !project.id}
+                  >
+                    삭제
+                  </button>
+                </div>
+              </div>
+            ))}
             {projects.length === 0 && (
               <div className="text-center py-8 text-gray-500">
                 등록된 프로젝트가 없습니다.

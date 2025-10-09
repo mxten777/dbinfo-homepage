@@ -38,10 +38,10 @@ const AdminLogin: React.FC = () => {
     
     // 데모 계정 확인 (Firebase 시도 전에 먼저 확인)
     const isDemoAccount = (
-      (emailTrimmed === 'admin@db-info.co.kr' && passwordTrimmed === 'admin123') ||
-      (emailTrimmed === 'test@db-info.co.kr' && passwordTrimmed === 'admin123') ||
-      (emailTrimmed === 'hankjae@db-info.co.kr' && passwordTrimmed === 'admin123') ||
-      (emailTrimmed === '6511kesuk@db-info.co.kr' && passwordTrimmed === 'admin123')
+      (emailTrimmed === 'admin@db-info.co.kr' && passwordTrimmed === 'admin1234!') ||
+      (emailTrimmed === 'test@db-info.co.kr' && passwordTrimmed === 'admin1234!') ||
+      (emailTrimmed === 'hankjae@db-info.co.kr' && passwordTrimmed === 'admin1234!') ||
+      (emailTrimmed === '6511kesuk@db-info.co.kr' && passwordTrimmed === 'admin1234!')
     );
     
     if (isDemoAccount) {
@@ -217,11 +217,11 @@ const AdminLogin: React.FC = () => {
             {/* Login Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-blue-200 mb-2">이메일</label>
+                <label className="block text-sm font-medium text-blue-200 mb-2">아이디/이메일</label>
                 <div className="relative">
                   <input
-                    type="email"
-                    placeholder="hankjae@db-info.co.kr"
+                    type="text"
+                    placeholder="admin 또는 hankjae@db-info.co.kr"
                     value={id}
                     onChange={e => setId(e.target.value)}
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-md"
