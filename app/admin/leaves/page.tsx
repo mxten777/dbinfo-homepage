@@ -118,8 +118,8 @@ const LeavesManagePage: React.FC = () => {
       if (!db) {
         // 데모 직원 데이터
         setEmployees([
-          { id: 'demo1', name: '김철수', email: 'kim@db-info.co.kr', department: '개발팀', position: '시니어 개발자', joinDate: '2023-01-15', phone: '010-1234-5678', salary: 5500000, status: 'active' },
-          { id: 'demo2', name: '이영희', email: 'lee@db-info.co.kr', department: '기획팀', position: '프로젝트 매니저', joinDate: '2022-08-20', phone: '010-2345-6789', salary: 4800000, status: 'active' }
+          { id: 'demo1', empNo: 'EMP001', name: '김철수', email: 'kim@db-info.co.kr', department: '개발팀', position: '시니어 개발자', joinDate: '2023-01-15', phone: '010-1234-5678', salary: 5500000, status: 'active' },
+          { id: 'demo2', empNo: 'EMP002', name: '이영희', email: 'lee@db-info.co.kr', department: '기획팀', position: '프로젝트 매니저', joinDate: '2022-08-20', phone: '010-2345-6789', salary: 4800000, status: 'active' }
         ]);
         return;
       }
