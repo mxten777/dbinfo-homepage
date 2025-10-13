@@ -20,27 +20,33 @@ let db: Firestore | null = null;
 let auth: Auth | null = null;
 let analytics: Analytics | null = null;
 
-// 실제 Firebase 설정이 있을 때만 초기화
-if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY && process.env.NEXT_PUBLIC_FIREBASE_API_KEY !== "demo-key") {
-  try {
-    app = initializeApp(firebaseConfig);
-    db = getFirestore(app);
-    auth = getAuth(app);
-    
-    // Analytics는 브라우저에서만 초기화
-    if (typeof window !== 'undefined') {
-      try {
-        analytics = getAnalytics(app);
-      } catch (error) {
-        console.log('Analytics not available:', error);
-      }
+// Firebase 초기화
+try {
+  // Firebase 설정값 확인
+  console.log('Firebase 초기화 시작...');
+  console.log('API Key exists:', !!process.env.NEXT_PUBLIC_FIREBASE_API_KEY);
+  console.log('Project ID:', process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID);
+  
+  app = initializeApp(firebaseConfig);
+  db = getFirestore(app);
+  auth = getAuth(app);
+  
+  // Analytics는 브라우저에서만 초기화
+  if (typeof window !== 'undefined') {
+    try {
+      analytics = getAnalytics(app);
+    } catch (error) {
+      console.log('Analytics not available:', error);
     }
-    console.log('Firebase 연결 성공');
-  } catch (error) {
-    console.log('Firebase 초기화 실패:', error);
   }
-} else {
-  console.log('Firebase 환경변수가 설정되지 않음. 데모 모드로 실행됩니다.');
+  
+  console.log('🔥 Firebase 연결 성공! Project ID:', process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID);
+} catch (error) {
+  console.error('❌ Firebase 초기화 실패:', error);
+  // 초기화 실패시 null로 설정
+  app = null;
+  db = null;
+  auth = null;
 }
 
 // Firebase 서비스 내보내기
