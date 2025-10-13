@@ -42,6 +42,53 @@ const EmployeeManagement: React.FC = () => {
     }
   }, [isAuthenticated]);
 
+  // Firebase 데이터베이스 상태 확인 함수
+  const checkFirebaseData = async () => {
+    if (!db) {
+      alert('Firebase가 연결되지 않았습니다.');
+      return;
+    }
+
+    try {
+      console.log('=== Firebase 데이터베이스 상태 확인 ===');
+      
+      // employees 컬렉션 확인
+      const employeesSnapshot = await getDocs(collection(db, 'employees'));
+      console.log('employees 컬렉션 문서 수:', employeesSnapshot.size);
+      
+      if (employeesSnapshot.empty) {
+        console.log('employees 컬렉션이 비어있습니다.');
+        alert(`Firebase 연결됨!\nemployees 컬렉션: 비어있음 (0개 문서)\n\n다른 컬렉션명을 사용하고 계신가요?`);
+      } else {
+        console.log('employees 컬렉션 문서들:');
+        const docList: string[] = [];
+        employeesSnapshot.forEach((doc) => {
+          console.log(`문서 ID: ${doc.id}`, doc.data());
+          docList.push(`- ${doc.id}: ${doc.data().name || '이름없음'}`);
+        });
+        alert(`Firebase 연결됨!\nemployees 컬렉션: ${employeesSnapshot.size}개 문서 발견\n\n${docList.join('\n')}`);
+      }
+
+      // 다른 가능한 컬렉션들도 확인
+      const possibleCollections = ['employee', 'staff', 'users', 'members', 'people', 'person'];
+      for (const collName of possibleCollections) {
+        try {
+          const snapshot = await getDocs(collection(db, collName));
+          if (!snapshot.empty) {
+            console.log(`${collName} 컬렉션에 ${snapshot.size}개 문서 발견`);
+            alert(`추가 발견: ${collName} 컬렉션에 ${snapshot.size}개 문서가 있습니다!`);
+          }
+        } catch {
+          // 컬렉션이 없을 수 있으므로 에러 무시
+        }
+      }
+
+    } catch (error) {
+      console.error('Firebase 데이터 확인 실패:', error);
+      alert(`Firebase 확인 실패: ${error}`);
+    }
+  };
+
   const loadEmployees = async () => {
     try {
       setLoading(true);
@@ -315,6 +362,13 @@ const EmployeeManagement: React.FC = () => {
               </div>
             </div>
             <div className="space-x-3">
+              <button
+                onClick={checkFirebaseData}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                disabled={!db}
+              >
+                🔍 DB 확인
+              </button>
               <button
                 onClick={() => router.push('/admin/dashboard')}
                 className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
