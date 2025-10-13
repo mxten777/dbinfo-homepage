@@ -34,7 +34,7 @@ const DeputyRequestPage: React.FC = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [firebaseConnected, setFirebaseConnected] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [editingRequest] = useState<DeputyRequest | null>(null);
+  // const [editingRequest] = useState<DeputyRequest | null>(null); // 현재 미사용
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterUrgency, setFilterUrgency] = useState<string>('all');
   const router = useRouter();

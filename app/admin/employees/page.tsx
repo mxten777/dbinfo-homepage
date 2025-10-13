@@ -9,7 +9,7 @@ import { useAdminAuth } from '../../../hooks/useAdminAuth';
 import type { Employee } from '../../../types/employee';
 
 const EmployeeManagement: React.FC = () => {
-  const { isAuthenticated, isLoading: authLoading } = useAdminAuth();
+  const { isAuthenticated } = useAdminAuth();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
