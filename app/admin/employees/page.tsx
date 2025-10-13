@@ -37,8 +37,22 @@ const EmployeeManagement: React.FC = () => {
   });
 
   useEffect(() => {
+    console.log('🔄 useEffect 실행 - isAuthenticated:', isAuthenticated);
     if (isAuthenticated) {
-      loadEmployees();
+      console.log('✅ 인증됨 - loadEmployees 호출');
+      
+      // 타임아웃 추가 (10초 후 강제 로딩 해제)
+      const timeout = setTimeout(() => {
+        console.log('⏰ 타임아웃 - 강제 로딩 해제');
+        setLoading(false);
+      }, 10000);
+
+      loadEmployees().finally(() => {
+        clearTimeout(timeout);
+      });
+    } else {
+      console.log('❌ 인증되지 않음');
+      setLoading(false);
     }
   }, [isAuthenticated]);
 
@@ -90,11 +104,14 @@ const EmployeeManagement: React.FC = () => {
   };
 
   const loadEmployees = async () => {
+    console.log('🚀 loadEmployees 함수 시작');
+    
     try {
       setLoading(true);
+      console.log('✅ 로딩 상태 true로 설정');
       
       if (!db) {
-        console.log('Firebase가 연결되지 않음 - 데모 데이터 사용');
+        console.log('❌ Firebase가 연결되지 않음 - 데모 데이터 사용');
         setFirebaseConnected(false);
         // 데모 데이터
         setEmployees([
@@ -139,32 +156,41 @@ const EmployeeManagement: React.FC = () => {
             carryOverLeaves: 0
           }
         ]);
+        console.log('✅ 데모 데이터 설정 완료, 로딩 false로 변경');
         setLoading(false);
         return;
       }
 
       setFirebaseConnected(true);
-      console.log('Firebase에서 직원 데이터 로드 시작...');
-      console.log('Firebase 프로젝트 ID:', process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID);
-      console.log('현재 시도하는 컬렉션: employees');
+      console.log('🔥 Firebase에서 직원 데이터 로드 시작...');
+      console.log('📋 Firebase 프로젝트 ID:', process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID);
+      console.log('📁 현재 시도하는 컬렉션: employees');
 
+      console.log('📡 Firebase 쿼리 시작...');
       const employeesSnapshot = await getDocs(collection(db, 'employees'));
-      console.log('employees 컬렉션 쿼리 결과:', employeesSnapshot.size, '개 문서');
+      console.log('📊 employees 컬렉션 쿼리 결과:', employeesSnapshot.size, '개 문서');
       
       const employeeList: Employee[] = [];
       
-      employeesSnapshot.forEach((doc) => {
-        const employeeData = doc.data();
-        console.log('Firebase 직원 데이터 구조:', employeeData);
-        employeeList.push({
-          id: doc.id,
-          ...employeeData
-        } as Employee);
-      });
+      if (employeesSnapshot.empty) {
+        console.log('⚠️ employees 컬렉션이 비어있습니다!');
+      } else {
+        console.log('📝 문서 데이터 처리 시작...');
+        employeesSnapshot.forEach((doc) => {
+          const employeeData = doc.data();
+          console.log(`👤 직원 데이터 [${doc.id}]:`, employeeData);
+          employeeList.push({
+            id: doc.id,
+            ...employeeData
+          } as Employee);
+        });
+        console.log('✅ 문서 데이터 처리 완료');
+      }
 
+      console.log('🔄 상태 업데이트 시작...');
       setEmployees(employeeList);
-      console.log(`Firebase에서 ${employeeList.length}명의 직원 데이터를 로드했습니다.`);
-      console.log('로드된 직원 목록:', employeeList);
+      console.log(`✅ Firebase에서 ${employeeList.length}명의 직원 데이터를 로드했습니다.`);
+      console.log('📋 최종 로드된 직원 목록:', employeeList);
 
       // employees 컬렉션이 비어있으면 다른 컬렉션 자동 확인
       if (employeeList.length === 0) {
@@ -189,9 +215,12 @@ const EmployeeManagement: React.FC = () => {
       }
       
     } catch (error) {
-      console.error('직원 데이터 로드 실패:', error);
+      console.error('❌ 직원 데이터 로드 실패:', error);
+      console.error('❌ 에러 상세:', error);
       setFirebaseConnected(false);
+      setEmployees([]); // 에러시 빈 배열로 설정
     } finally {
+      console.log('🏁 loadEmployees 함수 완료 - 로딩 false로 설정');
       setLoading(false);
     }
   };
