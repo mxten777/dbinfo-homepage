@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
+import app from '../../../lib/firebase';
 import { useAdminAuth } from '../../../hooks/useAdminAuth';
 import type { Employee } from '../../../types/employee';
 
@@ -55,6 +56,44 @@ const EmployeeManagement: React.FC = () => {
       setLoading(false);
     }
   }, [isAuthenticated]);
+
+  // Firebase 연결 테스트 함수
+  const testFirebaseConnection = async () => {
+    console.log('🧪 Firebase 연결 테스트 시작...');
+    
+    if (!app) {
+      alert('❌ Firebase App이 초기화되지 않았습니다.');
+      return;
+    }
+    
+    if (!db) {
+      alert('❌ Firestore가 초기화되지 않았습니다.');
+      return;
+    }
+
+    try {
+      // 간단한 컬렉션 접근 테스트
+      console.log('🔍 Firestore 접근 테스트...');
+      const testCollection = collection(db, 'employees');
+      console.log('✅ 컬렉션 레퍼런스 생성 성공');
+      
+      const snapshot = await getDocs(testCollection);
+      console.log('✅ 쿼리 성공! 문서 수:', snapshot.size);
+      
+      snapshot.forEach((doc) => {
+        console.log('📄 문서:', doc.id, doc.data());
+      });
+      
+      alert(`✅ Firebase 연결 성공!\n문서 수: ${snapshot.size}개`);
+      
+    } catch (error) {
+      console.error('❌ Firebase 연결 테스트 실패:', error);
+      const firebaseError = error as { code?: string; message?: string };
+      console.error('❌ 에러 코드:', firebaseError.code);
+      console.error('❌ 에러 메시지:', firebaseError.message);
+      alert(`❌ Firebase 연결 실패!\n에러: ${firebaseError.code || 'Unknown'}\n메시지: ${firebaseError.message || String(error)}`);
+    }
+  };
 
   // Firebase 데이터베이스 상태 확인 함수
   const checkFirebaseData = async () => {
@@ -167,8 +206,14 @@ const EmployeeManagement: React.FC = () => {
       console.log('📁 현재 시도하는 컬렉션: employees');
 
       console.log('📡 Firebase 쿼리 시작...');
+      console.log('🔑 Firebase 인스턴스 상태:', {
+        app: !!app,
+        db: !!db,
+        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
+      });
+      
       const employeesSnapshot = await getDocs(collection(db, 'employees'));
-      console.log('📊 employees 컬렉션 쿼리 결과:', employeesSnapshot.size, '개 문서');
+      console.log('📊 employees 컬렉션 쿼리 성공:', employeesSnapshot.size, '개 문서');
       
       const employeeList: Employee[] = [];
       
@@ -417,6 +462,13 @@ const EmployeeManagement: React.FC = () => {
               </div>
             </div>
             <div className="space-x-3">
+              <button
+                onClick={testFirebaseConnection}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                disabled={!app}
+              >
+                🧪 연결 테스트
+              </button>
               <button
                 onClick={checkFirebaseData}
                 className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"

@@ -26,23 +26,42 @@ try {
   console.log('Firebase 초기화 시작...');
   console.log('API Key exists:', !!process.env.NEXT_PUBLIC_FIREBASE_API_KEY);
   console.log('Project ID:', process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID);
+  console.log('Auth Domain:', process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN);
   
   app = initializeApp(firebaseConfig);
-  db = getFirestore(app);
-  auth = getAuth(app);
+  
+  // Firestore 초기화 시 에러 핸들링 추가
+  try {
+    db = getFirestore(app);
+    console.log('✅ Firestore 초기화 성공');
+  } catch (firestoreError) {
+    console.error('❌ Firestore 초기화 실패:', firestoreError);
+    db = null;
+  }
+  
+  // Auth 초기화
+  try {
+    auth = getAuth(app);
+    console.log('✅ Auth 초기화 성공');
+  } catch (authError) {
+    console.error('❌ Auth 초기화 실패:', authError);
+    auth = null;
+  }
   
   // Analytics는 브라우저에서만 초기화
   if (typeof window !== 'undefined') {
     try {
       analytics = getAnalytics(app);
+      console.log('✅ Analytics 초기화 성공');
     } catch (error) {
-      console.log('Analytics not available:', error);
+      console.log('⚠️ Analytics not available:', error);
     }
   }
   
-  console.log('🔥 Firebase 연결 성공! Project ID:', process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID);
+  console.log('🔥 Firebase 앱 연결 성공! Project ID:', process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID);
 } catch (error) {
-  console.error('❌ Firebase 초기화 실패:', error);
+  console.error('❌ Firebase 앱 초기화 실패:', error);
+  console.error('❌ 상세 에러:', error);
   // 초기화 실패시 null로 설정
   app = null;
   db = null;
