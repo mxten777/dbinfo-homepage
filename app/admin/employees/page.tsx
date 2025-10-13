@@ -145,8 +145,12 @@ const EmployeeManagement: React.FC = () => {
 
       setFirebaseConnected(true);
       console.log('Firebase에서 직원 데이터 로드 시작...');
+      console.log('Firebase 프로젝트 ID:', process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID);
+      console.log('현재 시도하는 컬렉션: employees');
 
       const employeesSnapshot = await getDocs(collection(db, 'employees'));
+      console.log('employees 컬렉션 쿼리 결과:', employeesSnapshot.size, '개 문서');
+      
       const employeeList: Employee[] = [];
       
       employeesSnapshot.forEach((doc) => {
@@ -161,6 +165,28 @@ const EmployeeManagement: React.FC = () => {
       setEmployees(employeeList);
       console.log(`Firebase에서 ${employeeList.length}명의 직원 데이터를 로드했습니다.`);
       console.log('로드된 직원 목록:', employeeList);
+
+      // employees 컬렉션이 비어있으면 다른 컬렉션 자동 확인
+      if (employeeList.length === 0) {
+        console.log('employees 컬렉션이 비어있습니다. 다른 컬렉션을 확인합니다...');
+        const alternativeCollections = ['employee', 'staff', 'users', 'members', 'people'];
+        
+        for (const collName of alternativeCollections) {
+          try {
+            const altSnapshot = await getDocs(collection(db, collName));
+            if (!altSnapshot.empty) {
+              console.log(`✅ ${collName} 컬렉션에서 ${altSnapshot.size}개 문서 발견!`);
+              altSnapshot.forEach((doc) => {
+                console.log(`${collName} 문서:`, doc.id, doc.data());
+              });
+              alert(`발견! ${collName} 컬렉션에 ${altSnapshot.size}개의 데이터가 있습니다. 이 컬렉션을 사용하시겠습니까?`);
+              break;
+            }
+          } catch {
+            // 컬렉션이 없거나 접근 불가
+          }
+        }
+      }
       
     } catch (error) {
       console.error('직원 데이터 로드 실패:', error);
