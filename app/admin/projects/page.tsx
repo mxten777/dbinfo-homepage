@@ -494,7 +494,7 @@ const ProjectManagement: React.FC = () => {
                     </td>
                     <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500 space-x-2">
                       <button
-                        onClick={() => startEdit(project)}
+                        onClick={() => handleEdit(project)}
                         className="text-blue-600 hover:text-blue-900"
                       >
                         수정
