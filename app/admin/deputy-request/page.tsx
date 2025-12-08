@@ -592,7 +592,7 @@ const DeputyRequestPage: React.FC = () => {
                       {request.status === 'pending' && (
                         <>
                           <button
-                            onClick={() => handleApproveRequest(request.id!)}
+                            onClick={() => handleApprove(request.id!)}
                             className="text-green-600 hover:text-green-900"
                             disabled={!firebaseConnected}
                           >
