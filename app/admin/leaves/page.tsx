@@ -27,6 +27,24 @@ const LeavesManagePage: React.FC = () => {
     days: 1
   });
 
+  // 연차 일수 자동 계산
+  const calculateLeaveDays = (startDate: string, endDate: string): number => {
+    if (!startDate || !endDate) return 1;
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const timeDiff = end.getTime() - start.getTime();
+    const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1; // 시작일과 종료일 모두 포함
+    return Math.max(1, daysDiff);
+  };
+
+  // 날짜 변경 시 자동으로 일수 계산
+  useEffect(() => {
+    if (formData.startDate && formData.endDate) {
+      const days = calculateLeaveDays(formData.startDate, formData.endDate);
+      setFormData(prev => ({ ...prev, days }));
+    }
+  }, [formData.startDate, formData.endDate]);
+
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
@@ -148,17 +166,34 @@ const LeavesManagePage: React.FC = () => {
       return;
     }
 
+    // 유효성 검사
+    if (!formData.employeeId && !formData.employeeName) {
+      alert('직원을 선택하거나 이름을 입력해주세요.');
+      return;
+    }
+    if (!formData.startDate || !formData.endDate) {
+      alert('시작일과 종료일을 모두 입력해주세요.');
+      return;
+    }
+    if (new Date(formData.startDate) > new Date(formData.endDate)) {
+      alert('종료일은 시작일보다 늦어야 합니다.');
+      return;
+    }
+    if (!formData.reason.trim()) {
+      alert('신청 사유를 입력해주세요.');
+      return;
+    }
+
     try {
       const selectedEmployee = employees.find(emp => emp.id === formData.employeeId);
-      if (!selectedEmployee) {
-        alert('직원을 선택해주세요.');
-        return;
-      }
-
+      const employeeName = selectedEmployee ? selectedEmployee.name : formData.employeeName;
+      
       const newLeave = {
         ...formData,
-        employeeName: selectedEmployee.name,
-        name: selectedEmployee.name,
+        employeeName: employeeName,
+        name: employeeName,
+        employeeId: formData.employeeId || 'manual-' + Date.now(),
+        days: calculateLeaveDays(formData.startDate, formData.endDate),
         status: '신청' as const,
         createdAt: new Date().toISOString()
       };
@@ -193,6 +228,31 @@ const LeavesManagePage: React.FC = () => {
     } catch (error) {
       console.error('연차 승인 실패:', error);
       alert('연차 승인에 실패했습니다.');
+    }
+  };
+
+  const handleRejectLeave = async (leaveId: string) => {
+    if (!firebaseConnected || !db) {
+      alert('Firebase가 연결되지 않았습니다.');
+      return;
+    }
+
+    const reason = prompt('반려 사유를 입력해주세요:');
+    if (!reason) return;
+
+    try {
+      await updateDoc(doc(db, 'leaves', leaveId), {
+        status: '반려',
+        rejectedAt: new Date().toISOString(),
+        rejectedBy: localStorage.getItem('admin_user') || 'admin',
+        rejectedReason: reason
+      });
+
+      loadLeaves();
+      alert('연차 신청이 반려되었습니다.');
+    } catch (error) {
+      console.error('연차 반려 실패:', error);
+      alert('연차 반려에 실패했습니다.');
     }
   };
 
@@ -425,13 +485,27 @@ const LeavesManagePage: React.FC = () => {
                     </td>
                     <td className="px-4 py-4 text-sm space-x-2">
                       {leave.status === '신청' && (
-                        <button
-                          onClick={() => handleApproveLeave(leave.id!)}
-                          className="text-emerald-400 hover:text-emerald-300 disabled:opacity-50"
-                          disabled={!firebaseConnected}
-                        >
-                          승인
-                        </button>
+                        <>
+                          <button
+                            onClick={() => handleApproveLeave(leave.id!)}
+                            className="text-emerald-400 hover:text-emerald-300 disabled:opacity-50 mr-2"
+                            disabled={!firebaseConnected}
+                          >
+                            승인
+                          </button>
+                          <button
+                            onClick={() => handleRejectLeave(leave.id!)}
+                            className="text-red-400 hover:text-red-300 disabled:opacity-50"
+                            disabled={!firebaseConnected}
+                          >
+                            반려
+                          </button>
+                        </>
+                      )}
+                      {leave.status === '반려' && leave.rejectedReason && (
+                        <span className="text-xs text-red-300" title={leave.rejectedReason}>
+                          반려사유: {leave.rejectedReason.length > 20 ? leave.rejectedReason.substring(0, 20) + '...' : leave.rejectedReason}
+                        </span>
                       )}
                     </td>
                   </tr>
@@ -475,13 +549,29 @@ const LeavesManagePage: React.FC = () => {
               </div>
 
               {leave.status === '신청' && (
-                <button
-                  onClick={() => handleApproveLeave(leave.id!)}
-                  className="w-full px-3 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 rounded-lg transition-colors text-sm disabled:opacity-50"
-                  disabled={!firebaseConnected}
-                >
-                  승인
-                </button>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => handleApproveLeave(leave.id!)}
+                    className="px-3 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 rounded-lg transition-colors text-sm disabled:opacity-50"
+                    disabled={!firebaseConnected}
+                  >
+                    승인
+                  </button>
+                  <button
+                    onClick={() => handleRejectLeave(leave.id!)}
+                    className="px-3 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-lg transition-colors text-sm disabled:opacity-50"
+                    disabled={!firebaseConnected}
+                  >
+                    반려
+                  </button>
+                </div>
+              )}
+              {leave.status === '반려' && leave.rejectedReason && (
+                <div className="mt-2 p-2 bg-red-500/10 rounded-lg">
+                  <span className="text-xs text-red-300">
+                    반려사유: {leave.rejectedReason}
+                  </span>
+                </div>
               )}
             </div>
           ))}
@@ -513,13 +603,12 @@ const LeavesManagePage: React.FC = () => {
               
               <form onSubmit={handleAddLeave} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">직원명</label>
-                  <input
-                    type="text"
-                    value={formData.employeeName}
-                    onChange={(e) => setFormData({...formData, employeeName: e.target.value})}
-                    className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                    placeholder="이름을 입력하세요"
+                  <label className="block text-sm font-medium text-gray-300 mb-2">사유 <span className="text-red-400">*</span></label>
+                  <textarea
+                    value={formData.reason}
+                    onChange={(e) => setFormData({...formData, reason: e.target.value})}
+                    className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 h-20 resize-none"
+                    placeholder="연차 사유를 입력하세요"
                     required
                   />
                 </div>
@@ -555,11 +644,20 @@ const LeavesManagePage: React.FC = () => {
                       type="date"
                       value={formData.endDate}
                       onChange={(e) => setFormData({...formData, endDate: e.target.value})}
+                      min={formData.startDate}
                       className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                       required
                     />
                   </div>
                 </div>
+
+                {formData.startDate && formData.endDate && (
+                  <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
+                    <span className="text-blue-300 text-sm">
+                      총 연차 일수: <span className="font-bold">{formData.days}일</span>
+                    </span>
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">사유</label>

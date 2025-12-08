@@ -318,9 +318,13 @@ const BusinessCard: React.FC<{
 
   useEffect(() => {
     if (isExpanded && cardRef.current) {
-      cardRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
+      const headerHeight = 80; // 헤더 높이
+      const elementPosition = cardRef.current.getBoundingClientRect().top + window.pageYOffset;
+      const offsetPosition = elementPosition - headerHeight;
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
       });
     }
   }, [isExpanded]);
@@ -328,9 +332,10 @@ const BusinessCard: React.FC<{
   return (
     <EnhancedAnimate variant="slideUp" delay={index * 200}>
       <div
+        id={item.id}
         ref={cardRef}
         className={`
-          relative overflow-hidden bg-white rounded-3xl border-2 transition-all duration-700 cursor-pointer
+          relative overflow-hidden bg-white rounded-3xl border-2 transition-all duration-700 cursor-pointer scroll-mt-20
           ${
             isExpanded
               ? 'border-blue-500 shadow-2xl scale-105 bg-gradient-to-br from-blue-50 to-indigo-50'

@@ -227,24 +227,30 @@ const DeputyRequestPage: React.FC = () => {
     }
   };
 
-  const handleApproveRequest = async (requestId: string) => {
+  const handleApprove = async (requestId: string) => {
     if (!firebaseConnected || !db) {
-      alert('Firebase가 연결되지 않았습니다.');
+      // 데모 모드에서 상태 업데이트
+      setRequests(prev => prev.map(req => 
+        req.id === requestId 
+          ? { ...req, status: 'approved' as const, approvedBy: 'admin', approvedDate: new Date().toISOString() }
+          : req
+      ));
+      alert('데모 모드: 대리 요청이 승인되었습니다!');
       return;
     }
 
     try {
-      await updateDoc(doc(db, 'deputy_requests', requestId), {
+      await updateDoc(doc(db, 'deputyRequests', requestId), {
         status: 'approved',
         approvedBy: localStorage.getItem('admin_user') || 'admin',
         approvedDate: new Date().toISOString()
       });
 
-      window.location.reload(); // 데이터 새로고침
-      alert('대리자 요청이 승인되었습니다!');
+      loadRequests();
+      alert('대리 요청이 승인되었습니다!');
     } catch (error) {
-      console.error('대리자 요청 승인 실패:', error);
-      alert('대리자 요청 승인에 실패했습니다.');
+      console.error('대리 요청 승인 실패:', error);
+      alert('대리 요청 승인에 실패했습니다.');
     }
   };
 

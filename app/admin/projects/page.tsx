@@ -214,22 +214,22 @@ const ProjectManagement: React.FC = () => {
     setEditingProject(null);
   };
 
-  const startEdit = (project: Project) => {
+  const handleEdit = (project: Project) => {
     setEditingProject(project);
     setFormData({
-      requestDate: project.requestDate,
-      client: project.client,
-      project: project.project,
-      period: project.period,
-      location: project.location,
-      developer: project.developer,
+      requestDate: project.requestDate || '',
+      client: project.client || '',
+      project: project.project || '',
+      period: project.period || '',
+      location: project.location || '',
+      developer: project.developer || '',
       grade: project.grade || '',
       department: project.department || '',
       skill: project.skill || '',
-      pay: project.pay?.toString() || '',
-      supply: project.supply?.toString() || '',
-      total: project.total?.toString() || '',
-      result: project.result || ''
+      pay: project.pay?.toString() || '0',
+      supply: project.supply?.toString() || '0',
+      total: project.total?.toString() || '0',
+      result: project.result || '진행중'
     });
     setShowAddForm(true);
   };

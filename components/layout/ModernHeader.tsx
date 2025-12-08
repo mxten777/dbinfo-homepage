@@ -66,13 +66,6 @@ export default function ModernHeader() {
     }
   ];
 
-  const company = [
-    { title: '회사소개', href: '#about' },
-    { title: '사업영역', href: '#business' },
-    { title: '포트폴리오', href: '#portfolio' },
-    { title: '문의하기', href: '#contact' }
-  ];
-
   const navigationItems = [
     { 
       href: '#home', 
@@ -105,23 +98,24 @@ export default function ModernHeader() {
     <>
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled 
-          ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200' 
-          : 'bg-white/80 backdrop-blur-sm'
+          ? 'bg-white/98 backdrop-blur-md shadow-xl shadow-blue-500/10 border-b border-blue-100/50' 
+          : 'bg-white/90 backdrop-blur-sm'
       }`}>
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            {/* Logo */}
+            {/* Logo & Brand */}
             <div className="flex items-center">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
                   <CpuChipIcon className="w-6 h-6 text-white" />
                 </div>
-                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                <a href="#home" className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent hover:from-blue-700 hover:to-indigo-800 transition-all duration-300">
                   DB.INFO
-                </span>
+                </a>
               </div>
-            </div>            {/* Desktop Navigation */}
+            </div>
+
+            {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center space-x-1">
               {navigationItems.map((item, index) => (
                 <div key={index} className="relative">
@@ -132,7 +126,7 @@ export default function ModernHeader() {
                     >
                       {item.label}
                     </a>
-                  ) : (
+                  ) : item.type === 'dropdown' ? (
                     <div 
                       className="relative"
                       onMouseEnter={() => setActiveDropdown(item.label)}
@@ -152,12 +146,27 @@ export default function ModernHeader() {
                           : 'opacity-0 invisible translate-y-2 pointer-events-none'
                       }`}>
                         <div className="p-6">
-                          {item.label === 'SERVICES' ? (
+                          {item.label === 'SERVICES' && (
                             <div className="grid grid-cols-2 gap-4">
                               {services.map((service, serviceIndex) => (
                                 <a
                                   key={serviceIndex}
                                   href={service.href}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    const targetId = service.href.replace('#', '');
+                                    const targetElement = document.getElementById(targetId);
+                                    if (targetElement) {
+                                      const headerHeight = 80; // 헤더 높이 고려
+                                      const elementPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
+                                      const offsetPosition = elementPosition - headerHeight;
+                                      
+                                      window.scrollTo({
+                                        top: offsetPosition,
+                                        behavior: 'smooth'
+                                      });
+                                    }
+                                  }}
                                   className="flex items-start p-3 rounded-lg hover:bg-blue-50 transition-colors duration-200 group"
                                 >
                                   <service.icon className="w-8 h-8 text-blue-600 mt-1 group-hover:text-blue-700 transition-colors" />
@@ -172,23 +181,11 @@ export default function ModernHeader() {
                                 </a>
                               ))}
                             </div>
-                          ) : (
-                            <div className="space-y-2">
-                              {company.map((companyItem, companyIndex) => (
-                                <a
-                                  key={companyIndex}
-                                  href={companyItem.href}
-                                  className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
-                                >
-                                  {companyItem.title}
-                                </a>
-                              ))}
-                            </div>
                           )}
                         </div>
                       </div>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               ))}
             </nav>
@@ -196,30 +193,34 @@ export default function ModernHeader() {
             {/* Right Side Actions */}
             <div className="flex items-center space-x-4">
               {/* Contact Info */}
-              <div className="hidden lg:flex items-center space-x-4 text-sm text-gray-600">
-                <div className="flex items-center space-x-1">
-                  <span>📞</span>
-                  <span>02-2025-8511</span>
+              <div className="hidden xl:flex items-center space-x-6 text-sm">
+                <div className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors">
+                  <div className="w-8 h-8 bg-blue-50 rounded-full flex items-center justify-center">
+                    <span className="text-blue-600 text-sm">📞</span>
+                  </div>
+                  <span className="font-medium">02-2025-8511</span>
                 </div>
-                <div className="flex items-center space-x-1">
-                  <span>📧</span>
-                  <span>hankjae@db-info.co.kr</span>
+                <div className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors">
+                  <div className="w-8 h-8 bg-blue-50 rounded-full flex items-center justify-center">
+                    <span className="text-blue-600 text-sm">📧</span>
+                  </div>
+                  <span className="font-medium">hankjae@db-info.co.kr</span>
                 </div>
               </div>
 
-              {/* CTA Buttons */}
-              <div className="hidden md:flex items-center space-x-2">
+              {/* Action Buttons */}
+              <div className="flex items-center space-x-3">
                 <button 
-                  className="px-4 py-2 text-blue-600 hover:text-blue-700 font-medium hover:bg-blue-50 rounded-lg transition-all duration-200"
-                  onClick={() => {
-                    const portfolioSection = document.getElementById('portfolio');
-                    portfolioSection?.scrollIntoView({ behavior: 'smooth' });
-                  }}
+                  className="hidden lg:flex items-center px-4 py-2.5 text-blue-600 hover:text-blue-700 font-medium hover:bg-blue-50/80 rounded-xl transition-all duration-200 border border-blue-100 hover:border-blue-200"
+                  onClick={() => window.location.href = '/employee'}
                 >
-                  포트폴리오 보기
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  직원 포털
                 </button>
                 <button 
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2.5 rounded-full font-semibold hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 transform hover:scale-105"
+                  className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white px-6 py-2.5 rounded-xl font-semibold hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 transform hover:scale-105 hover:from-blue-700 hover:to-indigo-800"
                   onClick={() => {
                     const contactSection = document.getElementById('contact');
                     contactSection?.scrollIntoView({ behavior: 'smooth' });
@@ -245,7 +246,7 @@ export default function ModernHeader() {
         </div>
 
         {/* Mobile Menu */}
-        <div className={`lg:hidden transition-all duration-300 overflow-hidden bg-white border-t border-gray-200 ${
+        <div className={`lg:hidden transition-all duration-300 overflow-hidden bg-white/98 backdrop-blur-md border-t border-blue-100/50 shadow-lg ${
           isMenuOpen ? 'max-h-screen' : 'max-h-0'
         }`}>
           <div className="container mx-auto px-4 py-6">
@@ -266,21 +267,19 @@ export default function ModernHeader() {
                         {item.label}
                       </div>
                       <div className="mt-3 space-y-3 pl-4">
-                        {(item.label === 'SERVICES' ? services : company).map((subItem, subIndex) => (
+                        {services.map((service, serviceIndex) => (
                           <a
-                            key={subIndex}
-                            href={'href' in subItem ? subItem.href : '#'}
+                            key={serviceIndex}
+                            href={service.href}
                             className="flex items-center text-gray-600 hover:text-blue-600 py-2 transition-colors duration-200"
                             onClick={() => setIsMenuOpen(false)}
                           >
-                            <div className="w-5 h-5 mr-3 text-blue-600 flex items-center justify-center">
-                              {item.label === 'SERVICES' ? '🔧' : '🏢'}
+                            <div className="w-8 h-8 mr-3 bg-blue-50 rounded-lg flex items-center justify-center">
+                              <service.icon className="w-4 h-4 text-blue-600" />
                             </div>
                             <div>
-                              <div className="font-medium">{subItem.title}</div>
-                              {'description' in subItem && typeof subItem.description === 'string' && (
-                                <div className="text-sm text-gray-500">{subItem.description}</div>
-                              )}
+                              <div className="font-medium">{service.title}</div>
+                              <div className="text-sm text-gray-500">{service.description}</div>
                             </div>
                           </a>
                         ))}
@@ -290,21 +289,45 @@ export default function ModernHeader() {
                 </div>
               ))}
               
-              <div className="space-y-3 mt-6 pt-6 border-t border-gray-100">
-                <div className="text-sm text-gray-600 space-y-2">
-                  <div>📞 02-2025-8511</div>
-                  <div>📧 hankjae@db-info.co.kr</div>
+              <div className="space-y-4 mt-6 pt-6 border-t border-blue-100">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <div className="w-6 h-6 bg-blue-50 rounded-full flex items-center justify-center">
+                      <span className="text-blue-600 text-xs">📞</span>
+                    </div>
+                    <span>02-2025-8511</span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <div className="w-6 h-6 bg-blue-50 rounded-full flex items-center justify-center">
+                      <span className="text-blue-600 text-xs">📧</span>
+                    </div>
+                    <span>문의하기</span>
+                  </div>
                 </div>
-                <button 
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-full font-semibold"
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    const contactSection = document.getElementById('contact');
-                    contactSection?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                >
-                  프로젝트 시작하기
-                </button>
+                <div className="grid grid-cols-1 gap-3">
+                  <button 
+                    className="flex items-center justify-center px-4 py-3 text-blue-600 border border-blue-200 rounded-xl font-medium hover:bg-blue-50 transition-colors"
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      window.location.href = '/employee';
+                    }}
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    직원 포털
+                  </button>
+                  <button 
+                    className="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white py-3 rounded-xl font-semibold shadow-lg"
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      const contactSection = document.getElementById('contact');
+                      contactSection?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                  >
+                    프로젝트 시작하기
+                  </button>
+                </div>
               </div>
             </nav>
           </div>

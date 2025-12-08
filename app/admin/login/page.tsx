@@ -23,38 +23,7 @@ const AdminLogin: React.FC = () => {
     let emailTrimmed = id.trim().toLowerCase();
     const passwordTrimmed = pw.trim();
     
-    // 데모 계정 매핑 (ID -> 이메일)
-    const demoAccounts: {[key: string]: string} = {
-      'admin': 'admin@db-info.co.kr',
-      'test': 'test@db-info.co.kr',
-      'hankjae': 'hankjae@db-info.co.kr',
-      '6511kesuk': '6511kesuk@db-info.co.kr'
-    };
-    
-    // ID로 입력한 경우 이메일로 변환
-    if (demoAccounts[emailTrimmed]) {
-      emailTrimmed = demoAccounts[emailTrimmed];
-    }
-    
-    // 데모 계정 확인 (Firebase 시도 전에 먼저 확인)
-    const isDemoAccount = (
-      (emailTrimmed === 'admin@db-info.co.kr' && passwordTrimmed === 'admin1234!') ||
-      (emailTrimmed === 'test@db-info.co.kr' && passwordTrimmed === 'admin1234!') ||
-      (emailTrimmed === 'hankjae@db-info.co.kr' && passwordTrimmed === 'admin1234!') ||
-      (emailTrimmed === '6511kesuk@db-info.co.kr' && passwordTrimmed === 'admin1234!')
-    );
-    
-    if (isDemoAccount) {
-      console.log('데모 계정으로 로그인:', emailTrimmed);
-      setSuccess('데모 관리자 로그인 성공!');
-      localStorage.setItem('admin_mode', 'true');
-      localStorage.setItem('admin_user', emailTrimmed);
-      setTimeout(() => {
-        router.push('/admin/dashboard');
-      }, 1500);
-      setLoading(false);
-      return;
-    }
+
     
     try {
       // Firebase Authentication 사용
@@ -62,10 +31,10 @@ const AdminLogin: React.FC = () => {
       const { doc, getDoc } = await import('firebase/firestore');
       const { auth, db } = await import('../../../lib/firebase');
       
-      // Firebase가 초기화되지 않았으면 바로 데모 모드로
+      // Firebase가 초기화되지 않았으면 에러 표시
       if (!auth || !db) {
-        console.log('Firebase가 초기화되지 않음. 데모 모드만 사용 가능합니다.');
-        setError('Firebase 연결 안됨. 데모 계정(admin/admin123)을 사용하세요.');
+        console.log('Firebase가 초기화되지 않음.');
+        setError('시스템 오류입니다. 관리자에게 문의하세요.');
         setLoading(false);
         return;
       }
@@ -78,10 +47,15 @@ const AdminLogin: React.FC = () => {
       
       console.log('Firebase 인증 성공:', user.uid);
       
-      // 관리자 권한 확인
-      const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+      // 관리자 권한 확인 (이메일 기반)
+      const { query, where, getDocs, collection } = await import('firebase/firestore');
+      const adminsQuery = query(
+        collection(db, 'admins'),
+        where('email', '==', emailTrimmed)
+      );
+      const adminSnapshot = await getDocs(adminsQuery);
       
-      if (adminDoc.exists() && adminDoc.data()?.isAdmin) {
+      if (!adminSnapshot.empty && adminSnapshot.docs[0].data()?.isAdmin) {
         // 관리자 인증 성공
         setSuccess('관리자 로그인 성공!');
         localStorage.setItem('admin_mode', 'true');
@@ -102,15 +76,15 @@ const AdminLogin: React.FC = () => {
       
       // Firebase 에러 메시지를 한글로 변환
       if (firebaseError.code === 'auth/user-not-found') {
-        setError('등록되지 않은 사용자입니다. 데모 계정: admin/admin123');
+        setError('등록되지 않은 사용자입니다.');
       } else if (firebaseError.code === 'auth/wrong-password' || firebaseError.code === 'auth/invalid-credential') {
-        setError('비밀번호가 올바르지 않습니다. 데모 계정: admin/admin123');
+        setError('이메일 또는 비밀번호가 올바르지 않습니다.');
       } else if (firebaseError.code === 'auth/invalid-email') {
-        setError('올바른 이메일 형식이 아닙니다. 데모 계정: admin/admin123');
+        setError('올바른 이메일 형식이 아닙니다.');
       } else if (firebaseError.code === 'auth/too-many-requests') {
         setError('로그인 시도가 너무 많습니다. 잠시 후 다시 시도해주세요.');
       } else {
-        setError('Firebase 인증 실패. 데모 계정을 사용하세요: admin/admin123');
+        setError('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.');
       }
     } finally {
       setLoading(false);
@@ -221,7 +195,7 @@ const AdminLogin: React.FC = () => {
                 <div className="relative">
                   <input
                     type="text"
-                    placeholder="admin 또는 hankjae@db-info.co.kr"
+                    placeholder="이메일을 입력하세요"
                     value={id}
                     onChange={e => setId(e.target.value)}
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-md"
@@ -311,33 +285,7 @@ const AdminLogin: React.FC = () => {
               </div>
             )}
 
-            {/* Demo Account Info */}
-            <div className="mt-8 pt-6 border-t border-white/20">
-              <h3 className="text-sm font-semibold text-blue-200 mb-3 text-center">🎯 데모 계정 (테스트용)</h3>
-              <div className="space-y-2 text-xs text-blue-300 text-center">
-                <div className="bg-white/10 rounded-lg p-3 mb-3">
-                  <p className="text-blue-200 font-semibold mb-2">ID로 간단하게 로그인:</p>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="bg-white/10 rounded px-2 py-1">
-                      <span className="text-emerald-300">ID:</span> admin
-                    </div>
-                    <div className="bg-white/10 rounded px-2 py-1">
-                      <span className="text-emerald-300">ID:</span> test
-                    </div>
-                  </div>
-                  <p className="mt-2 text-blue-200">비밀번호: <span className="font-mono bg-white/10 px-2 py-1 rounded">admin123</span></p>
-                </div>
-                <div className="text-xs text-blue-400">
-                  <p>또는 전체 이메일로 로그인:</p>
-                  <div className="space-y-1 mt-2">
-                    <div>admin@db-info.co.kr</div>
-                    <div>test@db-info.co.kr</div>
-                    <div>hankjae@db-info.co.kr</div>
-                    <div>6511kesuk@db-info.co.kr</div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Demo Account Info - Removed for production */}
           </div>
         </div>
       </div>
