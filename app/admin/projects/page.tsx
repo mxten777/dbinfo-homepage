@@ -596,7 +596,7 @@ const ProjectManagement: React.FC = () => {
 
                 <div className="mt-4 flex space-x-3">
                   <button
-                    onClick={() => startEdit(project)}
+                    onClick={() => handleEdit(project)}
                     className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     수정
