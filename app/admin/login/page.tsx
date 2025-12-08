@@ -20,7 +20,7 @@ const AdminLogin: React.FC = () => {
     setSuccess('');
     setLoading(true);
     
-    let emailTrimmed = id.trim().toLowerCase();
+    const emailTrimmed = id.trim().toLowerCase();
     const passwordTrimmed = pw.trim();
     
 
@@ -28,7 +28,6 @@ const AdminLogin: React.FC = () => {
     try {
       // Firebase Authentication 사용
       const { signInWithEmailAndPassword } = await import('firebase/auth');
-      const { doc, getDoc } = await import('firebase/firestore');
       const { auth, db } = await import('../../../lib/firebase');
       
       // Firebase가 초기화되지 않았으면 에러 표시
