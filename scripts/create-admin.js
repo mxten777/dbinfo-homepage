@@ -8,8 +8,8 @@
  * node scripts/create-admin.js hankjae@db-info.co.kr admin1234
  */
 
-const admin = require('firebase-admin');
-const serviceAccount = require('../serviceAccountKey.json');
+import admin from 'firebase-admin';
+import serviceAccount from '../serviceAccountKey.json' assert { type: 'json' };
 
 // Firebase Admin SDK 초기화
 admin.initializeApp({

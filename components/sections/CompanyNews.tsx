@@ -53,7 +53,7 @@ export default function CompanyNews() {
           return;
         }
       }
-    } catch (error) {
+    } catch {
       console.log('Firebase not available, using demo data');
     }
     
