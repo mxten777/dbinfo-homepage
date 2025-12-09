@@ -64,14 +64,14 @@ export default function Home() {
             </div>
 
             {/* Premium Logo */}
-            <h1 className="text-6xl md:text-7xl lg:text-8xl font-black mb-6 leading-none animate-in fade-in slide-in-from-bottom duration-1000">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-none animate-in fade-in slide-in-from-bottom duration-1000">
               <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent drop-shadow-2xl">
                 DB.INFO
               </span>
             </h1>
 
             {/* Premium Tagline */}
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight animate-in fade-in slide-in-from-bottom duration-1000 delay-200">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-6 leading-tight animate-in fade-in slide-in-from-bottom duration-1000 delay-200">
               <span className="text-white">디지털 혁신을 선도하는</span><br />
               <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                 IT 솔루션 파트너
@@ -79,7 +79,7 @@ export default function Home() {
             </h2>
 
             {/* Premium Description */}
-            <p className="text-lg md:text-xl lg:text-2xl mb-12 text-blue-100/90 max-w-4xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom duration-1000 delay-300">
+            <p className="text-base md:text-lg lg:text-xl mb-12 text-blue-100/90 max-w-4xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom duration-1000 delay-300">
               최첨단 기술과 창의적 사고로 고객의 비즈니스 성장을 가속화하는<br />
               <span className="font-semibold text-white">프리미엄 IT 전문 기업</span>
             </p>
@@ -126,37 +126,37 @@ export default function Home() {
         <section className="py-24 bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30">
           <div className="container mx-auto px-6 lg:px-8">
             <div className="text-center mb-12 sm:mb-16">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-4 px-4">
+              <h2 className="text-3xl sm:text-4xl md:text-4xl lg:text-5xl font-black text-gray-900 mb-4 px-4">
                 <span className="text-blue-600">숫자로</span> 보는 DB.INFO
               </h2>
-              <p className="text-lg sm:text-xl text-gray-600">신뢰할 수 있는 성과와 경험</p>
+              <p className="text-base sm:text-lg text-gray-600">신뢰할 수 있는 성과와 경험</p>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
               <div className="text-center group">
                 <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-105 border border-blue-100">
-                  <div className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-3 sm:mb-4 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">13</div>
+                  <div className="text-4xl sm:text-5xl md:text-5xl lg:text-6xl font-black mb-3 sm:mb-4 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">13</div>
                   <div className="text-base sm:text-lg font-bold text-gray-700">년</div>
                   <div className="text-sm sm:text-base text-gray-500 font-medium">사업 경력</div>
                 </div>
               </div>
               <div className="text-center group">
                 <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-105 border border-indigo-100">
-                  <div className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-3 sm:mb-4 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">100+</div>
+                  <div className="text-4xl sm:text-5xl md:text-5xl lg:text-6xl font-black mb-3 sm:mb-4 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">100+</div>
                   <div className="text-base sm:text-lg font-bold text-gray-700">개</div>
                   <div className="text-sm sm:text-base text-gray-500 font-medium">완료 프로젝트</div>
                 </div>
               </div>
               <div className="text-center group">
                 <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-105 border border-purple-100">
-                  <div className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-3 sm:mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">50+</div>
+                  <div className="text-4xl sm:text-5xl md:text-5xl lg:text-6xl font-black mb-3 sm:mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">50+</div>
                   <div className="text-base sm:text-lg font-bold text-gray-700">곳</div>
                   <div className="text-sm sm:text-base text-gray-500 font-medium">파트너 기업</div>
                 </div>
               </div>
               <div className="text-center group">
                 <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-105 border border-green-100">
-                  <div className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-3 sm:mb-4 bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">24/7</div>
+                  <div className="text-4xl sm:text-5xl md:text-5xl lg:text-6xl font-black mb-3 sm:mb-4 bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">24/7</div>
                   <div className="text-lg font-bold text-gray-700">시간</div>
                   <div className="text-gray-500 font-medium">기술 지원</div>
                 </div>
@@ -169,11 +169,11 @@ export default function Home() {
         <section id="about" className="py-16 sm:py-24 md:py-32 bg-gradient-to-b from-white to-slate-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12 sm:mb-16 md:mb-20">
-              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-black text-gray-900 mb-6 sm:mb-8 leading-tight px-2">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-black text-gray-900 mb-6 sm:mb-8 leading-tight px-2">
                 혁신을 통한 성장<br />
                 <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">미래를 선도하는 기술</span>
               </h2>
-              <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-600 max-w-4xl mx-auto leading-relaxed px-4">
+              <p className="text-base sm:text-lg md:text-xl lg:text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed px-4">
                 2011년부터 축적된 기술력과 경험으로<br className="hidden sm:block" />
                 <span className="font-bold text-gray-800">금융·공공·기업 분야에서 디지털 트랜스포메이션을 이끌어왔습니다</span>
               </p>
@@ -184,8 +184,8 @@ export default function Home() {
                 <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-600 rounded-2xl sm:rounded-3xl mx-auto mb-6 sm:mb-8 flex items-center justify-center text-white text-4xl sm:text-5xl md:text-6xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-2xl">
                   🚀
                 </div>
-                <h3 className="text-2xl sm:text-3xl md:text-4xl font-black mb-4 sm:mb-6 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">혁신</h3>
-                <p className="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed px-2">
+                <h3 className="text-xl sm:text-2xl md:text-2xl font-black mb-4 sm:mb-6 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">혁신</h3>
+                <p className="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed px-2">
                   최신 기술 트렌드를 선도하며 끊임없는 연구개발을 통해 차별화된 솔루션을 제공합니다.
                 </p>
               </div>
@@ -194,8 +194,8 @@ export default function Home() {
                 <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 bg-gradient-to-br from-green-500 via-emerald-600 to-teal-600 rounded-2xl sm:rounded-3xl mx-auto mb-6 sm:mb-8 flex items-center justify-center text-white text-4xl sm:text-5xl md:text-6xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-2xl">
                   🛡️
                 </div>
-                <h3 className="text-2xl sm:text-3xl md:text-4xl font-black mb-4 sm:mb-6 bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">신뢰</h3>
-                <p className="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed px-2">
+                <h3 className="text-xl sm:text-2xl md:text-2xl font-black mb-4 sm:mb-6 bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">신뢰</h3>
+                <p className="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed px-2">
                   13년간의 축적된 경험과 성공적인 프로젝트 수행으로 고객의 신뢰를 얻어왔습니다.
                 </p>
               </div>
@@ -204,8 +204,8 @@ export default function Home() {
                 <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 bg-gradient-to-br from-purple-500 via-pink-600 to-rose-600 rounded-2xl sm:rounded-3xl mx-auto mb-6 sm:mb-8 flex items-center justify-center text-white text-4xl sm:text-5xl md:text-6xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-2xl">
                   📈
                 </div>
-                <h3 className="text-2xl sm:text-3xl md:text-4xl font-black mb-4 sm:mb-6 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">성장</h3>
-                <p className="text-xl text-gray-600 leading-relaxed">
+                <h3 className="text-xl sm:text-2xl md:text-2xl font-black mb-4 sm:mb-6 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">성장</h3>
+                <p className="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed px-2">
                   지속적인 혁신과 품질 향상을 통해 고객과 함께 성장하는 동반자 역할을 합니다.
                 </p>
               </div>
@@ -236,10 +236,10 @@ export default function Home() {
       <section id="portfolio" className="py-16 sm:py-20 md:py-24 bg-gradient-to-br from-gray-50 to-blue-50 scroll-mt-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 mb-6 sm:mb-8">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-6 sm:mb-8">
               <span className="text-blue-600">포트폴리오</span>
             </h2>
-            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto">
               DB.INFO가 13년간 축적한 기술력과 경험으로 완성한 성공 프로젝트들
             </p>
           </div>
@@ -331,11 +331,11 @@ export default function Home() {
           <div className="absolute inset-0 bg-black/20"></div>
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="text-center mb-12 sm:mb-16 md:mb-20">
-              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-black text-white mb-6 sm:mb-8 leading-tight px-2">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-black text-white mb-6 sm:mb-8 leading-tight px-2">
                 함께 만들어가는<br />
                 <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">디지털 미래</span>
               </h2>
-              <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-blue-100 max-w-4xl mx-auto leading-relaxed px-4">
+              <p className="text-base sm:text-lg md:text-xl lg:text-xl text-blue-100 max-w-4xl mx-auto leading-relaxed px-4">
                 혁신적인 아이디어와 전문적인 기술력으로<br className="hidden sm:block" />
                 <span className="font-bold text-white">여러분의 비즈니스 성장을 함께 만들어갑니다</span>
               </p>
@@ -347,8 +347,8 @@ export default function Home() {
                 <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl sm:rounded-2xl mb-4 sm:mb-6 flex items-center justify-center text-2xl sm:text-4xl group-hover:scale-110 transition-transform shadow-lg mx-auto sm:mx-0">
                   🏢
                 </div>
-                <h3 className="text-lg sm:text-xl md:text-2xl font-black mb-3 sm:mb-4 bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent text-center sm:text-left">본사 주소</h3>
-                <p className="text-blue-100 text-sm sm:text-base md:text-lg leading-relaxed text-center sm:text-left">
+                <h3 className="text-base sm:text-lg md:text-xl font-black mb-3 sm:mb-4 bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent text-center sm:text-left">본사 주소</h3>
+                <p className="text-blue-100 text-xs sm:text-sm md:text-base leading-relaxed text-center sm:text-left">
                   서울특별시 금천구 서부샛길 606<br />
                   대성디폴리스 지식산업센터 B동 1410호<br />
                   <span className="text-cyan-300 font-semibold text-xs sm:text-sm">지하철 1호선, 7호선 8번 출구 500m</span>
@@ -360,8 +360,8 @@ export default function Home() {
                 <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl sm:rounded-2xl mb-4 sm:mb-6 flex items-center justify-center text-2xl sm:text-4xl group-hover:scale-110 transition-transform shadow-lg mx-auto sm:mx-0">
                   📧
                 </div>
-                <h3 className="text-lg sm:text-xl md:text-2xl font-black mb-3 sm:mb-4 bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent text-center sm:text-left">이메일</h3>
-                <p className="text-blue-100 text-sm sm:text-base md:text-lg leading-relaxed text-center sm:text-left">
+                <h3 className="text-base sm:text-lg md:text-xl font-black mb-3 sm:mb-4 bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent text-center sm:text-left">이메일</h3>
+                <p className="text-blue-100 text-xs sm:text-sm md:text-base leading-relaxed text-center sm:text-left">
                   <span className="text-cyan-300 font-semibold">hankjae@db-info.co.kr</span><br />
                   <span className="text-xs sm:text-sm">6511kesuk@db-info.co.kr</span><br />
                   <span className="text-xs text-gray-300">(관리이사)</span>
@@ -373,8 +373,8 @@ export default function Home() {
                 <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl sm:rounded-2xl mb-4 sm:mb-6 flex items-center justify-center text-2xl sm:text-4xl group-hover:scale-110 transition-transform shadow-lg mx-auto sm:mx-0">
                   📞
                 </div>
-                <h3 className="text-lg sm:text-xl md:text-2xl font-black mb-3 sm:mb-4 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent text-center sm:text-left">전화번호</h3>
-                <p className="text-blue-100 text-sm sm:text-base md:text-lg leading-relaxed text-center sm:text-left">
+                <h3 className="text-base sm:text-lg md:text-xl font-black mb-3 sm:mb-4 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent text-center sm:text-left">전화번호</h3>
+                <p className="text-blue-100 text-xs sm:text-sm md:text-base leading-relaxed text-center sm:text-left">
                   <span className="text-cyan-300 font-bold text-lg sm:text-xl">02-2025-8511</span><br />
                   <span className="text-gray-300 text-xs sm:text-sm">02-2025-8512 (팩스)</span>
                 </p>
@@ -385,7 +385,7 @@ export default function Home() {
                 <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl sm:rounded-2xl mb-4 sm:mb-6 flex items-center justify-center text-2xl sm:text-4xl group-hover:scale-110 transition-transform shadow-lg mx-auto sm:mx-0">
                   💼
                 </div>
-                <h3 className="text-lg sm:text-xl md:text-2xl font-black mb-4 sm:mb-6 bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent text-center sm:text-left">프로젝트 문의</h3>
+                <h3 className="text-base sm:text-lg md:text-xl font-black mb-4 sm:mb-6 bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent text-center sm:text-left">프로젝트 문의</h3>
                 <div className="space-y-3 sm:space-y-4">
                   <button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 px-4 sm:py-4 sm:px-6 rounded-xl sm:rounded-2xl text-sm sm:text-lg font-bold transition-all duration-300 hover:scale-105 shadow-lg">
                     📋 무료 상담 신청
@@ -404,8 +404,8 @@ export default function Home() {
       <footer className="bg-gradient-to-b from-gray-900 to-black text-white py-12 sm:py-16 md:py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 sm:mb-16">
-            <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black mb-4 sm:mb-6 bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">DB.INFO</h3>
-            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed px-4">
+            <h3 className="text-3xl sm:text-4xl md:text-4xl lg:text-5xl font-black mb-4 sm:mb-6 bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">DB.INFO</h3>
+            <p className="text-sm sm:text-base md:text-lg lg:text-lg text-gray-300 max-w-4xl mx-auto leading-relaxed px-4">
               13년간의 전문성과 혁신적 기술력으로 디지털 미래를 선도하는<br className="hidden sm:block" />
               <span className="font-bold text-white">프리미엄 IT 솔루션 파트너</span>
             </p>
