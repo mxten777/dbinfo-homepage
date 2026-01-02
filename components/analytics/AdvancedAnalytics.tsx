@@ -2,7 +2,6 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { useTheme } from '@/hooks/useTheme';
 
 // 애널리틱스 데이터 타입
 interface AnalyticsData {
@@ -174,12 +173,11 @@ const MetricCard = ({ title, value, change, icon, color = 'blue' }: MetricCardPr
 // 차트 컴포넌트 (간단한 라인 차트)
 interface SimpleLineChartProps {
   data: number[];
-  labels?: string[];
   color?: string;
   height?: number;
 }
 
-const SimpleLineChart = ({ data, labels, color = '#3B82F6', height = 200 }: SimpleLineChartProps) => {
+const SimpleLineChart = ({ data, color = '#3B82F6', height = 200 }: SimpleLineChartProps) => {
   const maxValue = Math.max(...data);
   const minValue = Math.min(...data);
   const range = maxValue - minValue || 1;

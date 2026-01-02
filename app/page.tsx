@@ -86,23 +86,23 @@ export default function Home() {
 
             {/* Premium CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom duration-1000 delay-500">
-              <button 
+              <a 
+                href="#contact"
                 className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold text-lg overflow-hidden transform hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-2xl"
-                onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <span className="relative flex items-center justify-center gap-2">
                   🚀 프로젝트 시작하기
                 </span>
-              </button>
-              <button 
+              </a>
+              <a 
+                href="#about"
                 className="group relative px-8 py-4 bg-white/10 backdrop-blur-xl text-white rounded-xl font-semibold text-lg border-2 border-white/30 hover:bg-white/20 hover:border-white/50 transition-all duration-300 shadow-xl"
-                onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 <span className="flex items-center justify-center gap-2">
                   📋 회사소개 보기
                 </span>
-              </button>
+              </a>
             </div>
 
             {/* Scroll Indicator */}
@@ -313,15 +313,12 @@ export default function Home() {
           </div>
           
           <div className="text-center mt-12">
-            <button
-              onClick={() => {
-                const contactSection = document.getElementById('contact');
-                contactSection?.scrollIntoView({ behavior: 'smooth' });
-              }}
+            <a
+              href="#contact"
               className="px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold text-lg hover:bg-blue-700 transition-colors duration-300 hover:scale-105 transform shadow-lg"
             >
               📋 프로젝트 상담받기
-            </button>
+            </a>
           </div>
         </div>
       </section>

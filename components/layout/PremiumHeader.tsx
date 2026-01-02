@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Bars3Icon, 
   XMarkIcon,
@@ -12,17 +12,8 @@ import {
 
 export default function PremiumHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const services = [
     {
@@ -94,10 +85,7 @@ export default function PremiumHeader() {
     const targetId = href.replace('#', '');
     const targetElement = document.getElementById(targetId);
     if (targetElement) {
-      const headerHeight = 80;
-      const elementPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
-      const offsetPosition = elementPosition - headerHeight;
-      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+      targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
     setIsMenuOpen(false);
     setActiveDropdown(null);
@@ -105,11 +93,7 @@ export default function PremiumHeader() {
 
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        isScrolled 
-          ? 'bg-white/95 backdrop-blur-xl shadow-2xl border-b border-gray-100' 
-          : 'bg-white/90 backdrop-blur-lg shadow-lg'
-      }`}>
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-b border-gray-100">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             {/* Premium Logo */}

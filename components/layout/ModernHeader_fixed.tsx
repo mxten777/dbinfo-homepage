@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ChevronDownIcon, Bars3Icon, XMarkIcon, MagnifyingGlassIcon, CpuChipIcon } from '@heroicons/react/24/outline';
 
 // Service icons (using simple icons)
@@ -17,18 +17,10 @@ const ServiceIcon = ({ type }: { type: string }) => (
 
 const ModernHeader: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const services = [
     {
@@ -99,11 +91,7 @@ const ModernHeader: React.FC = () => {
 
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled 
-          ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100' 
-          : 'bg-white/90 backdrop-blur-sm'
-      }`}>
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Logo */}
@@ -149,25 +137,11 @@ const ModernHeader: React.FC = () => {
                             <div className="grid grid-cols-2 gap-4">
                               {services.map((service, serviceIndex) => (
                                 <a
-                                  key={serviceIndex}
-                                  href={service.href}
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    const targetId = service.href.replace('#', '');
-                                    const targetElement = document.getElementById(targetId);
-                                    if (targetElement) {
-                                      const headerHeight = 80;
-                                      const elementPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
-                                      const offsetPosition = elementPosition - headerHeight;
-                                      
-                                      window.scrollTo({
-                                        top: offsetPosition,
-                                        behavior: 'smooth'
-                                      });
-                                    }
-                                  }}
-                                  className="flex items-start p-3 rounded-lg hover:bg-blue-50 transition-colors duration-200 group"
-                                >
+                                    key={serviceIndex}
+                                    href={service.href}
+                                    onClick={() => setActiveDropdown(null)}
+                                    className="flex items-start p-3 rounded-lg hover:bg-blue-50 transition-colors duration-200 group"
+                                  >
                                   <div className="w-8 h-8 text-blue-600 mt-1 group-hover:text-blue-700 transition-colors">
                                     {service.icon}
                                   </div>

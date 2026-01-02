@@ -1,8 +1,7 @@
 // 🔔 실시간 알림 시스템
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useTheme } from '@/hooks/useTheme';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 // 알림 타입 정의
 interface Notification {
@@ -44,7 +43,7 @@ interface NotificationProviderProps {
 export const NotificationProvider = ({ children }: NotificationProviderProps) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const showNotification = (notification: Omit<Notification, 'id' | 'timestamp'>) => {
+  const showNotification = useCallback((notification: Omit<Notification, 'id' | 'timestamp'>) => {
     const newNotification: Notification = {
       ...notification,
       id: generateNotificationId(),
@@ -57,10 +56,10 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
     // 자동 제거 (duration이 설정된 경우)
     if (notification.duration) {
       setTimeout(() => {
-        removeNotification(newNotification.id);
+        setNotifications(prev => prev.filter(n => n.id !== newNotification.id));
       }, notification.duration);
     }
-  };
+  }, []);
 
   const removeNotification = (id: string) => {
     setNotifications(prev => prev.filter(notification => notification.id !== id));
@@ -118,7 +117,7 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
     }, 5000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [showNotification]);
 
   const value = {
     notifications,

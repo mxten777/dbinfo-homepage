@@ -2,7 +2,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef, memo } from 'react';
-import { useTheme } from '@/hooks/useTheme';
 
 // 모바일 감지 훅
 export function useIsMobile() {
@@ -76,7 +75,7 @@ export const MobileButton = memo<MobileButtonProps>(({
   disabled = false,
   className = ''
 }) => {
-  const { actualTheme } = useTheme();
+  // theme not required here; keep component visual unchanged
   
   const baseClasses = 'font-semibold rounded-lg transition-all duration-200 focus-ring active:scale-95 select-none';
   

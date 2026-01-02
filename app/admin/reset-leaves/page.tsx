@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { collection, getDocs, doc, writeBatch } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
-import type { Leave, Employee } from '../../../types/employee';
+import type { Leave } from '../../../types/employee';
 
 const ResetLeavesPage: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -12,7 +12,7 @@ const ResetLeavesPage: React.FC = () => {
   const [isResetting, setIsResetting] = useState(false);
   const [firebaseConnected, setFirebaseConnected] = useState(false);
   const [leaves, setLeaves] = useState<Leave[]>([]);
-  const [employees] = useState<Employee[]>([]);
+  // 직원 데이터는 현재 초기화 페이지에서 사용하지 않음
   const [resetStats, setResetStats] = useState({
     totalLeaves: 0,
     approvedLeaves: 0,
@@ -21,31 +21,7 @@ const ResetLeavesPage: React.FC = () => {
   });
   const router = useRouter();
 
-  useEffect(() => {
-    const adminMode = localStorage.getItem('admin_mode');
-    const user = localStorage.getItem('admin_user');
-    
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        await Promise.all([loadLeaves(), loadEmployees()]);
-      } catch (error) {
-        console.error('데이터 로드 실패:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (adminMode === 'true' && user) {
-      setIsAuthenticated(true);
-      loadData();
-    } else {
-      router.push('/admin/login');
-    }
-    setLoading(false);
-  }, [router]);
-
-  const loadLeaves = async () => {
+  const loadLeaves = React.useCallback(async () => {
     try {
       if (!db) {
         console.log('Firebase가 연결되지 않음 - 데모 데이터 사용');
@@ -122,9 +98,9 @@ const ResetLeavesPage: React.FC = () => {
       console.error('연차 데이터 로드 실패:', error);
       setFirebaseConnected(false);
     }
-  };
+  }, []);
 
-  const loadEmployees = async () => {
+  const loadEmployees = React.useCallback(async () => {
     try {
       if (!db) {
         // 데모 직원 데이터는 현재 사용하지 않음
@@ -136,7 +112,32 @@ const ResetLeavesPage: React.FC = () => {
     } catch (error) {
       console.error('직원 데이터 로드 실패:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const adminMode = localStorage.getItem('admin_mode');
+    const user = localStorage.getItem('admin_user');
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        await Promise.all([loadLeaves(), loadEmployees()]);
+      } catch (error) {
+        console.error('데이터 로드 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (adminMode === 'true' && user) {
+      setIsAuthenticated(true);
+      loadData();
+    } else {
+      router.push('/admin/login');
+    }
+    setLoading(false);
+  }, [router, loadLeaves, loadEmployees]);
+
+  
 
   const calculateResetStats = (leavesData: Leave[]) => {
     const totalLeaves = leavesData.length;

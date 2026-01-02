@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Bars3Icon, 
   XMarkIcon,
@@ -15,17 +15,8 @@ import {
 
 export default function ModernHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const services = [
     {
@@ -96,11 +87,7 @@ export default function ModernHeader() {
 
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled 
-          ? 'bg-white/98 backdrop-blur-md shadow-xl shadow-blue-500/10 border-b border-blue-100/50' 
-          : 'bg-white/90 backdrop-blur-sm'
-      }`}>
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/98 backdrop-blur-md border-b border-blue-100/50">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo & Brand */}
@@ -157,15 +144,9 @@ export default function ModernHeader() {
                                     const targetId = service.href.replace('#', '');
                                     const targetElement = document.getElementById(targetId);
                                     if (targetElement) {
-                                      const headerHeight = 80; // 헤더 높이 고려
-                                      const elementPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
-                                      const offsetPosition = elementPosition - headerHeight;
-                                      
-                                      window.scrollTo({
-                                        top: offsetPosition,
-                                        behavior: 'smooth'
-                                      });
+                                      targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
                                     }
+                                    setActiveDropdown(null);
                                   }}
                                   className="flex items-start p-3 rounded-lg hover:bg-blue-50 transition-colors duration-200 group"
                                 >

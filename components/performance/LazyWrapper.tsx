@@ -1,7 +1,7 @@
 // 🚀 성능 최적화된 컴포넌트 래퍼들
 'use client';
 
-import { memo, Suspense, lazy, ComponentType, useEffect } from 'react';
+import { memo, Suspense, ComponentType, useEffect } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 // 로딩 컴포넌트 타입들

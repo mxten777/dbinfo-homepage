@@ -36,12 +36,12 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     }
 
     // 프로덕션에서는 에러 모니터링 서비스로 전송
-    this.logErrorToService(error, errorInfo);
+    this.logErrorToService(error);
 
     this.setState({ errorInfo });
   }
 
-  private logErrorToService = (error: Error, _errorInfo: ErrorInfo) => {
+  private logErrorToService = (error: Error) => {
     if (process.env.NODE_ENV === 'production') {
       // 실제 프로덕션에서는 Sentry, LogRocket 등 사용
       console.error('Production error:', error.message);

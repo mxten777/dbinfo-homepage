@@ -318,14 +318,7 @@ const BusinessCard: React.FC<{
 
   useEffect(() => {
     if (isExpanded && cardRef.current) {
-      const headerHeight = 80; // 헤더 높이
-      const elementPosition = cardRef.current.getBoundingClientRect().top + window.pageYOffset;
-      const offsetPosition = elementPosition - headerHeight;
-      
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
+      cardRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [isExpanded]);
 

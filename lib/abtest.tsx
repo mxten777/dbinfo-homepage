@@ -20,14 +20,6 @@ interface ABVariant {
   config: Record<string, unknown>; // 변형별 설정값들
 }
 
-interface ABTestResult {
-  testId: string;
-  variant: string;
-  userId: string;
-  timestamp: number;
-  conversions: string[]; // 전환 이벤트들
-}
-
 // 컨텍스트 타입
 interface ABTestContextType {
   getVariant: (testId: string) => string | null;
